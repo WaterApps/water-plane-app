@@ -53,6 +53,7 @@ GroundOverlay prevoverlay;
 		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.field);
 		MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 		GoogleMap map = mapFragment.getMap();
+		map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 		map.getUiSettings().setMyLocationButtonEnabled(true);
 		LatLngBounds bounds = readBounds();
 		prevoverlay = createOverlay(bitmap, bounds);
@@ -69,14 +70,15 @@ GroundOverlay prevoverlay;
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection
-	    switch (item.getItemId()) {
-	        case R.id.item_legal:
-	        	//this bit randomly stopped working
-	        	
+	    if (item.getItemId() == R.id.item_legal) {
+	        	//this part randomly stopped working
+	        	//and needed rewritten anyway
+	    	
 	            //DialogFragment newFragment = new LegalNoticeDialogFragment();
 	        	//newFragment.show(getFragmentManager(), "legal");
-	            //return true;
-	        default:
+	            return true;
+	    }
+	    else {
 	            return super.onOptionsItemSelected(item);
 	    }
 	}
