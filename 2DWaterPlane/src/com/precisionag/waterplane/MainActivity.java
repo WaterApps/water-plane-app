@@ -84,6 +84,7 @@ GroundOverlay prevoverlay;
 	}
 	
 //takes a bitmap, latitude/longitude bounds, and a map to create a map overlay
+//this has been duplicated in the Field class
 private GroundOverlay createOverlay(Bitmap overlayBitmap, LatLngBounds bounds) {
 	MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 	BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(overlayBitmap);
