@@ -1,8 +1,10 @@
 package com.precisionag.waterplane;
 
+import com.precisionag.waterplane.Field;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,6 +33,8 @@ import com.google.android.gms.maps.model.LatLngBounds;
 
 public class MainActivity extends Activity {
 GroundOverlay prevoverlay;
+
+Field field;
 
 	public class LegalNoticeDialogFragment extends DialogFragment {
 	    @Override
@@ -54,10 +59,15 @@ GroundOverlay prevoverlay;
 		MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 		GoogleMap map = mapFragment.getMap();
 		map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-		map.getUiSettings().setMyLocationButtonEnabled(true);
-		LatLngBounds bounds = readBounds();
-		prevoverlay = createOverlay(bitmap, bounds);
-		configSeekbar(bitmap, bounds, prevoverlay);
+		map.setMyLocationEnabled(true);
+		
+		field = new Field(bitmap, new LatLngBounds(new LatLng(0.0, 0.0), new LatLng(0.0, 0.0)), 0.0, 0.0);
+		
+		readDataFile(field);
+		
+		prevoverlay = field.createOverlay(map);
+		
+		configSeekbar(field, prevoverlay);
 	}
 
 	@Override
@@ -98,17 +108,24 @@ private GroundOverlay createOverlay(Bitmap overlayBitmap, LatLngBounds bounds) {
 }
 	
 //public void updateColors(Bitmap bitmap, LatLngBounds bounds) {
-public void updateColors(Bitmap bitmap, LatLngBounds bounds) {
+public void updateColors(Field field) {
 	//get level from seekbar
 	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
-	int waterLevel = seekBar.getProgress();
 	seekBar.setMax(255);
+	int waterLevel = seekBar.getProgress();
 	
-	int width = bitmap.getWidth();
-	int height = bitmap.getHeight();
+	//update text block
+	double waterLevelMeters = field.minElevation + ((double)waterLevel*(field.maxElevation-field.minElevation)/255.0);
+	TextView waterElevationTextView = (TextView) findViewById(R.id.text);
+	String elevation = new DecimalFormat("#").format(waterLevelMeters);
+	String waterElevationText = "Elevation: " + elevation + "m";
+	waterElevationTextView.setText(waterElevationText);
+	
+	int width = field.elevationBitmap.getWidth();
+	int height = field.elevationBitmap.getHeight();
 	int[] pixels = new int[width * height];
-	bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
-	bitmap = bitmap.copy(bitmap.getConfig(), true);
+	field.elevationBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+	Bitmap bitmap = field.elevationBitmap.copy(field.elevationBitmap.getConfig(), true);
 	
 	//test each pixel, if below water level set blue, else set transparent
 	for (int i = 0; i < (width * height); i++) {
@@ -124,30 +141,32 @@ public void updateColors(Bitmap bitmap, LatLngBounds bounds) {
 	
 	//remove old map overlay and create new one
 	prevoverlay.remove();
-	prevoverlay = createOverlay(bitmap, bounds);
+
+	prevoverlay = createOverlay(bitmap, field.fieldBounds);
 
 }
 
-private void configSeekbar(final Bitmap bitmap, final LatLngBounds bounds, final GroundOverlay overlay) {
+private void configSeekbar(final Field field, final GroundOverlay overlay) {
 	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
 	seekBar.setMax(255);
 	seekBar.setProgress(seekBar.getMax()/2);
 	seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 		@Override
-        public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {}
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {}
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-        	updateColors(bitmap, bounds);
+        	updateColors(field);
         }
 	});
 }
 
-private LatLngBounds readBounds() {
+private void readDataFile(Field field) {
 	try {
 		
+		//read data from string
 		AssetManager am = getApplicationContext().getAssets();
 		BufferedReader dataIO = new BufferedReader(new InputStreamReader(am.open("field.latlng")));
 	    String dataString = null;
@@ -163,13 +182,22 @@ private LatLngBounds readBounds() {
 	    
 	    LatLng northEast = new LatLng(north, east);
 	    LatLng southWest = new LatLng(south, west);
+	    
+	    dataString = dataIO.readLine();
+	    double minElevation = Double.parseDouble(dataString);
+	    dataString = dataIO.readLine();
+	    double maxElevation = Double.parseDouble(dataString);
+	    
+	    //set corresponding parameters in field
+	    field.setBounds(new LatLngBounds(northEast, southWest));
+	    field.setMinElevation(minElevation);
+	    field.setMaxElevation(maxElevation);
+	    
 	    dataIO.close();
 	    
-	    return new LatLngBounds(northEast, southWest);
 	
 	}
 	catch  (IOException e) {
-		return new LatLngBounds(new LatLng(0.0, 0.0), new LatLng(0.0, 0.0));
 	}
 
 
