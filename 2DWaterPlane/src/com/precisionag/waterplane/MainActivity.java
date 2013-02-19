@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -30,8 +31,9 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnMapClickListener {
 GroundOverlay prevoverlay;
 
 Field field;
@@ -60,8 +62,9 @@ Field field;
 		GoogleMap map = mapFragment.getMap();
 		map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 		map.setMyLocationEnabled(true);
+		map.setOnMapClickListener(this);
 		
-		field = new Field(bitmap, new LatLngBounds(new LatLng(0.0, 0.0), new LatLng(0.0, 0.0)), 0.0, 0.0);
+		field = new Field(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
 		
 		readDataFile(field);
 		
@@ -93,6 +96,25 @@ Field field;
 	    }
 	}
 	
+	@Override
+	public void onMapClick (LatLng point) {
+		double waterLevel = field.elevationFromLatLng(point);
+		String title;
+		if (waterLevel == 0.0) {
+			title = "Not in field!";
+		}
+		else {
+			String elevation = new DecimalFormat("#.#").format(waterLevel);
+			title = "Elevation: " + elevation + "m";
+		}
+		GoogleMap mMap;
+		mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+		mMap.addMarker(new MarkerOptions()
+		        .position(point)
+		        .title(title));
+
+	}
+	
 //takes a bitmap, latitude/longitude bounds, and a map to create a map overlay
 //this has been duplicated in the Field class
 private GroundOverlay createOverlay(Bitmap overlayBitmap, LatLngBounds bounds) {
@@ -117,7 +139,7 @@ public void updateColors(Field field) {
 	//update text block
 	double waterLevelMeters = field.minElevation + ((double)waterLevel*(field.maxElevation-field.minElevation)/255.0);
 	TextView waterElevationTextView = (TextView) findViewById(R.id.text);
-	String elevation = new DecimalFormat("#").format(waterLevelMeters);
+	String elevation = new DecimalFormat("#.#").format(waterLevelMeters);
 	String waterElevationText = "Elevation: " + elevation + "m";
 	waterElevationTextView.setText(waterElevationText);
 	
@@ -190,6 +212,8 @@ private void readDataFile(Field field) {
 	    
 	    //set corresponding parameters in field
 	    field.setBounds(new LatLngBounds(northEast, southWest));
+	    field.setNortheast(northEast);
+	    field.setSouthwest(southWest);
 	    field.setMinElevation(minElevation);
 	    field.setMaxElevation(maxElevation);
 	    
