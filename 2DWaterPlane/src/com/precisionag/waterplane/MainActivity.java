@@ -1,18 +1,24 @@
 package com.precisionag.waterplane;
 
-import com.precisionag.waterplane.Field;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.Menu;
@@ -24,6 +30,7 @@ import android.widget.TextView;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -31,12 +38,19 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends Activity implements OnMapClickListener {
+private static final int ADD_MODE = 1;
+private static final int REMOVE_MODE = 2;
+
 GroundOverlay prevoverlay;
 
 Field field;
+List<Marker> markers;
+LatLng userLocation;
+int mode;
 
 	public class LegalNoticeDialogFragment extends DialogFragment {
 	    @Override
@@ -63,14 +77,17 @@ Field field;
 		map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 		map.setMyLocationEnabled(true);
 		map.setOnMapClickListener(this);
+		map.setOnMarkerClickListener(onMarkerClickListener);
 		
 		field = new Field(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
+		markers = new ArrayList<Marker>();
+		mode = 0;
 		
 		readDataFile(field);
-		
 		prevoverlay = field.createOverlay(map);
-		
 		configSeekbar(field, prevoverlay);
+		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	}
 
 	@Override
@@ -91,6 +108,14 @@ Field field;
 	        	//newFragment.show(getFragmentManager(), "legal");
 	            return true;
 	    }
+	    else if (item.getItemId() == R.id.menu_add) {
+        	mode = ADD_MODE;
+            return true;
+	    }
+	    else if (item.getItemId() == R.id.menu_remove) {
+        	mode = REMOVE_MODE;
+            return true;
+	    }
 	    else {
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -98,21 +123,33 @@ Field field;
 	
 	@Override
 	public void onMapClick (LatLng point) {
-		double waterLevel = field.elevationFromLatLng(point);
-		String title;
-		if (waterLevel == 0.0) {
-			title = "Not in field!";
+		switch(mode) {
+		case ADD_MODE:
+			
+			double waterLevel = field.elevationFromLatLng(point);
+			String title;
+			if (waterLevel == 0.0) {
+				title = "Not in field!";
+			}
+			else {
+				String elevation = new DecimalFormat("#.#").format(waterLevel);
+				title = "Elevation: " + elevation + "m";
+			}
+			GoogleMap mMap;
+			mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+			markers.add(mMap.addMarker(new MarkerOptions()
+			        .position(point)
+			        .title(title)));
+			updateMarkers();
+			mode = 0;
+			break;
+		case REMOVE_MODE:
+			//TODO
+			break;
+		default:
+			break;
 		}
-		else {
-			String elevation = new DecimalFormat("#.#").format(waterLevel);
-			title = "Elevation: " + elevation + "m";
-		}
-		GoogleMap mMap;
-		mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-		mMap.addMarker(new MarkerOptions()
-		        .position(point)
-		        .title(title));
-
+		
 	}
 	
 //takes a bitmap, latitude/longitude bounds, and a map to create a map overlay
@@ -181,8 +218,28 @@ private void configSeekbar(final Field field, final GroundOverlay overlay) {
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
         	updateColors(field);
+        	updateMarkers();
         }
 	});
+}
+
+private void updateMarkers() {
+	Iterator<Marker> i = markers.iterator();
+	Marker marker;
+	LatLng markerLatLng;
+	double elevation;
+	double userElevation;
+	String elevationStr;
+	
+	while (i.hasNext()) {
+		 marker = i.next();
+		 markerLatLng = marker.getPosition();
+		 elevation = field.elevationFromLatLng(markerLatLng);
+		 userElevation = field.elevationFromLatLng(userLocation);
+		 elevationStr = new DecimalFormat("#.#").format(userElevation - elevation);
+		 marker.setSnippet(elevationStr + "m from your elevation");
+		 marker.showInfoWindow();
+	}
 }
 
 private void readDataFile(Field field) {
@@ -226,6 +283,45 @@ private void readDataFile(Field field) {
 
 
 }
+
+LocationListener locationListener = new LocationListener() {
+    public void onLocationChanged(Location location) {
+      // Called when a new location is found by the network location provider.
+      userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+      
+	  double elevationDouble = field.elevationFromLatLng(userLocation);
+	  String ElevationText;
+	  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
+	  
+	  if (elevationDouble == 0.0) {
+		  ElevationText = "You are not in the field.";
+	  }
+	  else {
+	  	  String elevationString = new DecimalFormat("#.#").format(elevationDouble);
+	  	  ElevationText = "Your Elevation: " + elevationString + "m";
+	  }
+	  ElevationTextView.setText(ElevationText);
+    }
+
+    public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+    public void onProviderEnabled(String provider) {}
+
+    public void onProviderDisabled(String provider) {}
+  };
+
+  OnMarkerClickListener onMarkerClickListener = new OnMarkerClickListener() {
+	  public boolean onMarkerClick (Marker marker) {
+		  if (mode == REMOVE_MODE) {
+			  marker.remove();
+			  mode = 0;
+		  }
+		  else {
+			  marker.showInfoWindow();
+		  }
+		  return true;
+	  }
+  };
 
 }
 
