@@ -51,6 +51,7 @@ Field field;
 List<Marker> markers;
 LatLng userLocation;
 int mode;
+double waterLevelMeters;
 
 	public class LegalNoticeDialogFragment extends DialogFragment {
 	    @Override
@@ -174,7 +175,7 @@ public void updateColors(Field field) {
 	int waterLevel = seekBar.getProgress();
 	
 	//update text block
-	double waterLevelMeters = field.minElevation + ((double)waterLevel*(field.maxElevation-field.minElevation)/255.0);
+	waterLevelMeters = field.minElevation + ((double)waterLevel*(field.maxElevation-field.minElevation)/255.0);
 	TextView waterElevationTextView = (TextView) findViewById(R.id.text);
 	String elevation = new DecimalFormat("#.#").format(waterLevelMeters);
 	String waterElevationText = "Elevation: " + elevation + "m";
@@ -290,6 +291,7 @@ LocationListener locationListener = new LocationListener() {
       userLocation = new LatLng(location.getLatitude(), location.getLongitude());
       
 	  double elevationDouble = field.elevationFromLatLng(userLocation);
+	  double elevationDelta =  elevationDouble - waterLevelMeters;
 	  String ElevationText;
 	  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
 	  
@@ -297,8 +299,14 @@ LocationListener locationListener = new LocationListener() {
 		  ElevationText = "You are not in the field.";
 	  }
 	  else {
-	  	  String elevationString = new DecimalFormat("#.#").format(elevationDouble);
-	  	  ElevationText = "Your Elevation: " + elevationString + "m";
+	  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
+	  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
+	  	  if (elevationDelta >= 0.0) {
+	  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+	  	  }
+	  	  else {
+	  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+	  	  }
 	  }
 	  ElevationTextView.setText(ElevationText);
     }
