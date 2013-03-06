@@ -30,16 +30,14 @@ import android.widget.TextView;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends Activity implements OnMapClickListener {
 private static final int ADD_MODE = 1;
@@ -48,7 +46,7 @@ private static final int REMOVE_MODE = 2;
 GroundOverlay prevoverlay;
 
 Field field;
-List<Marker> markers;
+List<CustomMarker> markers;
 LatLng userLocation;
 int mode;
 double waterLevelMeters;
@@ -78,17 +76,27 @@ double waterLevelMeters;
 		map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 		map.setMyLocationEnabled(true);
 		map.setOnMapClickListener(this);
-		map.setOnMarkerClickListener(onMarkerClickListener);
+		UiSettings uiSettings = map.getUiSettings();
+		
+		uiSettings.setRotateGesturesEnabled(false);
+		uiSettings.setTiltGesturesEnabled(false);
+		uiSettings.setZoomControlsEnabled(false);
 		
 		field = new Field(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
-		markers = new ArrayList<Marker>();
+		markers = new ArrayList<CustomMarker>();
 		mode = 0;
+		
+		CustomMarker.setField(field);
+		CustomMarker.setActivity(this);
+		CustomMarker.setMap(map);
 		
 		readDataFile(field);
 		prevoverlay = field.createOverlay(map);
 		configSeekbar(field, prevoverlay);
 		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		
+		updateColors(field);
 	}
 
 	@Override
@@ -126,26 +134,21 @@ double waterLevelMeters;
 	public void onMapClick (LatLng point) {
 		switch(mode) {
 		case ADD_MODE:
-			
-			double waterLevel = field.elevationFromLatLng(point);
-			String title;
-			if (waterLevel == 0.0) {
-				title = "Not in field!";
-			}
-			else {
-				String elevation = new DecimalFormat("#.#").format(waterLevel);
-				title = "Elevation: " + elevation + "m";
-			}
-			GoogleMap mMap;
-			mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-			markers.add(mMap.addMarker(new MarkerOptions()
-			        .position(point)
-			        .title(title)));
-			updateMarkers();
+			CustomMarker.setWaterElevation(waterLevelMeters);
+			markers.add(new CustomMarker(point));
 			mode = 0;
 			break;
 		case REMOVE_MODE:
-			//TODO
+			Iterator<CustomMarker> i = markers.iterator();
+			CustomMarker marker;
+
+			while (i.hasNext()) {
+				 marker = i.next();
+				 if (marker.inBounds(point)) {
+					 marker.removeMarker();
+					 i.remove();
+				 }
+			}
 			break;
 		default:
 			break;
@@ -173,13 +176,6 @@ public void updateColors(Field field) {
 	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
 	seekBar.setMax(255);
 	int waterLevel = seekBar.getProgress();
-	
-	//update text block
-	waterLevelMeters = field.minElevation + ((double)waterLevel*(field.maxElevation-field.minElevation)/255.0);
-	TextView waterElevationTextView = (TextView) findViewById(R.id.text);
-	String elevation = new DecimalFormat("#.#").format(waterLevelMeters);
-	String waterElevationText = "Elevation: " + elevation + "m";
-	waterElevationTextView.setText(waterElevationText);
 	
 	int width = field.elevationBitmap.getWidth();
 	int height = field.elevationBitmap.getHeight();
@@ -212,7 +208,46 @@ private void configSeekbar(final Field field, final GroundOverlay overlay) {
 	seekBar.setProgress(seekBar.getMax()/2);
 	seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 		@Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+			//get level from seekbar
+			int waterLevel = seekBar.getProgress();
+			
+			//update text block
+			waterLevelMeters = field.minElevation + ((double)waterLevel*(field.maxElevation-field.minElevation)/255.0);
+			TextView waterElevationTextView = (TextView) findViewById(R.id.text);
+			String elevation = new DecimalFormat("#.#").format(waterLevelMeters);
+			String waterElevationText = "Elevation: " + elevation + "m";
+			waterElevationTextView.setText(waterElevationText);
+			
+			//update other text block
+			double elevationDouble = field.elevationFromLatLng(userLocation);
+			  double elevationDelta =  elevationDouble - waterLevelMeters;
+			  String ElevationText;
+			  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
+			  
+			  if (elevationDouble == 0.0) {
+				  ElevationText = "You are not in the field.";
+			  }
+			  else {
+			  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
+			  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
+			  	  if (elevationDelta >= 0.0) {
+			  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+			  	  }
+			  	  else {
+			  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+			  	  }
+			  }
+			  ElevationTextView.setText(ElevationText);
+			  
+			  //update marker text
+			  CustomMarker.setWaterElevation(waterLevelMeters);
+			  
+			  //these are too slow to do realtime
+			  
+			  //updateMarkers();
+			 //updateColors(field);
+		}
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -225,21 +260,12 @@ private void configSeekbar(final Field field, final GroundOverlay overlay) {
 }
 
 private void updateMarkers() {
-	Iterator<Marker> i = markers.iterator();
-	Marker marker;
-	LatLng markerLatLng;
-	double elevation;
-	double userElevation;
-	String elevationStr;
-	
+	Iterator<CustomMarker> i = markers.iterator();
+	CustomMarker marker;
+
 	while (i.hasNext()) {
 		 marker = i.next();
-		 markerLatLng = marker.getPosition();
-		 elevation = field.elevationFromLatLng(markerLatLng);
-		 userElevation = field.elevationFromLatLng(userLocation);
-		 elevationStr = new DecimalFormat("#.#").format(userElevation - elevation);
-		 marker.setSnippet(elevationStr + "m from your elevation");
-		 marker.showInfoWindow();
+		 marker.updateMarker();
 	}
 }
 
@@ -309,6 +335,8 @@ LocationListener locationListener = new LocationListener() {
 	  	  }
 	  }
 	  ElevationTextView.setText(ElevationText);
+	  
+	  CustomMarker.setUserElevation(elevationDouble);
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {}
@@ -316,19 +344,6 @@ LocationListener locationListener = new LocationListener() {
     public void onProviderEnabled(String provider) {}
 
     public void onProviderDisabled(String provider) {}
-  };
-
-  OnMarkerClickListener onMarkerClickListener = new OnMarkerClickListener() {
-	  public boolean onMarkerClick (Marker marker) {
-		  if (mode == REMOVE_MODE) {
-			  marker.remove();
-			  mode = 0;
-		  }
-		  else {
-			  marker.showInfoWindow();
-		  }
-		  return true;
-	  }
   };
 
 }

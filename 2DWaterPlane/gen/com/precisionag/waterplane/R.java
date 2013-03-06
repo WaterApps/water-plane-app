@@ -128,11 +128,12 @@ containing a value of this type.
         public static final int zOrderOnTop=0x7f01000d;
     }
     public static final class drawable {
-        public static final int content_new=0x7f020000;
-        public static final int content_remove=0x7f020001;
-        public static final int field=0x7f020002;
-        public static final int ic_launcher=0x7f020003;
-        public static final int topos=0x7f020004;
+        public static final int box=0x7f020000;
+        public static final int content_new=0x7f020001;
+        public static final int content_remove=0x7f020002;
+        public static final int field=0x7f020003;
+        public static final int ic_launcher=0x7f020004;
+        public static final int topos=0x7f020005;
     }
     public static final class id {
         public static final int item_legal=0x7f040009;

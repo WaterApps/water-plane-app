@@ -12,11 +12,12 @@ int attr uiZoomControls 0x7f01000a
 int attr uiZoomGestures 0x7f01000b
 int attr useViewLifecycle 0x7f01000c
 int attr zOrderOnTop 0x7f01000d
-int drawable content_new 0x7f020000
-int drawable content_remove 0x7f020001
-int drawable field 0x7f020002
-int drawable ic_launcher 0x7f020003
-int drawable topos 0x7f020004
+int drawable box 0x7f020000
+int drawable content_new 0x7f020001
+int drawable content_remove 0x7f020002
+int drawable field 0x7f020003
+int drawable ic_launcher 0x7f020004
+int drawable topos 0x7f020005
 int id item_legal 0x7f040009
 int id map 0x7f040004
 int id menu_add 0x7f04000a
