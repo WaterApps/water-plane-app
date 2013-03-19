@@ -13,6 +13,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -50,6 +51,8 @@ List<CustomMarker> markers;
 LatLng userLocation;
 int mode;
 double waterLevelMeters;
+LocationManager locationManager;
+Context context = this;
 
 	public class LegalNoticeDialogFragment extends DialogFragment {
 	    @Override
@@ -93,10 +96,43 @@ double waterLevelMeters;
 		readDataFile(field);
 		prevoverlay = field.createOverlay(map);
 		configSeekbar(field, prevoverlay);
-		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 		
 		updateColors(field);
+		
+		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+					context);
+	 
+				// set title
+				alertDialogBuilder.setTitle("GPS is not enabled");
+	 
+				// set dialog message
+				alertDialogBuilder
+					.setMessage("Please enable GPS!")
+					.setCancelable(false)
+					.setPositiveButton("Exit",new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,int id) {
+							// if this button is clicked, close
+							// current activity
+							MainActivity.this.finish();
+						}
+					  })
+					.setNegativeButton("GPS Settings",new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog,int id) {
+							// if this button is clicked, just close
+							// the dialog box and do nothing
+							startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+						}
+					});
+	 
+					// create alert dialog
+					AlertDialog alertDialog = alertDialogBuilder.create();
+	 
+					// show it
+					alertDialog.show();
+		}
 	}
 
 	@Override
@@ -209,44 +245,47 @@ private void configSeekbar(final Field field, final GroundOverlay overlay) {
 	seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 		@Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-			//get level from seekbar
-			int waterLevel = seekBar.getProgress();
+			if (userLocation != null ) {
+				//get level from seekbar
+				int waterLevel = seekBar.getProgress();
+				
+				//update text block
+				waterLevelMeters = field.minElevation + ((double)waterLevel*(field.maxElevation-field.minElevation)/255.0);
+				TextView waterElevationTextView = (TextView) findViewById(R.id.text);
+				String elevation = new DecimalFormat("#.#").format(waterLevelMeters);
+				String waterElevationText = "Elevation: " + elevation + "m";
+				waterElevationTextView.setText(waterElevationText);
+				
+				//update other text block
+				double elevationDouble = field.elevationFromLatLng(userLocation);
+				  double elevationDelta =  elevationDouble - waterLevelMeters;
+				  String ElevationText;
+				  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
+				  
+				  if (elevationDouble == 0.0) {
+					  ElevationText = "You are not in the field.";
+				  }
+				  else {
+				  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
+				  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
+				  	  if (elevationDelta >= 0.0) {
+				  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+				  	  }
+				  	  else {
+				  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+				  	  }
+				  }
+				  ElevationTextView.setText(ElevationText);
+				  
+				  //update marker text
+				  CustomMarker.setWaterElevation(waterLevelMeters);
+				  
+				  //these are too slow to do realtime
+				  
+				  //updateMarkers();
+				  //updateColors(field);
+			}
 			
-			//update text block
-			waterLevelMeters = field.minElevation + ((double)waterLevel*(field.maxElevation-field.minElevation)/255.0);
-			TextView waterElevationTextView = (TextView) findViewById(R.id.text);
-			String elevation = new DecimalFormat("#.#").format(waterLevelMeters);
-			String waterElevationText = "Elevation: " + elevation + "m";
-			waterElevationTextView.setText(waterElevationText);
-			
-			//update other text block
-			double elevationDouble = field.elevationFromLatLng(userLocation);
-			  double elevationDelta =  elevationDouble - waterLevelMeters;
-			  String ElevationText;
-			  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
-			  
-			  if (elevationDouble == 0.0) {
-				  ElevationText = "You are not in the field.";
-			  }
-			  else {
-			  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
-			  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
-			  	  if (elevationDelta >= 0.0) {
-			  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
-			  	  }
-			  	  else {
-			  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
-			  	  }
-			  }
-			  ElevationTextView.setText(ElevationText);
-			  
-			  //update marker text
-			  CustomMarker.setWaterElevation(waterLevelMeters);
-			  
-			  //these are too slow to do realtime
-			  
-			  //updateMarkers();
-			 //updateColors(field);
 		}
 
         @Override
