@@ -51,6 +51,7 @@ List<CustomMarker> markers;
 LatLng userLocation;
 int mode;
 double waterLevelMeters;
+double density = 0.0;
 LocationManager locationManager;
 Context context = this;
 
@@ -88,6 +89,7 @@ Context context = this;
 		field = new Field(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
 		markers = new ArrayList<CustomMarker>();
 		mode = 0;
+		density = getResources().getDisplayMetrics().density;
 		
 		CustomMarker.setField(field);
 		CustomMarker.setActivity(this);
@@ -304,7 +306,7 @@ private void updateMarkers() {
 
 	while (i.hasNext()) {
 		 marker = i.next();
-		 marker.updateMarker();
+		 marker.updateMarker(density);
 	}
 }
 
