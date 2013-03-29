@@ -24,6 +24,8 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -89,7 +91,7 @@ Context context = this;
 		field = new Field(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
 		markers = new ArrayList<CustomMarker>();
 		mode = 0;
-		density = getResources().getDisplayMetrics().density;
+		density = (getResources().getDisplayMetrics().xdpi)/160.0;
 		
 		CustomMarker.setField(field);
 		CustomMarker.setActivity(this);
@@ -101,7 +103,31 @@ Context context = this;
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 		
+		//set button listeners
+		final Button buttonPlus = (Button) findViewById(R.id.buttonPlus);
+        buttonPlus.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Increase elevation
+            	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
+            	seekBar.setProgress(seekBar.getProgress()+2);
+            	updateColors(field);
+            }
+        });
+        
+        final Button buttonMinus = (Button) findViewById(R.id.buttonMinus);
+        buttonMinus.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	// Decrease elevation
+            	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
+            	seekBar.setProgress(seekBar.getProgress()-2);
+            	updateColors(field);
+            }
+        });
+
+
+		
 		updateColors(field);
+		
 		
 		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
@@ -285,7 +311,7 @@ private void configSeekbar(final Field field, final GroundOverlay overlay) {
 				  //these are too slow to do realtime
 				  
 				  //updateMarkers();
-				  //updateColors(field);
+				  updateColors(field);
 			}
 			
 		}

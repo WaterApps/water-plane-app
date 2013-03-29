@@ -93,11 +93,11 @@ public class CustomMarker {
 		}
 		else {
 			String elevation = new DecimalFormat("#.#").format(elevationDouble);
-			String temp = new DecimalFormat("#.#").format(userElevation-elevationDouble);
+			String temp = new DecimalFormat("#.#").format(elevationDouble-userElevation);
 			title = "Elevation: " + elevation + "m";
 			userDelta = temp+"m from you";
 			
-			temp = new DecimalFormat("#.#").format(waterElevation-elevationDouble);
+			temp = new DecimalFormat("#.#").format(elevationDouble-waterElevation);
 			waterDelta = temp+"m from water";
 		}
 		Bitmap markerBitmap = BitmapFactory.decodeResource(activity.getResources(), R.drawable.box);			
