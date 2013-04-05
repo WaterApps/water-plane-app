@@ -17,32 +17,37 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
-public class MainActivity extends Activity implements OnMapClickListener {
+public class MainActivity extends Activity implements OnMapClickListener, OnCameraChangeListener {
 private static final int ADD_MODE = 1;
 private static final int REMOVE_MODE = 2;
 
@@ -56,6 +61,7 @@ double waterLevelMeters;
 double density = 0.0;
 LocationManager locationManager;
 Context context = this;
+
 
 	public class LegalNoticeDialogFragment extends DialogFragment {
 	    @Override
@@ -79,6 +85,7 @@ Context context = this;
 		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.field);
 		MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 		GoogleMap map = mapFragment.getMap();
+		map.setOnCameraChangeListener(this);
 		map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 		map.setMyLocationEnabled(true);
 		map.setOnMapClickListener(this);
@@ -93,9 +100,17 @@ Context context = this;
 		mode = 0;
 		density = (getResources().getDisplayMetrics().xdpi)/160.0;
 		
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		int width = size.x;
+		
+		CustomMarker.setDisplayWidth(width);
 		CustomMarker.setField(field);
 		CustomMarker.setActivity(this);
 		CustomMarker.setMap(map);
+		CustomMarker.setContext(context);
+		CustomMarker.setLayout((RelativeLayout)findViewById(R.id.TopLevelView));
 		
 		readDataFile(field);
 		prevoverlay = field.createOverlay(map);
@@ -203,16 +218,7 @@ Context context = this;
 			mode = 0;
 			break;
 		case REMOVE_MODE:
-			Iterator<CustomMarker> i = markers.iterator();
-			CustomMarker marker;
-
-			while (i.hasNext()) {
-				 marker = i.next();
-				 if (marker.inBounds(point)) {
-					 marker.removeMarker();
-					 i.remove();
-				 }
-			}
+			//this case is handled by the button listener now
 			break;
 		default:
 			break;
@@ -412,6 +418,11 @@ LocationListener locationListener = new LocationListener() {
 
     public void onProviderDisabled(String provider) {}
   };
+
+@Override
+public void onCameraChange(CameraPosition position) {
+	updateMarkers();
+}
 
 }
 

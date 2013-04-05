@@ -1,61 +1,69 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/TopLevelView"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".MainActivity" >
-
-
-	<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-	      xmlns:map="http://schemas.android.com/apk/res-auto"
+    
+	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    xmlns:tools="http://schemas.android.com/tools"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="vertical"
+	    tools:context=".MainActivity" >
+	
+	
+		<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+		      xmlns:map="http://schemas.android.com/apk/res-auto"
+		    
+			  android:id="@+id/map"
+			  android:layout_width="match_parent"
+			  android:layout_height="wrap_content"
+			  android:layout_weight="5"
+			  class="com.google.android.gms.maps.MapFragment"
+			  map:cameraTargetLat="40.9749879577"
+		      map:cameraTargetLng="-86.1991258479" 
+		      map:cameraZoom="14"
+		      />
+	
+	    <TextView android:id="@+id/text"
+	              android:layout_width="wrap_content"
+	              android:layout_height="wrap_content"
+	              android:text="Water Elevation: 42.0m" />
 	    
-		  android:id="@+id/map"
-		  android:layout_width="match_parent"
-		  android:layout_height="wrap_content"
-		  android:layout_weight="5"
-		  class="com.google.android.gms.maps.MapFragment"
-		  map:cameraTargetLat="40.9749879577"
-	      map:cameraTargetLng="-86.1991258479" 
-	      map:cameraZoom="14"
-	      />
-
-    <TextView android:id="@+id/text"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="Water Elevation: 42.0m" />
-    
-    <TextView android:id="@+id/text2"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="Your Elevation: 42.0m" />
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:paddingLeft="1dp"
-	    android:paddingRight="1dp"
-	    android:orientation="horizontal" >
-    
-		<SeekBar
-	        android:id="@+id/seekBar"
-	        android:layout_width="match_parent"
-	        android:layout_height="40dp"
-	        android:layout_weight="1"
-	        android:layout_alignParentBottom="true"
-	        android:layout_alignParentLeft="true" />
-
-		<Button
-		    android:id="@+id/buttonMinus"
-		    android:layout_width="40dp"
-		    android:layout_height="40dp"
-		    android:text="-" />
-		
-		<Button
-		    android:id="@+id/buttonPlus"
-		    android:layout_width="40dp"
-		    android:layout_height="40dp"
-		    android:text="+" />
-
+	    <TextView android:id="@+id/text2"
+	              android:layout_width="wrap_content"
+	              android:layout_height="wrap_content"
+	              android:text="Your Elevation: 42.0m" />
+	
+	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:paddingLeft="1dp"
+		    android:paddingRight="1dp"
+		    android:orientation="horizontal" >
+	    
+			<SeekBar
+		        android:id="@+id/seekBar"
+		        android:layout_width="match_parent"
+		        android:layout_height="40dp"
+		        android:layout_weight="1"
+		        android:layout_alignParentBottom="true"
+		        android:layout_alignParentLeft="true" />
+	
+			<Button
+			    android:id="@+id/buttonMinus"
+			    android:layout_width="40dp"
+			    android:layout_height="40dp"
+			    android:text="-" />
+			
+			<Button
+			    android:id="@+id/buttonPlus"
+			    android:layout_width="40dp"
+			    android:layout_height="40dp"
+			    android:text="+" />
+	
+		</LinearLayout>
+	
 	</LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>

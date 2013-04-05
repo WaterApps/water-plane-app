@@ -3,13 +3,20 @@ package com.precisionag.waterplane;
 import java.text.DecimalFormat;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
+import android.view.ViewGroup.MarginLayoutParams;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlay;
@@ -23,8 +30,10 @@ public class CustomMarker {
 	private static double userElevation;
 	private static double waterElevation;
 	private LatLng location;
-	private Bitmap image;
-	private GroundOverlay overlay;
+	private Button button;
+	static Context context;
+	static RelativeLayout layout;
+	static int displayWidth;
 	
 	public CustomMarker(LatLng point) {
 		location = point;
@@ -39,8 +48,8 @@ public class CustomMarker {
 			waterDelta = "";
 		}
 		else {
-			String elevation = new DecimalFormat("#.#").format(elevationDouble);
-			String temp = new DecimalFormat("#.#").format(Math.abs(userElevation-elevationDouble));
+			String elevation = new DecimalFormat("000.0").format(elevationDouble);
+			String temp = new DecimalFormat("000.0").format(Math.abs(userElevation-elevationDouble));
 			title = "Elevation: " + elevation + "m";
 			if (userElevation-elevationDouble < 0.0) {
 				userDelta = temp+"m above you";
@@ -48,38 +57,45 @@ public class CustomMarker {
 				userDelta = temp+"m below you";
 			}
 			
-			temp = new DecimalFormat("#.#").format(Math.abs(waterElevation-elevationDouble));
+			temp = new DecimalFormat("000.0").format(Math.abs(waterElevation-elevationDouble));
 			if (waterElevation-elevationDouble < 0.0) {
 				waterDelta = temp+"m above water";
 			} else {
 				waterDelta = temp+"m below water";
 			}
 		}
-		Bitmap markerBitmap = BitmapFactory.decodeResource(activity.getResources(), R.drawable.box);			
-		markerBitmap = markerBitmap.copy(markerBitmap.getConfig(), true);
-		Canvas c = new Canvas(markerBitmap);
-		Paint paint = new Paint();
-		paint.setTextSize(75);
-		c.drawText(title, (float)5, (float)80, paint);
-		c.drawText(userDelta, (float)5, (float)160, paint);
-		c.drawText(waterDelta, (float)5, (float)240, paint);
-		BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(markerBitmap);
-		GoogleMap map;
-		map = ((MapFragment) activity.getFragmentManager().findFragmentById(R.id.map)).getMap();
 		
-		GroundOverlay groundOverlay = map.addGroundOverlay(new GroundOverlayOptions()
-	     .image(image)
-	     .anchor((float)1.0, (float)1.0)
-	     .position(point, (float)300.0)
-	     .transparency(0)
-	     .zIndex((float)1));
-		groundOverlay.setVisible(true);
-		overlay = groundOverlay;
+		Projection projection = map.getProjection();
+		
+		Point screenLocation = projection.toScreenLocation(point);
+
+		button = new Button(context);
+		//button.setBackgroundColor(Color.WHITE);
+		button.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.box));
+		button.setText(userDelta+"\n"+waterDelta);
+		
+		float textSize = button.getTextSize();
+		int posx = (int)(textSize * userDelta.length() / 1.5);
+		int posy = (int)textSize * 4;
+			
+
+		MarginLayoutParams marginParams = new MarginLayoutParams(posx, posy);
+		//left top right bottom
+		marginParams.setMargins(screenLocation.x, screenLocation.y, 0, 0);
+		
+		if ((screenLocation.x + posx) > displayWidth) {
+			marginParams.setMargins(screenLocation.x-posx, screenLocation.y, 0, 0);
+			button.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.boxflipped));
+		}
+	    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+	    button.setLayoutParams(layoutParams);
+		layout.addView(button);
+
 	}
 	
 	public void updateMarker(double density) {
 		//delete old overlay and recreate with updated text
-		overlay.remove();
+		//overlay.remove();
 		
 		double elevationDouble = field.elevationFromLatLng(location);
 		String title;
@@ -92,43 +108,59 @@ public class CustomMarker {
 			waterDelta = "";
 		}
 		else {
-			String elevation = new DecimalFormat("#.#").format(elevationDouble);
-			String temp = new DecimalFormat("#.#").format(elevationDouble-userElevation);
+			String elevation = new DecimalFormat("000.0").format(elevationDouble);
+			String temp = new DecimalFormat("000.0").format(elevationDouble-userElevation);
 			title = "Elevation: " + elevation + "m";
 			userDelta = temp+"m from you";
 			
-			temp = new DecimalFormat("#.#").format(elevationDouble-waterElevation);
+			temp = new DecimalFormat("000.0").format(elevationDouble-waterElevation);
 			waterDelta = temp+"m from water";
 		}
-		Bitmap markerBitmap = BitmapFactory.decodeResource(activity.getResources(), R.drawable.box);			
-		markerBitmap = markerBitmap.copy(markerBitmap.getConfig(), true);
-		Canvas c = new Canvas(markerBitmap);
-		Paint paint = new Paint();
 		
-		paint.setTextSize((int)(25.0*density));
-		c.drawText(title, (float)5, (float)80, paint);
-		c.drawText(userDelta, (float)5, (float)160, paint);
-		c.drawText(waterDelta, (float)5, (float)240, paint);
-		BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(markerBitmap);
-		GoogleMap map;
-		map = ((MapFragment) activity.getFragmentManager().findFragmentById(R.id.map)).getMap();
+		button.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.box));
+		button.setText(userDelta+"\n"+waterDelta);
 		
-		GroundOverlay groundOverlay = map.addGroundOverlay(new GroundOverlayOptions()
-	     .image(image)
-	     .anchor((float)1.0, (float)1.0)
-	     .position(location, (float)300.0)
-	     .transparency(0)
-	     .zIndex((float)1));
-		groundOverlay.setVisible(true);
-		overlay = groundOverlay;
+		float textSize = button.getTextSize();
+		int posx = (int)(textSize * userDelta.length() / 1.5);
+		int posy = (int)textSize * 4;
+		
+		Projection projection = map.getProjection();
+		Point screenLocation = projection.toScreenLocation(location); 
+
+		MarginLayoutParams marginParams = new MarginLayoutParams(posx, posy);
+		//left top right bottom
+		marginParams.setMargins(screenLocation.x, screenLocation.y, 0, 0);
+		
+		if ((screenLocation.x + posx) > displayWidth) {
+			marginParams.setMargins(screenLocation.x-posx, screenLocation.y, 0, 0);
+			button.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.boxflipped));
+		}
+		
+	    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
+	    button.setLayoutParams(layoutParams);
+	    layout.removeView(button);
+		layout.addView(button);
+		
+
 	}
 	
+	public static void setDisplayWidth(int newWidth) {
+		displayWidth = newWidth;
+	}
 	public void removeMarker() {
-		overlay.remove();
+		layout.removeView(button);
 	}
 	
 	public static void setMap(GoogleMap newMap) {
 		map = newMap;
+	}
+	
+	public static void setLayout(RelativeLayout newLayout) {
+		layout = newLayout;
+	}
+	
+	public static void setContext(Context newContext) {
+		context = newContext;
 	}
 	
 	public static void setField(Field newField) {
@@ -148,6 +180,7 @@ public class CustomMarker {
 	}
 	
 	public boolean inBounds(LatLng point) {
-		return overlay.getBounds().contains(point);
+		//return overlay.getBounds().contains(point);
+		return true;
 	}
 }
