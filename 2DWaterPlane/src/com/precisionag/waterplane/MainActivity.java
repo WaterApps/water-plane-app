@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -62,7 +63,6 @@ double density = 0.0;
 LocationManager locationManager;
 Context context = this;
 
-
 	public class LegalNoticeDialogFragment extends DialogFragment {
 	    @Override
 	    public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -82,6 +82,9 @@ Context context = this;
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+		getActionBar().setCustomView(R.layout.custom_ab);
+
 		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.field);
 		MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 		GoogleMap map = mapFragment.getMap();
@@ -112,6 +115,8 @@ Context context = this;
 		CustomMarker.setContext(context);
 		CustomMarker.setLayout((RelativeLayout)findViewById(R.id.TopLevelView));
 		
+		
+		
 		readDataFile(field);
 		prevoverlay = field.createOverlay(map);
 		configSeekbar(field, prevoverlay);
@@ -136,6 +141,25 @@ Context context = this;
             	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
             	seekBar.setProgress(seekBar.getProgress()-2);
             	updateColors(field);
+            }
+        });
+        
+        final Button buttonDelete = (Button) findViewById(R.id.buttonDelete);
+        buttonDelete.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	Iterator<CustomMarker> i = markers.iterator();
+            	CustomMarker marker;
+
+            	while (i.hasNext()) {
+            		 marker = i.next();
+            		 if (CustomMarker.selected == marker.button) {
+            			 marker.removeMarker();
+            			 markers.remove(marker);
+            			 break;
+            		 }
+            	}
+            	
+                CustomMarker.layout.removeView(CustomMarker.selected);
             }
         });
 
@@ -198,10 +222,6 @@ Context context = this;
 	    }
 	    else if (item.getItemId() == R.id.menu_add) {
         	mode = ADD_MODE;
-            return true;
-	    }
-	    else if (item.getItemId() == R.id.menu_remove) {
-        	mode = REMOVE_MODE;
             return true;
 	    }
 	    else {
