@@ -25,12 +25,13 @@ int drawable topos 0x7f020009
 int id TopLevelView 0x7f040004
 int id buttonDelete 0x7f04000b
 int id buttonMinus 0x7f040009
+int id buttonOpenDem 0x7f04000c
 int id buttonPlus 0x7f04000a
-int id item_legal 0x7f04000d
+int id item_legal 0x7f04000e
 int id map 0x7f040005
-int id menu_add 0x7f04000e
-int id menu_drag 0x7f04000f
-int id menu_settings 0x7f04000c
+int id menu_add 0x7f04000f
+int id menu_drag 0x7f040010
+int id menu_settings 0x7f04000d
 int id none 0x7f040000
 int id normal 0x7f040001
 int id satellite 0x7f040002

@@ -3,6 +3,7 @@ package com.precisionag.waterplane;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,7 +12,6 @@ import java.util.List;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,8 +23,8 @@ import android.graphics.Point;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -67,6 +67,7 @@ double waterLevelMeters;
 LocationManager locationManager;
 Context context = this;
 Marker userMarker;
+private Uri fileUri;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +108,6 @@ Marker userMarker;
 		
 		CustomMarker.setDisplayWidth(width);
 		CustomMarker.setField(field);
-		CustomMarker.setActivity(this);
 		CustomMarker.setMap(map);
 		CustomMarker.setContext(context);
 		CustomMarker.setLayout((RelativeLayout)findViewById(R.id.TopLevelView));
@@ -157,6 +157,27 @@ Marker userMarker;
             	}
             	
                 CustomMarker.layout.removeView(CustomMarker.selected);
+            }
+        });
+        
+        final Button buttonOpenDem = (Button) findViewById(R.id.buttonOpenDem);
+        buttonOpenDem.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	//opens file manager
+            	Intent intent = new Intent("org.openintents.action.PICK_FILE");
+            	intent.setData(Uri.parse("file:///sdcard/dem"));
+            	startActivityForResult(intent, 1);
+            	java.net.URI juri = null;
+				try {
+					juri = new java.net.URI(fileUri.getScheme(),
+					        fileUri.getSchemeSpecificPart(),
+					        fileUri.getFragment());
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	ElevationRaster raster = new ElevationRaster();
+            	raster.readGridFloat(juri);
             }
         });
 		
@@ -355,7 +376,7 @@ private void configSeekbar(final Field field, final GroundOverlay overlay) {
 				waterElevationTextView.setText(waterElevationText);
 				
 				//update other text block
-				double elevationDouble = field.elevationFromLatLng(userLocation);
+				  double elevationDouble = field.elevationFromLatLng(userLocation);
 				  double elevationDelta =  elevationDouble - waterLevelMeters;
 				  String ElevationText;
 				  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
@@ -536,6 +557,11 @@ public void onMarkerDragStart(Marker marker) {
 public boolean onTouch(View arg0, MotionEvent arg1) {
 	updateMarkers();
 	return false;
+}
+
+protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+	//handle data from file manager
+	fileUri = data.getData();
 }
 
 }

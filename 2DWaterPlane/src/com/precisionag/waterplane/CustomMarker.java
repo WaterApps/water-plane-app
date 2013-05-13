@@ -2,7 +2,6 @@ package com.precisionag.waterplane;
 
 import java.text.DecimalFormat;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -22,7 +21,6 @@ import com.google.android.gms.maps.model.LatLng;
 public class CustomMarker {
 	private static GoogleMap map;
 	private static Field field;
-	private static Activity activity;
 	private static double userElevation;
 	private static double waterElevation;
 	private LatLng location;
@@ -46,9 +44,8 @@ public class CustomMarker {
 			waterDelta = "";
 		}
 		else {
-			String elevation = new DecimalFormat("000.0").format(elevationDouble);
 			String temp = new DecimalFormat("000.0").format(Math.abs(userElevation-elevationDouble));
-			title = "Elevation: " + elevation + "m";
+			title = "";
 			if (userElevation-elevationDouble < 0.0) {
 				userDelta = temp+"m above you";
 			} else {
@@ -70,12 +67,7 @@ public class CustomMarker {
 		button = new Button(context);
 		//button.setBackgroundColor(Color.WHITE);
 		//button.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.box));
-		button.setText(userDelta+"\n"+waterDelta);
-		
-		float textSize = button.getTextSize();
-		int buttonWidth = (int)(textSize * userDelta.length() / 1.5);
-		int buttonHeight = (int)textSize * 4;
-			
+		button.setText(title+userDelta+"\n"+waterDelta);
 
 		MarginLayoutParams marginParams = new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		//left top right bottom
@@ -128,16 +120,15 @@ public class CustomMarker {
 			waterDelta = "";
 		}
 		else {
-			String elevation = new DecimalFormat("000.0").format(elevationDouble);
 			String temp = new DecimalFormat("000.0").format(elevationDouble-userElevation);
-			title = "Elevation: " + elevation + "m";
+			title = "";
 			userDelta = temp+"m from you";
 			
 			temp = new DecimalFormat("000.0").format(elevationDouble-waterElevation);
 			waterDelta = temp+"m from water";
 		}
 		
-		button.setText(userDelta+"\n"+waterDelta);
+		button.setText(title+userDelta+"\n"+waterDelta);
 		
 		Projection projection = map.getProjection();
 		Point screenLocation = projection.toScreenLocation(location); 
@@ -194,10 +185,6 @@ public class CustomMarker {
 	
 	public static void setWaterElevation(double elevation) {
 		waterElevation = elevation;
-	}
-	
-	public static void setActivity(Activity mActivity) {
-		activity = mActivity;
 	}
 	
 	public boolean inBounds(LatLng point) {
