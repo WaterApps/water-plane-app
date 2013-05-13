@@ -67,21 +67,6 @@ double waterLevelMeters;
 LocationManager locationManager;
 Context context = this;
 Marker userMarker;
-
-	public class LegalNoticeDialogFragment extends DialogFragment {
-	    @Override
-	    public Dialog onCreateDialog(Bundle savedInstanceState) {
-	        // Use the Builder class for convenient dialog construction
-	        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	        builder.setMessage(GooglePlayServicesUtil.getOpenSourceSoftwareLicenseInfo(getApplicationContext()))
-	               .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-	                   public void onClick(DialogInterface dialog, int id) {
-	                   }
-	               });
-	        // Create the AlertDialog object and return it
-	        return builder.create();
-	    }
-	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -232,12 +217,13 @@ Marker userMarker;
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection
 	    if (item.getItemId() == R.id.item_legal) {
-	        	//this part randomly stopped working
-	        	//and needed rewritten anyway
-	    	
-	            //DialogFragment newFragment = new LegalNoticeDialogFragment();
-	        	//newFragment.show(getFragmentManager(), "legal");
-	            return true;
+	        	  String LicenseInfo = GooglePlayServicesUtil.getOpenSourceSoftwareLicenseInfo(
+	              getApplicationContext());
+	              AlertDialog.Builder LicenseDialog = new AlertDialog.Builder(MainActivity.this);
+	              LicenseDialog.setTitle("Legal Notices");
+	              LicenseDialog.setMessage(LicenseInfo);
+	              LicenseDialog.show();
+	        	  return true;
 	    }
 	    else if (item.getItemId() == R.id.menu_add) {
         	mode = ADD_MODE;
