@@ -10,6 +10,11 @@
           android:icon="@drawable/content_new"
           android:title="Add Marker"
           android:showAsAction="ifRoom|withText" />
+            
+             <item android:id="@+id/menu_drag"
+          android:icon="@drawable/lock"
+          android:title="Finger Location Mode"
+          android:showAsAction="ifRoom|withText" />
 
 </menu>
 

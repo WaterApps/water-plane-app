@@ -30,8 +30,8 @@
         <activity
             android:name="com.precisionag.waterplane.MainActivity"
             android:label="@string/app_name" 
-            android:screenOrientation="portrait"
-            android:uiOptions="splitActionBarWhenNarrow" >
+            android:uiOptions="splitActionBarWhenNarrow" 
+            android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

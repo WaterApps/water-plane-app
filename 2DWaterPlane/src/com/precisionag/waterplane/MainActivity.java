@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -27,7 +28,9 @@ import android.support.v4.app.DialogFragment;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -38,6 +41,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -47,13 +51,14 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MainActivity extends Activity implements OnMapClickListener, OnCameraChangeListener {
+public class MainActivity extends Activity implements OnMapClickListener, OnCameraChangeListener, OnMarkerDragListener, OnTouchListener {
 private static final int ADD_MODE = 1;
-private static final int REMOVE_MODE = 2;
+private static final int DRAG_MODE = 2;
 
 GroundOverlay prevoverlay;
-
 Field field;
 List<CustomMarker> markers;
 LatLng userLocation;
@@ -62,6 +67,7 @@ double waterLevelMeters;
 double density = 0.0;
 LocationManager locationManager;
 Context context = this;
+Marker userMarker;
 
 	public class LegalNoticeDialogFragment extends DialogFragment {
 	    @Override
@@ -94,11 +100,19 @@ Context context = this;
 		map.setOnMapClickListener(this);
 		UiSettings uiSettings = map.getUiSettings();
 		
+		userMarker = map.addMarker(new MarkerOptions()
+        .position(new LatLng(0, 0))
+        .title("You are here"));
+		
+		map.setOnMarkerDragListener(this);
+
+		
 		uiSettings.setRotateGesturesEnabled(false);
 		uiSettings.setTiltGesturesEnabled(false);
 		uiSettings.setZoomControlsEnabled(false);
 		
 		field = new Field(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
+		userLocation = new LatLng(0.0, 0.0);
 		markers = new ArrayList<CustomMarker>();
 		mode = 0;
 		density = (getResources().getDisplayMetrics().xdpi)/160.0;
@@ -114,9 +128,9 @@ Context context = this;
 		CustomMarker.setMap(map);
 		CustomMarker.setContext(context);
 		CustomMarker.setLayout((RelativeLayout)findViewById(R.id.TopLevelView));
-		
-		
-		
+		RelativeLayout lay = (RelativeLayout) findViewById(R.id.TopLevelView);
+		lay.setOnTouchListener(this);
+				
 		readDataFile(field);
 		prevoverlay = field.createOverlay(map);
 		configSeekbar(field, prevoverlay);
@@ -162,46 +176,53 @@ Context context = this;
                 CustomMarker.layout.removeView(CustomMarker.selected);
             }
         });
-
-
 		
 		updateColors(field);
 		
 		
 		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-					context);
-	 
-				// set title
-				alertDialogBuilder.setTitle("GPS is not enabled");
-	 
-				// set dialog message
-				alertDialogBuilder
-					.setMessage("Please enable GPS!")
-					.setCancelable(false)
-					.setPositiveButton("Exit",new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,int id) {
-							// if this button is clicked, close
-							// current activity
-							MainActivity.this.finish();
-						}
-					  })
-					.setNegativeButton("GPS Settings",new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,int id) {
-							// if this button is clicked, just close
-							// the dialog box and do nothing
-							startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-						}
-					});
-	 
-					// create alert dialog
-					AlertDialog alertDialog = alertDialogBuilder.create();
-	 
-					// show it
-					alertDialog.show();
+			if (mode != DRAG_MODE) {
+				AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+						context);
+		 
+					// set title
+					alertDialogBuilder.setTitle("GPS is not enabled");
+		 
+					// set dialog message
+					alertDialogBuilder
+						.setMessage("Please enable GPS!")
+						.setCancelable(false)
+						.setPositiveButton("Exit",new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,int id) {
+								// if this button is clicked, close
+								// current activity
+								MainActivity.this.finish();
+							}
+						  })
+						.setNegativeButton("GPS Settings",new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,int id) {
+								// if this button is clicked, just close
+								// the dialog box and do nothing
+								startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+							}
+						});
+		 
+						// create alert dialog
+						AlertDialog alertDialog = alertDialogBuilder.create();
+		 
+						// show it
+						alertDialog.show();
+			}
 		}
+		
+		
 	}
-
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+	  super.onConfigurationChanged(newConfig);
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -224,6 +245,43 @@ Context context = this;
         	mode = ADD_MODE;
             return true;
 	    }
+	    else if (item.getItemId() == R.id.menu_drag) {
+	    	if (mode == DRAG_MODE) {
+	    		mode = 0;
+	    		userLocation = new LatLng(
+	    				locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude(), 
+	    				locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude());
+	    		
+	    		double elevationDouble = field.elevationFromLatLng(userLocation);
+	  		  double elevationDelta =  elevationDouble - waterLevelMeters;
+	  		  String ElevationText;
+	  		  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
+	  		  
+	  		  if (elevationDouble == 0.0) {
+	  			  ElevationText = "You are not in the field.";
+	  		  }
+	  		  else {
+	  		  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
+	  		  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
+	  		  	  if (elevationDelta >= 0.0) {
+	  		  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+	  		  	  }
+	  		  	  else {
+	  		  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+	  		  	  }
+	  		  }
+	  		  ElevationTextView.setText(ElevationText);
+	  		  
+	  		  CustomMarker.setUserElevation(elevationDouble);
+	  		  userMarker.setPosition(userLocation);
+	    	} 
+	    	else {
+	    		mode = DRAG_MODE;
+	    		
+	    	}
+	    	userMarker.setDraggable(mode == DRAG_MODE);
+            return true;
+	    }
 	    else {
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -231,15 +289,40 @@ Context context = this;
 	
 	@Override
 	public void onMapClick (LatLng point) {
+		CustomMarker.selected = null;
+		updateMarkers();
 		switch(mode) {
 		case ADD_MODE:
 			CustomMarker.setWaterElevation(waterLevelMeters);
-			markers.add(new CustomMarker(point));
+			CustomMarker newMarker = new CustomMarker(point);
+			newMarker.updateMarker(density);
+			markers.add(newMarker);
 			mode = 0;
 			break;
-		case REMOVE_MODE:
-			//this case is handled by the button listener now
-			break;
+		case DRAG_MODE:/*
+			userLocation = point;
+			double elevationDouble = field.elevationFromLatLng(userLocation);
+			  double elevationDelta =  elevationDouble - waterLevelMeters;
+			  String ElevationText;
+			  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
+			  
+			  if (elevationDouble == 0.0) {
+				  ElevationText = "You are not in the field.";
+			  }
+			  else {
+			  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
+			  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
+			  	  if (elevationDelta >= 0.0) {
+			  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+			  	  }
+			  	  else {
+			  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+			  	  }
+			  }
+			  ElevationTextView.setText(ElevationText);
+			  
+			  CustomMarker.setUserElevation(elevationDouble);
+			  */
 		default:
 			break;
 		}
@@ -407,9 +490,52 @@ private void readDataFile(Field field) {
 LocationListener locationListener = new LocationListener() {
     public void onLocationChanged(Location location) {
       // Called when a new location is found by the network location provider.
-      userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-      
-	  double elevationDouble = field.elevationFromLatLng(userLocation);
+    	if (mode != DRAG_MODE) {
+
+	      userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+	      
+		  double elevationDouble = field.elevationFromLatLng(userLocation);
+		  double elevationDelta =  elevationDouble - waterLevelMeters;
+		  String ElevationText;
+		  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
+		  
+		  if (elevationDouble == 0.0) {
+			  ElevationText = "You are not in the field.";
+		  }
+		  else {
+		  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
+		  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
+		  	  if (elevationDelta >= 0.0) {
+		  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+		  	  }
+		  	  else {
+		  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+		  	  }
+		  }
+		  ElevationTextView.setText(ElevationText);
+		  
+		  CustomMarker.setUserElevation(elevationDouble);
+		  userMarker.setPosition(userLocation);
+    	}
+    }
+
+    public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+    public void onProviderEnabled(String provider) {}
+
+    public void onProviderDisabled(String provider) {}
+  };
+
+@Override
+public void onCameraChange(CameraPosition position) {
+	updateMarkers();
+}
+
+@Override
+public void onMarkerDrag(Marker marker) {
+	// TODO Auto-generated method stub
+	userLocation = marker.getPosition();
+	double elevationDouble = field.elevationFromLatLng(userLocation);
 	  double elevationDelta =  elevationDouble - waterLevelMeters;
 	  String ElevationText;
 	  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
@@ -430,18 +556,26 @@ LocationListener locationListener = new LocationListener() {
 	  ElevationTextView.setText(ElevationText);
 	  
 	  CustomMarker.setUserElevation(elevationDouble);
-    }
-
-    public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-    public void onProviderEnabled(String provider) {}
-
-    public void onProviderDisabled(String provider) {}
-  };
+	  updateMarkers();
+}
 
 @Override
-public void onCameraChange(CameraPosition position) {
+public void onMarkerDragEnd(Marker marker) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public void onMarkerDragStart(Marker marker) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public boolean onTouch(View arg0, MotionEvent arg1) {
+	// TODO Auto-generated method stub
 	updateMarkers();
+	return true;
 }
 
 }
