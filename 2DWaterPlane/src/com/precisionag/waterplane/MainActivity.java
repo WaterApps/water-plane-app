@@ -60,11 +60,10 @@ private static final int DRAG_MODE = 2;
 
 GroundOverlay prevoverlay;
 Field field;
-List<CustomMarker> markers;
+static List<CustomMarker> markers;
 LatLng userLocation;
 int mode;
 double waterLevelMeters;
-double density = 0.0;
 LocationManager locationManager;
 Context context = this;
 Marker userMarker;
@@ -92,7 +91,7 @@ Marker userMarker;
 		getActionBar().setCustomView(R.layout.custom_ab);
 
 		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.field);
-		MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+		MyMapFragment mapFragment = (MyMapFragment) getFragmentManager().findFragmentById(R.id.map);
 		GoogleMap map = mapFragment.getMap();
 		map.setOnCameraChangeListener(this);
 		map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
@@ -115,7 +114,6 @@ Marker userMarker;
 		userLocation = new LatLng(0.0, 0.0);
 		markers = new ArrayList<CustomMarker>();
 		mode = 0;
-		density = (getResources().getDisplayMetrics().xdpi)/160.0;
 		
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
@@ -130,7 +128,7 @@ Marker userMarker;
 		CustomMarker.setLayout((RelativeLayout)findViewById(R.id.TopLevelView));
 		RelativeLayout lay = (RelativeLayout) findViewById(R.id.TopLevelView);
 		lay.setOnTouchListener(this);
-				
+		
 		readDataFile(field);
 		prevoverlay = field.createOverlay(map);
 		configSeekbar(field, prevoverlay);
@@ -292,39 +290,17 @@ Marker userMarker;
 		CustomMarker.selected = null;
 		updateMarkers();
 		switch(mode) {
-		case ADD_MODE:
-			CustomMarker.setWaterElevation(waterLevelMeters);
-			CustomMarker newMarker = new CustomMarker(point);
-			newMarker.updateMarker(density);
-			markers.add(newMarker);
-			mode = 0;
-			break;
-		case DRAG_MODE:/*
-			userLocation = point;
-			double elevationDouble = field.elevationFromLatLng(userLocation);
-			  double elevationDelta =  elevationDouble - waterLevelMeters;
-			  String ElevationText;
-			  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
-			  
-			  if (elevationDouble == 0.0) {
-				  ElevationText = "You are not in the field.";
-			  }
-			  else {
-			  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
-			  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
-			  	  if (elevationDelta >= 0.0) {
-			  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
-			  	  }
-			  	  else {
-			  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
-			  	  }
-			  }
-			  ElevationTextView.setText(ElevationText);
-			  
-			  CustomMarker.setUserElevation(elevationDouble);
-			  */
-		default:
-			break;
+			case ADD_MODE:
+				CustomMarker.setWaterElevation(waterLevelMeters);
+				CustomMarker newMarker = new CustomMarker(point);
+				newMarker.updateMarker();
+				markers.add(newMarker);
+				updateMarkers();
+				mode = 0;
+				break;
+				
+			default:
+				break;
 		}
 		
 	}
@@ -378,7 +354,6 @@ public void updateColors(Field field) {
 private void configSeekbar(final Field field, final GroundOverlay overlay) {
 	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
 	seekBar.setMax(255);
-	seekBar.setProgress(seekBar.getMax()/2);
 	seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 		@Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -416,15 +391,14 @@ private void configSeekbar(final Field field, final GroundOverlay overlay) {
 				  
 				  //update marker text
 				  CustomMarker.setWaterElevation(waterLevelMeters);
-				  
-				  //these are too slow to do realtime
-				  
-				  //updateMarkers();
+				  				  
+				  //visual updates
+				  updateMarkers();
 				  updateColors(field);
 			}
 			
 		}
-
+		
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {}
         @Override
@@ -433,15 +407,16 @@ private void configSeekbar(final Field field, final GroundOverlay overlay) {
         	updateMarkers();
         }
 	});
+	seekBar.setProgress(seekBar.getMax()/2);
 }
 
-private void updateMarkers() {
+public static void updateMarkers() {
 	Iterator<CustomMarker> i = markers.iterator();
 	CustomMarker marker;
 
 	while (i.hasNext()) {
 		 marker = i.next();
-		 marker.updateMarker(density);
+		 marker.updateMarker();
 	}
 }
 
@@ -573,10 +548,8 @@ public void onMarkerDragStart(Marker marker) {
 
 @Override
 public boolean onTouch(View arg0, MotionEvent arg1) {
-	// TODO Auto-generated method stub
 	updateMarkers();
-	return true;
+	return false;
 }
 
 }
-

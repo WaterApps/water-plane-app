@@ -21,7 +21,7 @@
 			  android:layout_width="match_parent"
 			  android:layout_height="wrap_content"
 			  android:layout_weight="5"
-			  class="com.google.android.gms.maps.MapFragment"
+			  class="com.precisionag.waterplane.MyMapFragment"
 			  map:cameraTargetLat="40.9749879577"
 		      map:cameraTargetLng="-86.1991258479" 
 		      map:cameraZoom="14"

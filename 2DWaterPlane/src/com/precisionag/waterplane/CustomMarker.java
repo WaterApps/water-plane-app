@@ -114,7 +114,7 @@ public class CustomMarker {
 		checkBox.setChecked(true);
 	}
 	
-	public void updateMarker(double density) {	
+	public void updateMarker() {	
 		double elevationDouble = field.elevationFromLatLng(location);
 		String title;
 		String userDelta;
