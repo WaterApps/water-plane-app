@@ -235,6 +235,18 @@ private Uri fileUri;
 	}
 	
 	@Override
+	public boolean onPrepareOptionsMenu (Menu menu) {
+		MenuItem item = menu.findItem(R.id.menu_drag);
+		if (mode == DRAG_MODE) {
+			item.setIcon(R.drawable.unlock);
+		}
+		else {
+			item.setIcon(R.drawable.lock);
+		}
+		return true;
+	}
+	
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection
 	    if (item.getItemId() == R.id.item_legal) {
@@ -257,7 +269,7 @@ private Uri fileUri;
 	    				locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude(), 
 	    				locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude());
 	    		
-	    		double elevationDouble = field.elevationFromLatLng(userLocation);
+	    	  double elevationDouble = field.elevationFromLatLng(userLocation);
 	  		  double elevationDelta =  elevationDouble - waterLevelMeters;
 	  		  String ElevationText;
 	  		  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
@@ -285,6 +297,9 @@ private Uri fileUri;
 	    		
 	    	}
 	    	userMarker.setDraggable(mode == DRAG_MODE);
+	    	
+	    	invalidateOptionsMenu();
+	    	
             return true;
 	    }
 	    else {

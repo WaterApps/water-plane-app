@@ -22,6 +22,7 @@ int drawable ic_launcher 0x7f020006
 int drawable location_place 0x7f020007
 int drawable lock 0x7f020008
 int drawable topos 0x7f020009
+int drawable unlock 0x7f02000a
 int id TopLevelView 0x7f040004
 int id buttonDelete 0x7f04000b
 int id buttonMinus 0x7f040009

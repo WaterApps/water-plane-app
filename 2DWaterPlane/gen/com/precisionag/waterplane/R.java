@@ -138,6 +138,7 @@ containing a value of this type.
         public static final int location_place=0x7f020007;
         public static final int lock=0x7f020008;
         public static final int topos=0x7f020009;
+        public static final int unlock=0x7f02000a;
     }
     public static final class id {
         public static final int TopLevelView=0x7f040004;

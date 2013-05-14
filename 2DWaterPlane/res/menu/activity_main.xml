@@ -4,17 +4,21 @@
         android:id="@+id/menu_settings"
         android:orderInCategory="100"
         android:showAsAction="never"
-        android:title="@string/menu_settings"/>    <item android:id="@+id/item_legal" android:title="@string/menu_legal" android:showAsAction="never"></item>
+        android:title="@string/menu_settings"/>    
         
-            <item android:id="@+id/menu_add"
+    <item android:id="@+id/item_legal"
+          android:title="@string/menu_legal"
+          android:showAsAction="never" />
+        
+    <item android:id="@+id/menu_add"
           android:icon="@drawable/content_new"
           android:title="Add Marker"
-          android:showAsAction="ifRoom|withText" />
+          android:showAsAction="always" />
             
-             <item android:id="@+id/menu_drag"
+   <item android:id="@+id/menu_drag"
           android:icon="@drawable/lock"
           android:title="Finger Location Mode"
-          android:showAsAction="ifRoom|withText" />
+          android:showAsAction="always" />
 
 </menu>
 
