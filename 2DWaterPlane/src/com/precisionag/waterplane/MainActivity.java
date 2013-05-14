@@ -576,7 +576,7 @@ protected void onActivityResult (int requestCode, int resultCode, Intent data) {
 		e.printStackTrace();
 	}
 	ElevationRaster raster = new ElevationRaster();
-	raster.readGridFloat(juri);
+	new ReadGridFloatTask(this, raster).execute(juri);
 }
 
 }
