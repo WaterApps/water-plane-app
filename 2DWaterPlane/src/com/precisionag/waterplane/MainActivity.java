@@ -167,17 +167,6 @@ private Uri fileUri;
             	Intent intent = new Intent("org.openintents.action.PICK_FILE");
             	intent.setData(Uri.parse("file:///sdcard/dem"));
             	startActivityForResult(intent, 1);
-            	java.net.URI juri = null;
-				try {
-					juri = new java.net.URI(fileUri.getScheme(),
-					        fileUri.getSchemeSpecificPart(),
-					        fileUri.getFragment());
-				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-            	ElevationRaster raster = new ElevationRaster();
-            	raster.readGridFloat(juri);
             }
         });
 		
@@ -577,6 +566,17 @@ public boolean onTouch(View arg0, MotionEvent arg1) {
 protected void onActivityResult (int requestCode, int resultCode, Intent data) {
 	//handle data from file manager
 	fileUri = data.getData();
+	java.net.URI juri = null;
+	try {
+		juri = new java.net.URI(fileUri.getScheme(),
+		        fileUri.getSchemeSpecificPart(),
+		        fileUri.getFragment());
+	} catch (URISyntaxException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	ElevationRaster raster = new ElevationRaster();
+	raster.readGridFloat(juri);
 }
 
 }
