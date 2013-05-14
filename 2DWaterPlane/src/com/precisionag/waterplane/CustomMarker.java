@@ -30,7 +30,7 @@ public class CustomMarker {
 	static RelativeLayout layout;
 	static int displayWidth;
 	static Button selected;
-	
+	static final int blue = 0xFF33B5E5;
 	public CustomMarker(LatLng point) {
 		location = point;
 		double elevationDouble = field.elevationFromLatLng(point);
@@ -83,7 +83,7 @@ public class CustomMarker {
             		selected.setBackgroundColor(Color.WHITE);
             	}
                 selected = button;
-                button.setBackgroundColor(Color.YELLOW);
+                button.setBackgroundColor(blue);
             }
         });
 		
@@ -112,7 +112,7 @@ public class CustomMarker {
 		String userDelta;
 		String waterDelta;
 		
-		button.setBackgroundColor(button == selected ? Color.YELLOW : Color.WHITE);
+		button.setBackgroundColor(button == selected ? blue : Color.WHITE);
 		
 		if (elevationDouble == 0.0) {
 			title = "Not in field!";
@@ -135,7 +135,11 @@ public class CustomMarker {
 
 		MarginLayoutParams marginParams = new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		//left top right bottom
-		marginParams.setMargins(screenLocation.x-(button.getWidth()/2), screenLocation.y-button.getHeight(), 0, 0);
+		if (button.getWidth() == 0) {
+			marginParams.setMargins(screenLocation.x-(int)(button.getTextSize()*waterDelta.length()/4.0), screenLocation.y-(int)(button.getTextSize()*3.0), 0, 0);
+		} else {
+			marginParams.setMargins(screenLocation.x-(button.getWidth()/2), screenLocation.y-button.getHeight(), 0, 0);
+		}
 		
 	    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
 	    //layoutParams.setWidth();

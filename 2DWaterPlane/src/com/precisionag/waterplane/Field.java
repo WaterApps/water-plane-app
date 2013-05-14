@@ -34,6 +34,10 @@ public class Field {
 		maxElevation = maxHeight;
 	}
 	
+	public void setBitmap(Bitmap bits) {
+		elevationBitmap = bits;
+	}
+	
 	public void setBounds(LatLngBounds bounds) {
 		fieldBounds = bounds;
 	}

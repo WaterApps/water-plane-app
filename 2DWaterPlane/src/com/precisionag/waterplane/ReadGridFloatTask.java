@@ -39,6 +39,7 @@ public class ReadGridFloatTask extends AsyncTask <URI, Integer, ElevationRaster>
 	protected void onPostExecute(ElevationRaster rasters) {
 		dialog.dismiss();
 		Toast.makeText(context, "File load complete", Toast.LENGTH_LONG).show();
+		
 	}
 
 }

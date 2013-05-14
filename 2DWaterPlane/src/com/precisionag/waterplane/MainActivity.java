@@ -59,7 +59,7 @@ private static final int ADD_MODE = 1;
 private static final int DRAG_MODE = 2;
 
 GroundOverlay prevoverlay;
-Field field;
+static Field field;
 static List<CustomMarker> markers;
 LatLng userLocation;
 int mode;
@@ -577,6 +577,10 @@ protected void onActivityResult (int requestCode, int resultCode, Intent data) {
 	}
 	ElevationRaster raster = new ElevationRaster();
 	new ReadGridFloatTask(this, raster).execute(juri);
+}
+
+public void onFileRead() {
+	
 }
 
 }

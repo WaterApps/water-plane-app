@@ -12,42 +12,78 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.widget.Toast;
+
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 public class ElevationRaster {
 
-	private int width;
-	private int height;
+	private int ncols;
+	private int nrows;
 	private float [][]elevationData;
+	private float minElevation;
+	private float maxElevation;
 	private LatLng lowerLeft;
 	private LatLng upperRight;
 	
 	ElevationRaster(int w, int h, float [][]data) {
-		width = w;
-		height = h;
+		minElevation = Float.POSITIVE_INFINITY;
+		maxElevation = Float.NEGATIVE_INFINITY;
+		ncols = w;
+		nrows = h;
 		elevationData = data;
 	}
 	
 	ElevationRaster(int w, int h) {
-		width = w;
-		height = h;
-		elevationData = new float[width][height];
+		minElevation = Float.POSITIVE_INFINITY;
+		maxElevation = Float.NEGATIVE_INFINITY;
+		ncols = w;
+		nrows = h;
+		elevationData = new float[ncols][nrows];
 	}
 	
 	ElevationRaster() {
-		width = 1;
-		height = 1;
-		elevationData = new float[width][height];
+		minElevation = Float.POSITIVE_INFINITY;
+		maxElevation = Float.NEGATIVE_INFINITY;
+		ncols = 1;
+		nrows = 1;
+		elevationData = new float[ncols][nrows];
 	}
 	
 	public void setDimensions(int w, int h) {
-		width = w;
-		height = h;
-		elevationData = new float[width][height];
+		ncols = w;
+		nrows = h;
+		elevationData = new float[ncols][nrows];
 	}
 	
 	public float[][] getData() {
 		return elevationData;
+	}
+	
+	public LatLngBounds getBounds() {
+		return new LatLngBounds(lowerLeft, upperRight);
+	}
+	
+	public Bitmap getBitmap() {
+		Bitmap bitmap;
+		int intpixels[] = new int[nrows*ncols];
+		
+		for(int k = 0; k<nrows; k++) {
+			for(int m=0; m<ncols; m++) {
+		    	//normalize each float to a value from 0-255
+		    	intpixels[m+(k*ncols)] = (int)((elevationData[k][m]-minElevation)*maxElevation/(double)255);
+		    	//intpixels[k] = (int)( ((pixels[k]-min)/(max-min))*(double)255.0);
+		    	//convert to greyscale ARGB value
+		    	intpixels[k] = 0xFF000000 + intpixels[k] + intpixels[k]<<8 + intpixels[k]<<16;
+			}	
+	    }
+		bitmap = Bitmap.createBitmap(intpixels, 0, nrows, nrows, ncols, Bitmap.Config.ARGB_8888);
+		return bitmap;
 	}
 	
 	public void readGridFloat(URI fileUri) {
@@ -69,8 +105,8 @@ public class ElevationRaster {
 					System.out.println(data[i]);
 				}
 				*/
-				if (data[0].equals("ncols")) width = Integer.parseInt(data[1]);
-				if (data[0].equals("nrows")) height = Integer.parseInt(data[1]);
+				if (data[0].equals("ncols")) ncols = Integer.parseInt(data[1]);
+				if (data[0].equals("nrows")) nrows = Integer.parseInt(data[1]);
 				if (data[0].equals("xllcorner")) llx = Float.parseFloat(data[1]);
 				if (data[0].equals("yllcorner")) lly = Float.parseFloat(data[1]);
 				if (data[0].equals("cellsize")) cellsize = Float.parseFloat(data[1]);
@@ -78,7 +114,7 @@ public class ElevationRaster {
 			}
 			
 			lowerLeft = new LatLng(llx, lly);
-			upperRight = new LatLng(llx+(width*cellsize), lly+(height*cellsize));
+			upperRight = new LatLng(llx+(ncols*cellsize), lly+(nrows*cellsize));
 			System.out.println(upperRight.latitude);
 			
 			//now read data file (.flt)
@@ -90,13 +126,17 @@ public class ElevationRaster {
 			//reader.read
 			
 			BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File(dataUri)));
-			byte[] bytes = new byte[width*height*4];
-			bis.read(bytes, 0, width*height*4);
+			byte[] bytes = new byte[ncols*nrows*4];
+			bis.read(bytes, 0, ncols*nrows*4);
 			
-			elevationData = new float[width][height];
-			for(int i = 0; i<width; i++) {
-				for(int j = 0; j<height; j++) {
-					elevationData[i][j] = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 4*(i+(width*j)), 4*(i+(width*j))+4)).order(ByteOrder.BIG_ENDIAN).getFloat();
+			elevationData = new float[ncols][nrows];
+			for(int i = 0; i<ncols; i++) {
+				for(int j = 0; j<nrows; j++) {
+					elevationData[i][j] = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 4*(i+(ncols*j)), 4*(i+(ncols*j))+4)).order(ByteOrder.BIG_ENDIAN).getFloat();
+					if (elevationData[i][j] != nodata) {
+						if (elevationData[i][j] < minElevation) minElevation = elevationData[i][j];
+						if (elevationData[i][j] > maxElevation) maxElevation = elevationData[i][j];
+					}
 				}
 			}
 			System.out.println(elevationData[0][0]);
@@ -111,4 +151,5 @@ public class ElevationRaster {
 		}
 		
 	}
+
 }
