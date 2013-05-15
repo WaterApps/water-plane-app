@@ -20,7 +20,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -505,15 +504,16 @@ protected void onActivityResult (int requestCode, int resultCode, Intent data) {
 		        fileUri.getSchemeSpecificPart(),
 		        fileUri.getFragment());
 	} catch (URISyntaxException e) {
-		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
 	ElevationRaster raster = new ElevationRaster();
 	new ReadElevationRasterTask(this, raster).execute(juri);
 }
 
-public void onFileRead() {
-	
+public static void onFileRead(ElevationRaster raster) {
+	field.setBitmap(raster.getBitmap());
+	field.setBounds(raster.getBounds());
+	//field.updateColors();
 }
 
 }
