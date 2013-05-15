@@ -60,17 +60,17 @@ import com.precisionag.lib.ReadElevationRasterTask;
 
 public class MainActivity extends Activity implements OnMapClickListener, OnCameraChangeListener, OnTouchListener {
 private static final int ADD_MODE = 1;
-private static final int DRAG_MODE = 2;
+static final int DRAG_MODE = 2;
 
 GroundOverlay prevoverlay;
 static Field field;
 static List<CustomMarker> markers;
 static LatLng userLocation;
-int mode;
+static int mode;
 static double waterLevelMeters;
 LocationManager locationManager;
 Context context = this;
-Marker userMarker;
+static Marker userMarker;
 private Uri fileUri;
 static TextView ElevationTextView;
 
@@ -483,44 +483,7 @@ private void readDataFile(Field field) {
 
 }
 
-LocationListener locationListener = new LocationListener() {
-    public void onLocationChanged(Location location) {
-      // Called when a new location is found by the network location provider.
-    	if (mode != DRAG_MODE) {
-
-	      userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-	      
-		  double elevationDouble = field.elevationFromLatLng(userLocation);
-		  double elevationDelta =  elevationDouble - waterLevelMeters;
-		  String ElevationText;
-		  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
-		  
-		  if (elevationDouble == 0.0) {
-			  ElevationText = "You are not in the field.";
-		  }
-		  else {
-		  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
-		  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
-		  	  if (elevationDelta >= 0.0) {
-		  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
-		  	  }
-		  	  else {
-		  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
-		  	  }
-		  }
-		  ElevationTextView.setText(ElevationText);
-		  
-		  CustomMarker.setUserElevation(elevationDouble);
-		  userMarker.setPosition(userLocation);
-    	}
-    }
-
-    public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-    public void onProviderEnabled(String provider) {}
-
-    public void onProviderDisabled(String provider) {}
-  };
+LocationListener locationListener = new LocationHandler();
 
 @Override
 public void onCameraChange(CameraPosition position) {
