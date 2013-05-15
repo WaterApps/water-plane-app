@@ -43,11 +43,11 @@ public class Field {
 	}
 	
 	//access methods
-	public void setMapFragment(MapFragment map) {
+	public static void setMapFragment(MapFragment map) {
 		mapFragment = map;
 	}
 	
-	public void setSeekBar(SeekBar bar) {
+	public static void setSeekBar(SeekBar bar) {
 		seekBar = bar;
 	}
 	

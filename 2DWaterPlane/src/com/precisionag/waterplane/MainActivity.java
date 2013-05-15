@@ -41,7 +41,6 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
-import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -57,23 +56,24 @@ import com.precisionag.lib.CustomMarker;
 import com.precisionag.lib.ElevationRaster;
 import com.precisionag.lib.Field;
 import com.precisionag.lib.MyMapFragment;
-import com.precisionag.lib.ReadGridFloatTask;
+import com.precisionag.lib.ReadElevationRasterTask;
 
-public class MainActivity extends Activity implements OnMapClickListener, OnCameraChangeListener, OnMarkerDragListener, OnTouchListener {
+public class MainActivity extends Activity implements OnMapClickListener, OnCameraChangeListener, OnTouchListener {
 private static final int ADD_MODE = 1;
 private static final int DRAG_MODE = 2;
 
 GroundOverlay prevoverlay;
 static Field field;
 static List<CustomMarker> markers;
-LatLng userLocation;
+static LatLng userLocation;
 int mode;
-double waterLevelMeters;
+static double waterLevelMeters;
 LocationManager locationManager;
 Context context = this;
 Marker userMarker;
 private Uri fileUri;
-	
+static TextView ElevationTextView;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -90,17 +90,24 @@ private Uri fileUri;
 		map.setOnMapClickListener(this);
 		UiSettings uiSettings = map.getUiSettings();
 		
+		ElevationTextView = (TextView) findViewById(R.id.text2);
+		
 		userMarker = map.addMarker(new MarkerOptions()
         .position(new LatLng(0, 0))
         .title("You are here"));
 		
-		map.setOnMarkerDragListener(this);
+		MarkerHandler markerListener = new MarkerHandler();
+		map.setOnMarkerDragListener(markerListener);
 
 		
 		uiSettings.setRotateGesturesEnabled(false);
 		uiSettings.setTiltGesturesEnabled(false);
 		uiSettings.setZoomControlsEnabled(false);
 		
+		MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+		Field.setMapFragment(mapFrag);
+		SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
+		Field.setSeekBar(seekBar);
 		field = new Field(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
 		userLocation = new LatLng(0.0, 0.0);
 		markers = new ArrayList<CustomMarker>();
@@ -322,7 +329,6 @@ private Uri fileUri;
 	}
 	
 //takes a bitmap, latitude/longitude bounds, and a map to create a map overlay
-//this has been duplicated in the Field class
 private GroundOverlay createOverlay(Bitmap overlayBitmap, LatLngBounds bounds) {
 	MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 	BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(overlayBitmap);
@@ -522,46 +528,6 @@ public void onCameraChange(CameraPosition position) {
 }
 
 @Override
-public void onMarkerDrag(Marker marker) {
-	// TODO Auto-generated method stub
-	userLocation = marker.getPosition();
-	double elevationDouble = field.elevationFromLatLng(userLocation);
-	  double elevationDelta =  elevationDouble - waterLevelMeters;
-	  String ElevationText;
-	  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
-	  
-	  if (elevationDouble == 0.0) {
-		  ElevationText = "You are not in the field.";
-	  }
-	  else {
-	  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
-	  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
-	  	  if (elevationDelta >= 0.0) {
-	  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
-	  	  }
-	  	  else {
-	  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
-	  	  }
-	  }
-	  ElevationTextView.setText(ElevationText);
-	  
-	  CustomMarker.setUserElevation(elevationDouble);
-	  updateMarkers();
-}
-
-@Override
-public void onMarkerDragEnd(Marker marker) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public void onMarkerDragStart(Marker marker) {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
 public boolean onTouch(View arg0, MotionEvent arg1) {
 	updateMarkers();
 	return false;
@@ -580,7 +546,7 @@ protected void onActivityResult (int requestCode, int resultCode, Intent data) {
 		e.printStackTrace();
 	}
 	ElevationRaster raster = new ElevationRaster();
-	new ReadGridFloatTask(this, raster).execute(juri);
+	new ReadElevationRasterTask(this, raster).execute(juri);
 }
 
 public void onFileRead() {
