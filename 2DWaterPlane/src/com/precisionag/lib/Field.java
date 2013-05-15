@@ -120,15 +120,17 @@ public class Field {
 	}
 	
 	public void updateColors() {
+		prevoverlay.remove();
+		
 		//get level from seekbar
 		seekBar.setMax(255);
 		int waterLevel = seekBar.getProgress();
 		
-		int width = getElevationBitmap().getWidth();
-		int height = getElevationBitmap().getHeight();
+		int width = elevationBitmap.getWidth();
+		int height = elevationBitmap.getHeight();
 		int[] pixels = new int[width * height];
-		getElevationBitmap().getPixels(pixels, 0, width, 0, 0, width, height);
-		Bitmap bitmap = getElevationBitmap().copy(getElevationBitmap().getConfig(), true);
+		elevationBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+		Bitmap bitmap = elevationBitmap.copy(elevationBitmap.getConfig(), true);
 		
 		//test each pixel, if below water level set blue, else set transparent
 		for (int i = 0; i < (width * height); i++) {
@@ -143,7 +145,7 @@ public class Field {
 		bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
 		
 		//remove old map overlay and create new one
-		prevoverlay.remove();
+		
 
 		prevoverlay = createOverlay(bitmap, getFieldBounds());
 		

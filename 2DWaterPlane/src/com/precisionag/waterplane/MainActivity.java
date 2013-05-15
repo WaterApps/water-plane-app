@@ -513,7 +513,7 @@ protected void onActivityResult (int requestCode, int resultCode, Intent data) {
 public static void onFileRead(ElevationRaster raster) {
 	field.setBitmap(raster.getBitmap());
 	field.setBounds(raster.getBounds());
-	//field.updateColors();
+	field.updateColors();
 }
 
 }
