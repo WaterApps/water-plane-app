@@ -1,4 +1,4 @@
-package com.precisionag.waterplane;
+package com.precisionag.lib;
 
 import com.google.android.gms.maps.MapFragment;
 

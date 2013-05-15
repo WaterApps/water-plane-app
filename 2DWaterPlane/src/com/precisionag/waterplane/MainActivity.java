@@ -53,6 +53,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.precisionag.lib.CustomMarker;
+import com.precisionag.lib.ElevationRaster;
+import com.precisionag.lib.Field;
+import com.precisionag.lib.MyMapFragment;
+import com.precisionag.lib.ReadGridFloatTask;
 
 public class MainActivity extends Activity implements OnMapClickListener, OnCameraChangeListener, OnMarkerDragListener, OnTouchListener {
 private static final int ADD_MODE = 1;
@@ -149,14 +154,14 @@ private Uri fileUri;
 
             	while (i.hasNext()) {
             		 marker = i.next();
-            		 if (CustomMarker.selected == marker.button) {
+            		 if (CustomMarker.getSelected() == marker.getButton()) {
             			 marker.removeMarker();
             			 markers.remove(marker);
             			 break;
             		 }
             	}
             	
-                CustomMarker.layout.removeView(CustomMarker.selected);
+                CustomMarker.getLayout().removeView(CustomMarker.getSelected());
             }
         });
         
@@ -298,7 +303,7 @@ private Uri fileUri;
 	
 	@Override
 	public void onMapClick (LatLng point) {
-		CustomMarker.selected = null;
+		CustomMarker.setSelected(null);
 		updateMarkers();
 		switch(mode) {
 			case ADD_MODE:
@@ -330,18 +335,17 @@ private GroundOverlay createOverlay(Bitmap overlayBitmap, LatLngBounds bounds) {
 	return groundOverlay;
 }
 	
-//public void updateColors(Bitmap bitmap, LatLngBounds bounds) {
 public void updateColors(Field field) {
 	//get level from seekbar
 	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
 	seekBar.setMax(255);
 	int waterLevel = seekBar.getProgress();
 	
-	int width = field.elevationBitmap.getWidth();
-	int height = field.elevationBitmap.getHeight();
+	int width = field.getElevationBitmap().getWidth();
+	int height = field.getElevationBitmap().getHeight();
 	int[] pixels = new int[width * height];
-	field.elevationBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
-	Bitmap bitmap = field.elevationBitmap.copy(field.elevationBitmap.getConfig(), true);
+	field.getElevationBitmap().getPixels(pixels, 0, width, 0, 0, width, height);
+	Bitmap bitmap = field.getElevationBitmap().copy(field.getElevationBitmap().getConfig(), true);
 	
 	//test each pixel, if below water level set blue, else set transparent
 	for (int i = 0; i < (width * height); i++) {
@@ -358,7 +362,7 @@ public void updateColors(Field field) {
 	//remove old map overlay and create new one
 	prevoverlay.remove();
 
-	prevoverlay = createOverlay(bitmap, field.fieldBounds);
+	prevoverlay = createOverlay(bitmap, field.getFieldBounds());
 
 }
 
@@ -373,7 +377,7 @@ private void configSeekbar(final Field field, final GroundOverlay overlay) {
 				int waterLevel = seekBar.getProgress();
 				
 				//update text block
-				waterLevelMeters = field.minElevation + ((double)waterLevel*(field.maxElevation-field.minElevation)/255.0);
+				waterLevelMeters = field.getMinElevation() + ((double)waterLevel*(field.getMaxElevation()-field.getMinElevation())/255.0);
 				TextView waterElevationTextView = (TextView) findViewById(R.id.text);
 				String elevation = new DecimalFormat("#.#").format(waterLevelMeters);
 				String waterElevationText = "Elevation: " + elevation + "m";

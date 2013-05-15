@@ -1,4 +1,4 @@
-package com.precisionag.waterplane;
+package com.precisionag.lib;
 
 import java.text.DecimalFormat;
 
@@ -17,6 +17,8 @@ import android.widget.RelativeLayout;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.LatLng;
+import com.precisionag.waterplane.R;
+import com.precisionag.waterplane.R.drawable;
 
 public class CustomMarker {
 	private static GoogleMap map;
@@ -24,12 +26,12 @@ public class CustomMarker {
 	private static double userElevation;
 	private static double waterElevation;
 	private LatLng location;
-	Button button;
+	private Button button;
 	CheckBox checkBox;
 	static Context context;
-	static RelativeLayout layout;
+	private static RelativeLayout layout;
 	static int displayWidth;
-	static Button selected;
+	private static Button selected;
 	static final int blue = 0xFF33B5E5;
 	public CustomMarker(LatLng point) {
 		location = point;
@@ -64,26 +66,26 @@ public class CustomMarker {
 		
 		Point screenLocation = projection.toScreenLocation(point);
 
-		button = new Button(context);
+		setButton(new Button(context));
 		//button.setBackgroundColor(Color.WHITE);
 		//button.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.box));
-		button.setText(title+userDelta+"\n"+waterDelta);
+		getButton().setText(title+userDelta+"\n"+waterDelta);
 
 		MarginLayoutParams marginParams = new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		//left top right bottom
-		marginParams.setMargins(screenLocation.x-(button.getWidth()/2), screenLocation.y-button.getHeight(), 0, 0);
+		marginParams.setMargins(screenLocation.x-(getButton().getWidth()/2), screenLocation.y-getButton().getHeight(), 0, 0);
 		
 	    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
-	    button.setLayoutParams(layoutParams);
-		layout.addView(button);
-		button.setBackgroundColor(Color.WHITE);
-		button.setOnClickListener(new View.OnClickListener() {
+	    getButton().setLayoutParams(layoutParams);
+		getLayout().addView(getButton());
+		getButton().setBackgroundColor(Color.WHITE);
+		getButton().setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	if (selected != null) {
-            		selected.setBackgroundColor(Color.WHITE);
+            	if (getSelected() != null) {
+            		getSelected().setBackgroundColor(Color.WHITE);
             	}
-                selected = button;
-                button.setBackgroundColor(blue);
+                setSelected(getButton());
+                getButton().setBackgroundColor(blue);
             }
         });
 		
@@ -92,9 +94,9 @@ public class CustomMarker {
 		checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            	layout.removeView(button);
+            	getLayout().removeView(getButton());
             	if (isChecked) {
-            		layout.addView(button);
+            		getLayout().addView(getButton());
             	}
             }
           });
@@ -102,7 +104,7 @@ public class CustomMarker {
 		checkBoxParams.setMargins(screenLocation.x, screenLocation.y, 0, 0);
 		layoutParams = new RelativeLayout.LayoutParams(checkBoxParams);
 		checkBox.setLayoutParams(layoutParams);
-		layout.addView(checkBox);
+		getLayout().addView(checkBox);
 		checkBox.setChecked(true);
 	}
 	
@@ -112,7 +114,7 @@ public class CustomMarker {
 		String userDelta;
 		String waterDelta;
 		
-		button.setBackgroundColor(button == selected ? blue : Color.WHITE);
+		getButton().setBackgroundColor(getButton() == getSelected() ? blue : Color.WHITE);
 		
 		if (elevationDouble == 0.0) {
 			title = "Not in field!";
@@ -128,41 +130,41 @@ public class CustomMarker {
 			waterDelta = temp+"m from water";
 		}
 		
-		button.setText(title+userDelta+"\n"+waterDelta);
+		getButton().setText(title+userDelta+"\n"+waterDelta);
 		
 		Projection projection = map.getProjection();
 		Point screenLocation = projection.toScreenLocation(location); 
 
 		MarginLayoutParams marginParams = new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		//left top right bottom
-		if (button.getWidth() == 0) {
-			marginParams.setMargins(screenLocation.x-(int)(button.getTextSize()*waterDelta.length()/4.0), screenLocation.y-(int)(button.getTextSize()*3.0), 0, 0);
+		if (getButton().getWidth() == 0) {
+			marginParams.setMargins(screenLocation.x-(int)(getButton().getTextSize()*waterDelta.length()/4.0), screenLocation.y-(int)(getButton().getTextSize()*3.0), 0, 0);
 		} else {
-			marginParams.setMargins(screenLocation.x-(button.getWidth()/2), screenLocation.y-button.getHeight(), 0, 0);
+			marginParams.setMargins(screenLocation.x-(getButton().getWidth()/2), screenLocation.y-getButton().getHeight(), 0, 0);
 		}
 		
 	    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
 	    //layoutParams.setWidth();
 	    // LayoutParams.WRAP_CONTENT;
-	    button.setLayoutParams(layoutParams);
-	    layout.removeView(button);
+	    getButton().setLayoutParams(layoutParams);
+	    getLayout().removeView(getButton());
 	    if (checkBox.isChecked()) {
-	    	layout.addView(button);
+	    	getLayout().addView(getButton());
 	    }
 		MarginLayoutParams checkBoxParams = new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		checkBoxParams.setMargins(screenLocation.x, screenLocation.y, 0, 0);
 		layoutParams = new RelativeLayout.LayoutParams(checkBoxParams);
 		checkBox.setLayoutParams(layoutParams);
-		layout.removeView(checkBox);
-		layout.addView(checkBox);
+		getLayout().removeView(checkBox);
+		getLayout().addView(checkBox);
 	}
 	
 	public static void setDisplayWidth(int newWidth) {
 		displayWidth = newWidth;
 	}
 	public void removeMarker() {
-		button.setVisibility(View.GONE);
-		button = null;
+		getButton().setVisibility(View.GONE);
+		setButton(null);
 		checkBox.setVisibility(View.GONE);
 		checkBox = null;
 	}
@@ -194,5 +196,25 @@ public class CustomMarker {
 	public boolean inBounds(LatLng point) {
 		//return overlay.getBounds().contains(point);
 		return true;
+	}
+
+	public static Button getSelected() {
+		return selected;
+	}
+
+	public static void setSelected(Button selected) {
+		CustomMarker.selected = selected;
+	}
+
+	public static RelativeLayout getLayout() {
+		return layout;
+	}
+
+	public Button getButton() {
+		return button;
+	}
+
+	public void setButton(Button button) {
+		this.button = button;
 	}
 }

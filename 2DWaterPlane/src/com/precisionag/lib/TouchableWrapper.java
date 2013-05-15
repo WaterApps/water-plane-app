@@ -1,4 +1,6 @@
-package com.precisionag.waterplane;
+package com.precisionag.lib;
+
+import com.precisionag.waterplane.MainActivity;
 
 import android.content.Context;
 import android.view.MotionEvent;

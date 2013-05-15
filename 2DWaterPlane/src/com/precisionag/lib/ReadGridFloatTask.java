@@ -1,6 +1,8 @@
-package com.precisionag.waterplane;
+package com.precisionag.lib;
 
 import java.net.URI;
+
+
 import android.os.AsyncTask;
 import android.widget.Toast;
 import android.app.ProgressDialog;
@@ -11,7 +13,7 @@ public class ReadGridFloatTask extends AsyncTask <URI, Integer, ElevationRaster>
 	ElevationRaster data;
 	ProgressDialog dialog;
 	
-	ReadGridFloatTask(Context con, ElevationRaster raster) {
+	public ReadGridFloatTask(Context con, ElevationRaster raster) {
 		context = con;
 		data = raster;
 	}
@@ -39,7 +41,6 @@ public class ReadGridFloatTask extends AsyncTask <URI, Integer, ElevationRaster>
 	protected void onPostExecute(ElevationRaster rasters) {
 		dialog.dismiss();
 		Toast.makeText(context, "File load complete", Toast.LENGTH_LONG).show();
-		
 	}
 
 }
