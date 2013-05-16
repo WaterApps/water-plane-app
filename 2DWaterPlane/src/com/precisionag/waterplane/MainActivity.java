@@ -37,6 +37,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
@@ -72,6 +73,7 @@ Context context = this;
 static Marker userMarker;
 private Uri fileUri;
 static TextView ElevationTextView;
+static GoogleMap map;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +84,7 @@ static TextView ElevationTextView;
 
 		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.field);
 		MyMapFragment mapFragment = (MyMapFragment) getFragmentManager().findFragmentById(R.id.map);
-		GoogleMap map = mapFragment.getMap();
+		map = mapFragment.getMap();
 		map.setOnCameraChangeListener(this);
 		map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 		map.setMyLocationEnabled(true);
@@ -92,9 +94,9 @@ static TextView ElevationTextView;
 		ElevationTextView = (TextView) findViewById(R.id.text2);
 		
 		userMarker = map.addMarker(new MarkerOptions()
-        .position(new LatLng(0, 0))
+        .position(map.getCameraPosition().target)
         .title("You are here"));
-		
+				
 		MarkerHandler markerListener = new MarkerHandler();
 		map.setOnMarkerDragListener(markerListener);
 
@@ -171,6 +173,7 @@ static TextView ElevationTextView;
             }
         });
         
+        
         final Button buttonOpenDem = (Button) findViewById(R.id.buttonOpenDem);
         buttonOpenDem.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -181,6 +184,7 @@ static TextView ElevationTextView;
             }
         });
 		
+        
 		updateColors(field);
 		
 		
@@ -306,7 +310,8 @@ static TextView ElevationTextView;
 	    	} 
 	    	else {
 	    		mode = DRAG_MODE;
-	    		
+	    		userLocation = map.getCameraPosition().target;
+	    		userMarker.setPosition(userLocation);
 	    	}
 	    	userMarker.setDraggable(mode == DRAG_MODE);
 	    	
@@ -525,7 +530,11 @@ protected void onActivityResult (int requestCode, int resultCode, Intent data) {
 public static void onFileRead(ElevationRaster raster) {
 	field.setBitmap(raster.getBitmap());
 	field.setBounds(raster.getBounds());
+	field.setMinElevation(raster.getMinElevation());
+	field.setMaxElevation(raster.getMaxElevation());
 	field.updateColors();
+	System.out.println(raster.getBounds());
+	map.animateCamera(CameraUpdateFactory.newLatLng(raster.getBounds().northeast));
 }
 
 }

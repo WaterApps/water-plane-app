@@ -44,8 +44,8 @@ public class ReadGridFloat implements ReadElevationRaster {
 				if (data[0].equals("NODATA_value")) nodata = Float.parseFloat(data[1]);
 			}
 			
-			raster.setLowerLeft(new LatLng(llx, lly));
-			raster.setUpperRight(new LatLng(llx+(raster.getNcols()*cellsize), lly+(raster.getNrows()*cellsize)));
+			raster.setLowerLeft(new LatLng(lly, llx));
+			raster.setUpperRight(new LatLng(lly+(raster.getNrows()*cellsize), llx+(raster.getNcols()*cellsize)));
 			System.out.println(raster.getUpperRight().latitude);
 			
 			//now read data file (.flt)
@@ -60,17 +60,23 @@ public class ReadGridFloat implements ReadElevationRaster {
 			byte[] bytes = new byte[raster.getNcols()*raster.getNrows()*4];
 			bis.read(bytes, 0, raster.getNcols()*raster.getNrows()*4);
 			
-			raster.setElevationData(new float[raster.getNcols()][raster.getNrows()]);
+			int sampleWidth = 6;
+			
+			raster.setElevationData(new float[raster.getNcols()/sampleWidth][raster.getNrows()/sampleWidth]);
+			raster.setNcols(raster.getNcols()/sampleWidth);
+			raster.setNrows(raster.getNrows()/sampleWidth);
+			
 			for(int i = 0; i<raster.getNcols(); i++) {
 				for(int j = 0; j<raster.getNrows(); j++) {
-					raster.elevationData[i][j] = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 4*(i+(raster.getNcols()*j)), 4*(i+(raster.getNcols()*j))+4)).order(ByteOrder.BIG_ENDIAN).getFloat();
-					if (raster.getElevationData()[i][j] != nodata) {
-						if (raster.getElevationData()[i][j] < raster.getMaxElevation()) raster.setMinElevation(raster.getElevationData()[i][j]);
-						if (raster.getElevationData()[i][j] > raster.getMaxElevation()) raster.setMaxElevation(raster.getElevationData()[i][j]);
+					raster.elevationData[j][i] = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 4*((i*sampleWidth)+(raster.getNcols()*(j*sampleWidth))), 4*((i*sampleWidth)+(raster.getNcols()*(j*sampleWidth)))+4)).order(ByteOrder.BIG_ENDIAN).getFloat();
+					if (raster.getElevationData()[j][i] != nodata) {
+						if (raster.getElevationData()[j][i] < raster.getMaxElevation()) raster.setMinElevation(raster.getElevationData()[i][j]);
+						if (raster.getElevationData()[j][i] > raster.getMaxElevation()) raster.setMaxElevation(raster.getElevationData()[i][j]);
 					}
 				}
 			}
-			System.out.println(raster.elevationData[0][0]);
+			System.out.println(raster.getMinElevation());
+			System.out.println(raster.getMaxElevation());
 		}
 		
 		catch (FileNotFoundException e) {

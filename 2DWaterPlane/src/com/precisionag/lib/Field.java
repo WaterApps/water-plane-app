@@ -57,6 +57,8 @@ public class Field {
 	
 	public void setBounds(LatLngBounds bounds) {
 		setFieldBounds(bounds);
+		ne = bounds.northeast;
+		sw = bounds.southwest;
 	}
 	
 	public void setMinElevation(double elevation) {
@@ -87,6 +89,9 @@ public class Field {
 	
 	//returns elevation of given point
 	public double elevationFromLatLng(LatLng point) {
+		System.out.println(getFieldBounds());
+		System.out.println(point);
+		
 		if (getFieldBounds().contains(point)) {
 			//use linear interpolation to figure out which pixel to get data from
 			//should be accurate since fields <= ~1 mile wide
@@ -100,6 +105,15 @@ public class Field {
 			
 			double x = (double)width*(point.latitude-west)/(east-west);
 			double y = (double)height*(point.longitude-south)/(north-south);
+			
+			System.out.println(east);
+			System.out.println(west);
+			System.out.println(north);
+			System.out.println(south);
+			System.out.println(width);
+			System.out.println(height);
+			System.out.println(x);
+			System.out.println(y);
 			
 			//retrieve packed int
 			int waterLevel = getElevationBitmap().getPixel((int)x, (int)y);
