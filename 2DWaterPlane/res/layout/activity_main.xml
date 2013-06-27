@@ -4,65 +4,161 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
     
 	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	    xmlns:tools="http://schemas.android.com/tools"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:orientation="vertical"
-	    tools:context=".MainActivity" >
+	    tools:context=".MainActivity"
+        android:animateLayoutChanges="true">
 		
-		<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-		      xmlns:map="http://schemas.android.com/apk/res-auto"
-		    
-			  android:id="@+id/map"
-			  android:layout_width="match_parent"
-			  android:layout_height="wrap_content"
-			  android:layout_weight="5"
-			  class="com.precisionag.lib.MyMapFragment"
-			  map:cameraTargetLat="40.9749879577"
-		      map:cameraTargetLng="-86.1991258479" 
-		      map:cameraZoom="14"
-		      />
-	
-	    <TextView android:id="@+id/text"
-	              android:layout_width="wrap_content"
-	              android:layout_height="wrap_content"
-	              android:text="Water Elevation: 42.0m" />
-	    
-	    <TextView android:id="@+id/text2"
-	              android:layout_width="wrap_content"
-	              android:layout_height="wrap_content"
-	              android:text="Your Elevation: 42.0m" />
-	
-	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		    android:layout_width="fill_parent"
-		    android:layout_height="wrap_content"
-		    android:paddingLeft="1dp"
-		    android:paddingRight="1dp"
-		    android:orientation="horizontal" >
-	    
-			<SeekBar
-		        android:id="@+id/seekBar"
-		        android:layout_width="match_parent"
-		        android:layout_height="40dp"
-		        android:layout_weight="1"
-		        android:layout_alignParentBottom="true"
-		        android:layout_alignParentLeft="true" />
-	
-			<Button
-			    android:id="@+id/buttonMinus"
-			    android:layout_width="40dp"
-			    android:layout_height="40dp"
-			    android:text="-" />
-			
-			<Button
-			    android:id="@+id/buttonPlus"
-			    android:layout_width="40dp"
-			    android:layout_height="40dp"
-			    android:text="+" />
-	
-		</LinearLayout>
+            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:map="http://schemas.android.com/apk/res-auto"
+                  android:id="@+id/map"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_weight="5"
+                  class="com.precisionag.lib.MyMapFragment"
+                  map:cameraTargetLat="40.9779943136"
+                  map:cameraTargetLng="-86.1949964826"
+                  map:cameraZoom="15"
+                  />
+
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                          android:id="@+id/elevationControls"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="vertical">
+
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:orientation="horizontal"
+                        >
+
+                    <Button
+                            android:id="@+id/buttonMinus"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:text="-" />
+
+                    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                  android:layout_width="wrap_content"
+                                  android:layout_height="wrap_content"
+                                  android:orientation="vertical">
+
+                            <TextView android:id="@+id/text"
+                                      android:layout_width="wrap_content"
+                                      android:layout_height="wrap_content"
+                                      android:text="Water Elevation: 42.0m"
+                                      android:textSize="16dp"
+                                      android:paddingStart="20dp"
+                                      android:paddingTop="5dp"/>
+
+                            <TextView android:id="@+id/text2"
+                                      android:layout_width="wrap_content"
+                                      android:layout_height="wrap_content"
+                                      android:text="Your Elevation: 42.0m"
+                                      android:textSize="16dp"
+                                      android:paddingStart="20dp"/>
+                    </LinearLayout>
+                        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                      android:layout_width="fill_parent"
+                                      android:layout_height="wrap_content"
+                                      android:orientation="horizontal"
+                                      android:gravity="right">
+                            <Button
+                                    android:id="@+id/buttonPlus"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:text="+" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/bottomBar"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="1dp"
+                    android:paddingRight="1dp"
+                    android:orientation="horizontal"
+                    android:divider="@color/background_dark">
+
+
+                            <SeekBar
+                                android:id="@+id/seekBar"
+                                android:layout_width="match_parent"
+                                android:layout_height="40dp"
+                                android:layout_weight="1"
+                                android:layout_alignParentBottom="true"
+                                android:layout_alignParentLeft="true" />
+
+            </LinearLayout>
+
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:paddingLeft="1dp"
+                              android:paddingRight="1dp"
+                              android:orientation="horizontal"
+                              android:divider="@color/background_dark">
+
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="fill_parent"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:gravity="center_vertical"
+                            android:text="Min:"
+                            android:id="@+id/minText"/>
+
+                    <EditText
+                            android:layout_width="wrap_content"
+                            android:layout_height="fill_parent"
+                            android:inputType="numberDecimal"
+                            android:ems="10"
+                            android:text="241.94"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:id="@+id/editMin"/>
+
+
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="fill_parent"
+                                android:gravity="center_vertical"
+                                android:textAppearance="?android:attr/textAppearanceSmall"
+                                android:text="Max:"
+                                android:id="@+id/maxText"/>
+
+                        <EditText
+                                android:layout_width="wrap_content"
+                                android:layout_height="fill_parent"
+                                android:inputType="numberDecimal"
+                                android:text="250.925"
+                                android:ems="10"
+                                android:textAppearance="?android:attr/textAppearanceSmall"
+                                android:id="@+id/editMax"/>
+                </LinearLayout>
+
+
+
+
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/markerControls"
+                      android:layout_height="wrap_content"
+                      android:layout_width="fill_parent"
+                      android:orientation="horizontal"
+                      android:visibility="gone">
+            <TextView android:id="@+id/markerBottomText"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:text="Elevation:42.0m\nDistance from you: 50.0m"
+                    />
+        </LinearLayout>
 	</LinearLayout>
 </RelativeLayout>

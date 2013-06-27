@@ -6,9 +6,12 @@ import com.precisionag.waterplane.MainActivity;
 
 
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 import android.app.ProgressDialog;
 import android.content.Context;
+
+import static android.util.Log.*;
 
 public class ReadElevationRasterTask extends AsyncTask <URI, Integer, ElevationRaster> {
 	Context context;
@@ -36,7 +39,8 @@ public class ReadElevationRasterTask extends AsyncTask <URI, Integer, ElevationR
 		
 		//select proper reader for filetype
 		if (params[0].getPath().contains(".hdr")) readObject = new ReadGridFloat();
-		
+        Log.i("geotiff", "About to read geotiff");
+        if (params[0].getPath().contains(".tif")) readObject = new ReadGeoTiff();
 		data = readObject.readFromFile(params[0]);
 		publishProgress(100);
 		return data;

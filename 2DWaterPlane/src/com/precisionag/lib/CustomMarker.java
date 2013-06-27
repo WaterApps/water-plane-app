@@ -12,11 +12,13 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.LatLng;
+import com.precisionag.waterplane.MainActivity;
 import com.precisionag.waterplane.R;
 import com.precisionag.waterplane.R.drawable;
 
@@ -86,11 +88,15 @@ public class CustomMarker {
             	}
                 setSelected(getButton());
                 getButton().setBackgroundColor(blue);
+                MainActivity.hideElevationControls();
+                MainActivity.showMarkerBottomText();
+                MainActivity.showMarkerAB();
+                MainActivity.updateMarkers();
             }
         });
 		
 		checkBox = new CheckBox(context);
-		checkBox.setButtonDrawable(context.getResources().getDrawable(R.drawable.location_place));
+		checkBox.setButtonDrawable(context.getResources().getDrawable(R.drawable.arrow));
 		checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -101,7 +107,7 @@ public class CustomMarker {
             }
           });
 		MarginLayoutParams checkBoxParams = new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		checkBoxParams.setMargins(screenLocation.x, screenLocation.y, 0, 0);
+		checkBoxParams.setMargins(screenLocation.x-checkBox.getWidth()/2, screenLocation.y, 0, 0);
 		layoutParams = new RelativeLayout.LayoutParams(checkBoxParams);
 		checkBox.setLayoutParams(layoutParams);
 		getLayout().addView(checkBox);
@@ -140,7 +146,12 @@ public class CustomMarker {
 		if (getButton().getWidth() == 0) {
 			marginParams.setMargins(screenLocation.x-(int)(getButton().getTextSize()*waterDelta.length()/4.0), screenLocation.y-(int)(getButton().getTextSize()*3.0), 0, 0);
 		} else {
-			marginParams.setMargins(screenLocation.x-(getButton().getWidth()/2), screenLocation.y-getButton().getHeight(), 0, 0);
+            if (screenLocation.x+(getButton().getWidth()/2) < displayWidth) {
+			    marginParams.setMargins(screenLocation.x-(getButton().getWidth()/2), screenLocation.y-getButton().getHeight(), 0, 0);
+            }
+            else {
+                marginParams.setMargins(screenLocation.x+(getButton().getWidth()/2), screenLocation.y-getButton().getHeight(), 0, 0);
+            }
 		}
 		
 	    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(marginParams);
@@ -152,7 +163,7 @@ public class CustomMarker {
 	    	getLayout().addView(getButton());
 	    }
 		MarginLayoutParams checkBoxParams = new MarginLayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-		checkBoxParams.setMargins(screenLocation.x, screenLocation.y, 0, 0);
+		checkBoxParams.setMargins(screenLocation.x-checkBox.getWidth()/2, screenLocation.y, 0, 0);
 		layoutParams = new RelativeLayout.LayoutParams(checkBoxParams);
 		checkBox.setLayoutParams(layoutParams);
 		getLayout().removeView(checkBox);

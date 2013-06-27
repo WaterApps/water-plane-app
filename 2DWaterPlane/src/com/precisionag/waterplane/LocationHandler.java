@@ -12,7 +12,7 @@ import com.precisionag.lib.CustomMarker;
 public class LocationHandler implements LocationListener {
 	    public void onLocationChanged(Location location) {
 	      // Called when a new location is found by the network location provider.
-	    	if (MainActivity.mode != MainActivity.DRAG_MODE) {
+	    	if (!MainActivity.drag_mode) {
 
 	    	  MainActivity.userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 		      
@@ -27,10 +27,10 @@ public class LocationHandler implements LocationListener {
 			  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
 			  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
 			  	  if (elevationDelta >= 0.0) {
-			  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+			  		  ElevationText = "You: " + elevationDeltaString + "m above water (" + elevationString + "m)";
 			  	  }
 			  	  else {
-			  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+			  		ElevationText = "You: " + elevationDeltaString + "m below water (" + elevationString + "m)";
 			  	  }
 			  }
 			  MainActivity.ElevationTextView.setText(ElevationText);

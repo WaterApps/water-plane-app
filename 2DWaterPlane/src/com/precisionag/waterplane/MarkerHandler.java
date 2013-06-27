@@ -21,10 +21,10 @@ public class MarkerHandler implements OnMarkerDragListener {
 		  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
 		  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
 		  	  if (elevationDelta >= 0.0) {
-		  		  ElevationText = "Your Elevation: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+		  		  ElevationText = "You: " + elevationDeltaString + "m above water (" + elevationString + "m)";
 		  	  }
 		  	  else {
-		  		ElevationText = "Your Elevation: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+		  		ElevationText = "You: " + elevationDeltaString + "m below water (" + elevationString + "m)";
 		  	  }
 		  }
 		  MainActivity.ElevationTextView.setText(ElevationText);

@@ -2,18 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="right"
     android:orientation="horizontal" >
     
     <Button
-        android:id="@+id/buttonDelete"
+        android:id="@+id/buttonDeleteMarker"
         android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text="Delete" />
-    
-    <Button
-        android:id="@+id/buttonOpenDem"
-        android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-        android:text="Open DEM File" />
-	
 </LinearLayout>
