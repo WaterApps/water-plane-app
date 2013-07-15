@@ -642,23 +642,6 @@ typedef	enum {
 #define EXIFTAG_GAINCONTROL		41991	/* Gain control */
 #define EXIFTAG_IMAGEUNIQUEID		42016	/* Unique image ID */
 
-
-/* GeoTiff tags */
-/* tags 33550 is a private tag registered to SoftDesk, Inc */
-#define TIFFTAG_GEOPIXELSCALE       33550
-/* tags 33920-33921 are private tags registered to Intergraph, Inc */
-#define TIFFTAG_INTERGRAPH_MATRIX    33920   /* $use TIFFTAG_GEOTRANSMATRIX ! */
-#define TIFFTAG_GEOTIEPOINTS         33922
-/* tags 34263-34264 are private tags registered to NASA-JPL Carto Group */
-#ifdef JPL_TAG_SUPPORT
-#define TIFFTAG_JPL_CARTO_IFD        34263    /* $use GeoProjectionInfo ! */
-#endif
-#define TIFFTAG_GEOTRANSMATRIX       34264    /* New Matrix Tag replaces 33920 */
-/* tags 34735-3438 are private tags registered to SPOT Image, Inc */
-#define TIFFTAG_GEOKEYDIRECTORY      34735
-#define TIFFTAG_GEODOUBLEPARAMS      34736
-#define TIFFTAG_GEOASCIIPARAMS       34737
-
 #endif /* _TIFF_ */
 
 /* vim: set ts=8 sts=8 sw=8 noet: */

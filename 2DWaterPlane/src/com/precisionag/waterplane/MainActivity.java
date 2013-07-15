@@ -1,13 +1,16 @@
 package com.precisionag.waterplane;
 
+import com.ibm.util.CoordinateConversion;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -17,13 +20,11 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.*;
 import android.view.View.OnTouchListener;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -31,7 +32,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
@@ -39,6 +39,7 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.*;
+import com.ibm.util.CoordinateConversion;
 import com.precisionag.lib.*;
 
 import java.io.BufferedReader;
@@ -52,8 +53,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static android.graphics.Color.HSVToColor;
-import static android.graphics.Color.RED;
-import static android.graphics.Color.argb;
 
 public class MainActivity extends Activity implements OnMapClickListener, OnCameraChangeListener, OnTouchListener {
 private static final int ADD_MODE = 1;
@@ -66,7 +65,6 @@ static LatLng userLocation;
 static int mode;
 public static double waterLevelMeters;
 LocationManager locationManager;
-Context context = this;
 static Marker userMarker;
 private Uri fileUri;
 static TextView ElevationTextView;
@@ -81,16 +79,28 @@ public static boolean transparency;
 public static boolean coloring;
 public static boolean hasGPS;
 public static Button buttonDelete;
-int lineCount;
 LatLng[] linePoints;
 public static float sliderMin;
 public static float sliderMax;
-static EditText editMin;
-static EditText editMax;
+public static float defaultSliderMin;
+public static float defaultSliderMax;
+static TextView editMin;
+static TextView editMax;
 public static int hsvColors[];
 public static int hsvTransparentColors[];
+static float alpha;
+public static SharedPreferences prefs;
+public static Context context;
+static boolean following;
+public static float scale;
+public static Resources resources;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+        resources = getResources();
+        scale = getResources().getDisplayMetrics().density;
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        context = this;
+        alpha = 0.5f;
         hsvColors = new int[256];
         hsvTransparentColors = new int[256];
         float hsvComponents[] = {1.0f, 0.75f, 0.75f};
@@ -102,20 +112,21 @@ public static int hsvTransparentColors[];
 		super.onCreate(savedInstanceState);
         sliderMin = 241.94f;
         sliderMax = 250.925f;
+        defaultSliderMin = 241.94f;
+        defaultSliderMax = 250.925f;
         currentlyDrawing = false;
 		setContentView(R.layout.activity_main);
-        editMin = (EditText) findViewById(R.id.editMin);
-        editMax = (EditText) findViewById(R.id.editMax);
+        editMin = (TextView) findViewById(R.id.editMin);
+        editMax = (TextView) findViewById(R.id.editMax);
         elevationControls = (LinearLayout) findViewById(R.id.elevationControls);
         markerBottomText = (LinearLayout) findViewById(R.id.markerControls);
         actionBar = getActionBar();
         transparency = false;
         coloring = false;
         linePoints = new LatLng[2];
-		//getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
 	    getActionBar().setCustomView(R.layout.custom_ab);
         actionBar.setDisplayShowCustomEnabled(true);
-		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.field);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.field);
 		MyMapFragment mapFragment = (MyMapFragment) getFragmentManager().findFragmentById(R.id.map);
 		map = mapFragment.getMap();
 		map.setOnCameraChangeListener(this);
@@ -132,7 +143,7 @@ public static int hsvTransparentColors[];
 				
 		MarkerHandler markerListener = new MarkerHandler();
 		map.setOnMarkerDragListener(markerListener);
-
+        map.setOnMarkerClickListener(markerListener);
 		
 		uiSettings.setRotateGesturesEnabled(false);
 		uiSettings.setTiltGesturesEnabled(false);
@@ -206,14 +217,15 @@ public static int hsvTransparentColors[];
 
             	while (i.hasNext()) {
             		 marker = i.next();
-            		 if (CustomMarker.getSelected() == marker.getButton()) {
+            		 if (CustomMarker.getSelected() == marker.getMarker()) {
             			 marker.removeMarker();
             			 markers.remove(marker);
             			 break;
             		 }
             	}
             	
-                CustomMarker.getLayout().removeView(CustomMarker.getSelected());
+                CustomMarker.getSelected().remove();
+                buttonDelete.setVisibility(View.GONE);
             }
         });
         buttonDelete.setVisibility(View.GONE);
@@ -291,52 +303,6 @@ public static int hsvTransparentColors[];
             }
         }
 
-        EditText editMin = (EditText) findViewById(R.id.editMin);
-        editMin.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                boolean handled = true;
-                if (actionId == EditorInfo.IME_ACTION_DONE && !v.getText().toString().equals("")) {
-                    sliderMin = Float.parseFloat(v.getText().toString());
-                    handled = false;
-                }
-                return handled;
-            }
-        });
-
-        EditText editMax = (EditText) findViewById(R.id.editMax);
-        editMax.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                boolean handled = true;
-                if (actionId == EditorInfo.IME_ACTION_DONE && !v.getText().toString().equals("")) {
-                    sliderMax = Float.parseFloat(v.getText().toString());
-                    handled = false;
-                }
-                return false;
-            }
-        });
-
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(true) {
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateMarkers();
-                        }
-                    });
-
-                }
-            }
-        });
-        thread.start();
     }
 	
 	@Override
@@ -348,6 +314,7 @@ public static int hsvTransparentColors[];
 	@Override
 	public void onResume() {
 		super.onResume();
+        updateColors(field);
         if (hasGPS)
 		    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	}
@@ -360,27 +327,20 @@ public static int hsvTransparentColors[];
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity_main, menu);
+		getMenuInflater().inflate(R.menu.main_menu, menu);
 		return true;
 	}
 	
 	@Override
 	public boolean onPrepareOptionsMenu (Menu menu) {
-		MenuItem item = menu.findItem(R.id.menu_drag);
-        /*
-		if (drag_mode) {
-			item.setIcon(R.drawable.unlock);
-		}
-		else {
-			item.setIcon(R.drawable.lock);
-		}
-		*/
 		return true;
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection
+
+        /*
 	    if (item.getItemId() == R.id.item_legal) {
 	        	  String LicenseInfo = GooglePlayServicesUtil.getOpenSourceSoftwareLicenseInfo(
 	              getApplicationContext());
@@ -390,7 +350,9 @@ public static int hsvTransparentColors[];
 	              LicenseDialog.show();
 	        	  return true;
 	    }
-	    else if (item.getItemId() == R.id.menu_add) {
+	    */
+
+	    if (item.getItemId() == R.id.menu_add) {
         	mode = ADD_MODE;
             return true;
 	    }
@@ -436,47 +398,10 @@ public static int hsvTransparentColors[];
 	    	}
 	    	userMarker.setDraggable(drag_mode);
             item.setChecked(!drag_mode);
-            return true;
 	    }
 
         else if (item.getItemId() == R.id.menu_center) {
             map.animateCamera(CameraUpdateFactory.newLatLngBounds(field.getFieldBounds(), 50));
-            return true;
-        }
-
-        else if (item.getItemId() == R.id.menu_choose_dem) {
-            //opens file manager
-            Intent intent = new Intent("org.openintents.action.PICK_FILE");
-            intent.setData(Uri.parse("file:///sdcard/dem"));
-            startActivityForResult(intent, 1);
-            return true;
-        }
-
-        else if (item.getItemId() == R.id.menu_set_folder) {
-            Bundle data = new Bundle();
-            data.putString(Environment.getExternalStorageDirectory().getPath(), ""); //Starting path
-            data.putString("returnIntent", "back"); //After choose return back to this
-            Intent i = new Intent("com.filebrowser.DataPathChooser");
-            i.putExtras(data);
-            startActivity(i);
-            return true;
-        }
-
-        else if(item.getItemId() == R.id.menu_add_line) {
-            lineCount = 2;
-            return true;
-        }
-
-        else if(item.getItemId() == R.id.menu_transparency) {
-            if (transparency) {
-                transparency = false;
-            }
-            else {
-                transparency = true;
-            }
-            item.setChecked(transparency);
-            updateColors(field);
-            return true;
         }
 
         else if(item.getItemId() == R.id.menu_coloring) {
@@ -488,36 +413,66 @@ public static int hsvTransparentColors[];
             }
             item.setChecked(coloring);
             updateColors(field);
+        }
+
+        else if(item.getItemId() == R.id.menu_transparency) {
+            if (transparency) {
+                transparency = false;
+            }
+            else {
+                transparency = true;
+            }
+            item.setChecked(transparency);
+            updateColors(field);
+        }
+
+        else if (item.getItemId() == R.id.menu_choose_dem) {
+            //opens file manager
+            //Intent intent = new Intent("org.openintents.action.PICK_FILE");
+            //intent.setData(Uri.parse("file:///sdcard/dem"));
+
+            Intent intent = new Intent("com.filebrowser.DataFileChooser");
+            //intent.setData(Uri.parse("file:///sdcard/dem"));
+            //intent.setDataAndType(Uri.parse("file:///sdcard/dem"), "path");
+            startActivityForResult(intent, 1);
+        }
+
+        else if(item.getItemId() == R.id.menu_follow) {
+            following = !following;
+            item.setChecked(following);
+        }
+
+        /*
+        else if (item.getItemId() == R.id.menu_set_folder) {
+            Bundle data = new Bundle();
+            data.putString(Environment.getExternalStorageDirectory().getPath(), ""); //Starting path
+            data.putString("returnIntent", "back"); //After choose return back to this
+            Intent i = new Intent("com.filebrowser.DataPathChooser");
+            i.putExtras(data);
+            startActivity(i);
+            prefs.registerOnSharedPreferenceChangeListener(this);
+            return true;
+        }
+        */
+
+        else if(item.getItemId() == R.id.menu_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            //prefs.registerOnSharedPreferenceChangeListener(this);
             return true;
         }
 
 	    else {
 	            return super.onOptionsItemSelected(item);
 	    }
-
+        return true;
 	}
 	
 	@Override
 	public void onMapClick (LatLng point) {
 		CustomMarker.setSelected(null);
 		updateMarkers();
-
-        if(lineCount > 0) {
-            System.out.println("line being drawn");
-            lineCount--;
-            linePoints[lineCount] = point;
-            if (lineCount == 0) {
-                map.addPolyline(new PolylineOptions().add(linePoints[0])
-                        .add(linePoints[1])
-                        .color(RED));
-                float[] minMax = field.getMinMaxLine(linePoints[0], linePoints[1]);
-                //Toast toast = Toast.makeText(this, "Min:" + Float.toString(minMax[0]) + " Max:" + Float.toString(minMax[1]), Toast.LENGTH_LONG);
-                Toast toast = Toast.makeText(this, "Min:" + Float.toString(minMax[0]) + " Max:" + Float.toString(minMax[1])
-                        + "\nLength: " + Float.toString(distanceBetween(linePoints[0], linePoints[1])) + "m", Toast.LENGTH_LONG);
-                toast.show();
-            }
-        }
-
+        showNormalAB();
 		switch(mode) {
 			case ADD_MODE:
 				CustomMarker.setWaterElevation(waterLevelMeters);
@@ -572,7 +527,8 @@ public void updateColors(Field field) {
             for (int i = 0; i < (width * height); i++) {
                 if ((pixels[i] & 0x000000FF) < waterLevel) {
                     //water is visible, set pixel to blue
-                    pixels[i] = transparency ? 0x880000FF : 0xFF0000FF;
+                    //pixels[i] = transparency ? 0x880000FF : 0xFF0000FF;
+                    pixels[i] = 0xFF0000FF;
                 } else {
                     //no water, set pixel transparent
                     pixels[i] = 0x00000000;
@@ -587,7 +543,8 @@ public void updateColors(Field field) {
                     c=pixels[i] & 0xFF;
                     //pixels[i] = HSVToColor(transparency ? 0x88 : 0xFF, hsv);
                     //pixels[i] = argb(transparency ? 0x88 : 0xFF, 255-c, 0, c);
-                    pixels[i] = transparency ? hsvTransparentColors[c] : hsvColors[c];
+                    //pixels[i] = transparency ? hsvTransparentColors[c] : hsvColors[c];
+                    pixels[i] =  hsvColors[c];
                 } else {
                     //no water, set pixel transparent
                     pixels[i] = 0x00000000;
@@ -597,9 +554,11 @@ public void updateColors(Field field) {
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
 
         //remove old map overlay and create new one
-
         GroundOverlay ppo = field.prevoverlay;
         field.prevoverlay = createOverlay(bitmap, field.getFieldBounds());
+        if (transparency) {
+            field.prevoverlay.setTransparency(alpha);
+        }
         ppo.remove();
         currentlyDrawing = false;
     }
@@ -732,17 +691,25 @@ public boolean onTouch(View arg0, MotionEvent arg1) {
 
 protected void onActivityResult (int requestCode, int resultCode, Intent data) {
 	//handle data from file manager
-	fileUri = data.getData();
-	java.net.URI juri = null;
-	try {
-		juri = new java.net.URI(fileUri.getScheme(),
-		        fileUri.getSchemeSpecificPart(),
-		        fileUri.getFragment());
-	} catch (URISyntaxException e) {
-		e.printStackTrace();
-	}
-	ElevationRaster raster = new ElevationRaster();
-	new ReadElevationRasterTask(this, raster).execute(juri);
+    if (data != null) {
+        if (data.getData().toString().contains(".tif")) {
+            fileUri = data.getData();
+            java.net.URI juri = null;
+            try {
+                juri = new java.net.URI(fileUri.getScheme(),
+                        fileUri.getSchemeSpecificPart(),
+                        fileUri.getFragment());
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+            ElevationRaster raster = new ElevationRaster();
+            new ReadElevationRasterTask(this, raster).execute(juri);
+        }
+        else {
+            Toast toast = Toast.makeText(this, "File selected was not a GEOTiff file.", Toast.LENGTH_LONG);
+            toast.show();
+        }
+    }
 }
 
 public static void onFileRead(ElevationRaster raster) {
@@ -751,7 +718,6 @@ public static void onFileRead(ElevationRaster raster) {
 	field.setBounds(raster.getBounds());
 	field.setMinElevation(raster.getMinElevation());
 	field.setMaxElevation(raster.getMaxElevation());
-	//field.updateColors();
 	System.out.println(raster.getBounds());
     sliderMin = raster.getMinElevation();
     sliderMax = raster.getMaxElevation();
@@ -804,5 +770,18 @@ public float distanceBetween(LatLng p1, LatLng p2) {
     return (float)Math.sqrt((latDistance*latDistance) + (longDistance*longDistance));
 }
 
+public static void setAlpha(float a) {
+    alpha = a;
+}
+
+public static float getAlpha() {
+    return alpha;
+}
+
+    public static void defaultSlider() {
+        sliderMin = defaultSliderMin;
+        sliderMax = defaultSliderMax;
+        updateEditText(sliderMin, sliderMax);
+    }
 
 }

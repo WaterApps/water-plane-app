@@ -41,7 +41,7 @@ public class Field {
 	double maxElevation;
 	
 	static MapFragment mapFragment;
-	static SeekBar seekBar;
+	public static SeekBar seekBar;
 	public static GroundOverlay prevoverlay;
 	
 	//constructor method
@@ -192,7 +192,7 @@ public class Field {
             for (int i = 0; i < (width * height); i++) {
                 if ((pixels[i] & 0x000000FF) < waterLevel) {
                     //water is visible, set pixel to blue
-                    pixels[i] = MainActivity.transparency ? 0x880000FF : 0xFF0000FF;
+                    pixels[i] = 0xFF0000FF;
                 } else {
                     //no water, set pixel transparent
                     pixels[i] = 0x00000000;
@@ -206,7 +206,7 @@ public class Field {
                     //hsv[0] = pixels[i]&0xFF;
                     c=pixels[i] & 0xFF;
                     //pixels[i] = HSVToColor(transparency ? 0x88 : 0xFF, hsv);
-                    pixels[i] = MainActivity.transparency ? MainActivity.hsvTransparentColors[c] : MainActivity.hsvColors[c];
+                    pixels[i] = MainActivity.hsvColors[c];
                 } else {
                     //no water, set pixel transparent
                     pixels[i] = 0x00000000;
@@ -216,9 +216,10 @@ public class Field {
 		bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
 		
 		//remove old map overlay and create new one
-		
-
 		prevoverlay = createOverlay(bitmap, getFieldBounds());
+        if (MainActivity.transparency) {
+            prevoverlay.setTransparency(MainActivity.getAlpha());
+        }
 		
 	}
 	
@@ -326,5 +327,10 @@ public class Field {
         }
         float[] returnValue = {(float)min, (float)max};
         return returnValue;
+    }
+
+    public void setWaterLevel(double level) {
+        seekBar.setProgress((int)(255.0*(level-MainActivity.sliderMin)/(MainActivity.sliderMax-MainActivity.sliderMin)));
+        updateColors();
     }
 }

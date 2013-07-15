@@ -1,15 +1,22 @@
 package com.precisionag.waterplane;
 
 import java.text.DecimalFormat;
+
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 import com.precisionag.lib.CustomMarker;
 
-public class MarkerHandler implements OnMarkerDragListener {
+public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerClickListener {
 	@Override
 	public void onMarkerDrag(Marker marker) {
 		// TODO Auto-generated method stub
 		MainActivity.userLocation = marker.getPosition();
+        if (MainActivity.following) {
+            MainActivity.field.setWaterLevel(MainActivity.field.elevationFromLatLng(MainActivity.userLocation));
+            MainActivity.field.updateColors();
+        }
 		double elevationDouble = MainActivity.field.elevationFromLatLng(MainActivity.userLocation);
 		  double elevationDelta =  elevationDouble - MainActivity.waterLevelMeters;
 		  String ElevationText;
@@ -44,4 +51,21 @@ public class MarkerHandler implements OnMarkerDragListener {
 		// TODO Auto-generated method stub
 		
 	}
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        if(marker.getTitle().equals("true") | marker.getTitle().equals("false")) {
+            CustomMarker.setSelected(marker);
+            MainActivity.showMarkerAB();
+        }
+        if (marker.getTitle().equals("true")) {
+            marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow));
+            marker.setTitle("false");
+        }
+        else if (marker.getTitle().equals("false")) {
+            marker.setTitle("true");
+        }
+        MainActivity.updateMarkers();
+        return true;
+    }
 }

@@ -116,10 +116,9 @@
                             android:text="Min:"
                             android:id="@+id/minText"/>
 
-                    <EditText
+                    <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="fill_parent"
-                            android:inputType="numberDecimal"
                             android:ems="10"
                             android:text="241.94"
                             android:textAppearance="?android:attr/textAppearanceSmall"
@@ -134,10 +133,9 @@
                                 android:text="Max:"
                                 android:id="@+id/maxText"/>
 
-                        <EditText
+                        <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="fill_parent"
-                                android:inputType="numberDecimal"
                                 android:text="250.925"
                                 android:ems="10"
                                 android:textAppearance="?android:attr/textAppearanceSmall"

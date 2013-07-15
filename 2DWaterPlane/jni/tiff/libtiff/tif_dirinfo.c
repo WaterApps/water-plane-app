@@ -255,8 +255,6 @@ tiffFieldInfo[] = {
        FIELD_CUSTOM,	1,	0,	"MatrixWorldToCamera" },
     { TIFFTAG_COPYRIGHT,	-1, -1,	TIFF_ASCII,	FIELD_CUSTOM,
       1,	0,	"Copyright" },
-        { TIFFTAG_GEOTIEPOINTS,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
-          TRUE,	TRUE,	"GeoTiePoints" },
 /* end Pixar tags */
     { TIFFTAG_RICHTIFFIPTC, -3, -3,	TIFF_LONG,	FIELD_CUSTOM, 
       0,    1,   "RichTIFFIPTC" },
@@ -393,19 +391,7 @@ tiffFieldInfo[] = {
       0,	1,	"CurrentPreProfileMatrix" },
 /* end DNG tags */
 };
-/*
-        { TIFFTAG_GEOPIXELSCALE,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
-          TRUE,	TRUE,	"GeoPixelScale" },
-        { TIFFTAG_GEOTRANSMATRIX,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
-          TRUE,	TRUE,	"GeoTransformationMatrix" },
 
-        { TIFFTAG_GEOKEYDIRECTORY, -1,-1, TIFF_SHORT,	FIELD_CUSTOM,
-          TRUE,	TRUE,	"GeoKeyDirectory" },
-        { TIFFTAG_GEODOUBLEPARAMS,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
-          TRUE,	TRUE,	"GeoDoubleParams" },
-        { TIFFTAG_GEOASCIIPARAMS,	-1,-1, TIFF_ASCII,	FIELD_CUSTOM,
-          TRUE,	FALSE,	"GeoASCIIParams" }
-*/
 static const TIFFFieldInfo
 exifFieldInfo[] = {
     { EXIFTAG_EXPOSURETIME,	1, 1,		TIFF_RATIONAL,	FIELD_CUSTOM, 

@@ -9,6 +9,7 @@ import java.io.File;
 import java.net.URI;
 
 import static com.tiffdecoder.TiffDecoder.nativeTiffGetCornerLatitude;
+import com.ibm.util.CoordinateConversion;
 
 /**
  * Created by steve on 5/30/13.
@@ -33,8 +34,8 @@ public class ReadGeoTiff implements ReadElevationRaster {
         Log.i("readgeotiff", Integer.toString(raster.getNrows()));
         raster.elevationData = new float[raster.getNrows()][raster.getNcols()];
 
-        Log.i("longitude puru", Float.toString(com.tiffdecoder.TiffDecoder.nativeTiffGetCornerLongitude()));
-        Log.i("latitude puru", Float.toString(com.tiffdecoder.TiffDecoder.nativeTiffGetCornerLatitude()));
+        //Log.i("longitude puru", Float.toString(com.tiffdecoder.TiffDecoder.nativeTiffGetCornerLongitude()));
+        //Log.i("latitude puru", Float.toString(com.tiffdecoder.TiffDecoder.nativeTiffGetCornerLatitude()));
         /*
         for(int i=0; i<raster.getNrows(); i++) {
             for(int j=0; j<raster.getNcols(); j++) {
@@ -73,8 +74,16 @@ public class ReadGeoTiff implements ReadElevationRaster {
         Log.i("min elevation", Float.toString(raster.getMinElevation()));
         Log.i("max elevation", Float.toString(raster.getMaxElevation()));
         //float []anchor = nativeTiffGetCornerLatitude();
-        //float longitude[] = TiffDecoder.nativeTiffGetCornerLongitude();
-
+        float longitude = TiffDecoder.nativeTiffGetCornerLongitude();
+        float latitude = TiffDecoder.nativeTiffGetCornerLatitude();
+        double latLng[];
+        CoordinateConversion conversion = new CoordinateConversion();
+        latLng = conversion.utm2LatLon("16 N " + Integer.toString((int)longitude) + " " + Integer.toString((int)latitude));
+        double scale = TiffDecoder.nativeTiffGetScale();
+        double width = scale*raster.getNrows()/(111111.0);
+        double height = scale*raster.getNcols()/(111111.0*Math.cos(Math.toRadians(latLng[0])));
+        raster.setLowerLeft(new LatLng(latLng[0]-width, latLng[1]));
+        raster.setUpperRight(new LatLng(latLng[0], latLng[1]+height));
 
         return raster;
     }

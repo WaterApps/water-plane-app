@@ -26,6 +26,7 @@ public class TiffDecoder {
 
     public static native float nativeTiffGetCornerLongitude();
 
+    public static native float nativeTiffGetScale();
     public static native int nativeTiffGetLength();
     
     public static native int nativeTiffGetWidth();

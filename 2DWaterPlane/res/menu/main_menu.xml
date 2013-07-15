@@ -1,0 +1,49 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_choose_dem"
+        android:showAsAction="never"
+        android:title="Choose DEM"/>
+
+    <item android:id="@+id/menu_center"
+          android:title="Center map on DEM"
+          android:showAsAction="never" />
+
+<group android:id="@+id/checkable_group"
+       android:checkableBehavior="all">
+
+    <item android:id="@+id/menu_drag"
+          android:title="Location Tracking"
+          android:showAsAction="never"
+          android:checked="true"/>
+
+    <item android:id="@+id/menu_coloring"
+          android:title="DEM Coloring"
+          android:showAsAction="never"
+          android:checked="false"/>
+
+    <item android:id="@+id/menu_transparency"
+          android:title="DEM Transparency"
+          android:showAsAction="never"
+          android:checked="false"/>
+
+    <item android:id="@+id/menu_follow"
+          android:title="Follow Elevation"
+          android:showAsAction="never"
+          android:checked="false"/>
+</group>
+
+    <item android:id="@+id/menu_help"
+          android:title="Help"
+          android:showAsAction="never" />
+        
+    <item android:id="@+id/menu_add"
+          android:icon="@drawable/add_marker"
+          android:title="Add Marker"
+          android:showAsAction="always|withText" />
+
+    <item android:id="@+id/menu_settings"
+          android:title="@string/menu_settings"
+          android:showAsAction="never" />
+
+</menu>

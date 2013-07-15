@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:robobunny="http://robobunny.com">
+    <com.precisionag.waterplane.SeekBarPreference
+            android:key="pref_key_trans_level"
+            android:title = "Transparency Level"
+            android:defaultValue="50"
+            robobunny:min="10"
+            android:max="100"/>
+    <EditTextPreference
+        android:key="pref_min_elevation"
+        android:title="Minimum Slider Elevation"
+        android:defaultValue="241.94"
+        android:inputType="numberDecimal"
+        android:summary="241.94"/>
+    <EditTextPreference
+            android:key="pref_max_elevation"
+            android:title="Maximum Slider Elevation"
+            android:defaultValue="250.925"
+            android:inputType="numberDecimal"
+            android:summary="250.925"/>
+    <com.precisionag.waterplane.MyDialogPreference
+            android:key="pref_reset"
+            android:title="Reset Slider Elevations"/>
+    <com.precisionag.waterplane.MyDialogPreference
+        android:key="pref_legal"
+        android:title="Legal Notice"/>
+    <Preference
+        android:title="Choose DEM Folder">
+        <intent
+                android:action="com.filebrowser.DataPathChooser"/>
+    </Preference>
+</PreferenceScreen>

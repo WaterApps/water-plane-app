@@ -20,6 +20,23 @@
 
 #define	N(a)	(sizeof (a) / sizeof (a[0]))
 
+/* tags 33550 is a private tag registered to SoftDesk, Inc */
+#define TIFFTAG_GEOPIXELSCALE       33550
+/* tags 33920-33921 are private tags registered to Intergraph, Inc */
+#define TIFFTAG_INTERGRAPH_MATRIX    33920   /* $use TIFFTAG_GEOTRANSMATRIX ! */
+#define TIFFTAG_GEOTIEPOINTS         33922
+/* tags 34263-34264 are private tags registered to NASA-JPL Carto Group */
+#ifdef JPL_TAG_SUPPORT
+#define TIFFTAG_JPL_CARTO_IFD        34263    /* $use GeoProjectionInfo ! */
+#endif
+#define TIFFTAG_GEOTRANSMATRIX       34264    /* New Matrix Tag replaces 33920 */
+/* tags 34735-3438 are private tags registered to SPOT Image, Inc */
+#define TIFFTAG_GEOKEYDIRECTORY      34735
+#define TIFFTAG_GEODOUBLEPARAMS      34736
+#define TIFFTAG_GEOASCIIPARAMS       34737
+#define FALSE 0
+#define TRUE 1
+
 TIFF *image = NULL;
 unsigned int *buffer = NULL;
 tsize_t stripSize = 0;
@@ -30,25 +47,34 @@ unsigned int height = 0;
 unsigned int samplesperpixel = 0;
 unsigned int bitspersample = 0;
 unsigned int totalFrame = 0;
-double latlng[1][6];
+void *latlng;
+void *scale;
+unsigned short iCount;
+
+
+static void TagExtender(TIFF *tiff)
+{
+	static const TIFFFieldInfo xtiffFieldInfo[] = {
+
+		{ TIFFTAG_GEOPIXELSCALE,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
+		  TRUE,	TRUE,	"GeoPixelScale" },
+		{ TIFFTAG_GEOTRANSMATRIX,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
+		  TRUE,	TRUE,	"GeoTransformationMatrix" },
+		{ TIFFTAG_GEOTIEPOINTS,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
+		  TRUE,	TRUE,	"GeoTiePoints" },
+		{ TIFFTAG_GEOKEYDIRECTORY, -1,-1, TIFF_SHORT,	FIELD_CUSTOM,
+		  TRUE,	TRUE,	"GeoKeyDirectory" },
+		{ TIFFTAG_GEODOUBLEPARAMS,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
+		  TRUE,	TRUE,	"GeoDoubleParams" },
+		{ TIFFTAG_GEOASCIIPARAMS,	-1,-1, TIFF_ASCII,	FIELD_CUSTOM,
+		  TRUE,	FALSE,	"GeoASCIIParams" }
+	    };
+
+	TIFFMergeFieldInfo( tiff, xtiffFieldInfo,
+				sizeof(xtiffFieldInfo) / sizeof(xtiffFieldInfo[0]) );
+}
 
 /*
-static const TIFFFieldInfo xtiffFieldInfo[] = {
-
-        { TIFFTAG_GEOPIXELSCALE,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
-          TRUE,	TRUE,	"GeoPixelScale" },
-        { TIFFTAG_GEOTRANSMATRIX,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
-          TRUE,	TRUE,	"GeoTransformationMatrix" },
-        { TIFFTAG_GEOTIEPOINTS,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
-          TRUE,	TRUE,	"GeoTiePoints" },
-        { TIFFTAG_GEOKEYDIRECTORY, -1,-1, TIFF_SHORT,	FIELD_CUSTOM,
-          TRUE,	TRUE,	"GeoKeyDirectory" },
-        { TIFFTAG_GEODOUBLEPARAMS,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
-          TRUE,	TRUE,	"GeoDoubleParams" },
-        { TIFFTAG_GEOASCIIPARAMS,	-1,-1, TIFF_ASCII,	FIELD_CUSTOM,
-          TRUE,	FALSE,	"GeoASCIIParams" }
-    };
-
 static
 void _XTIFFInitialize(void)
 {
@@ -82,6 +108,8 @@ Java_com_tiffdecoder_TiffDecoder_nativeTiffOpen( JNIEnv* env, jobject thiz, jstr
 	// Open the TIFF image
 	const char *strPath = NULL;
 	strPath = (*env)->GetStringUTFChars(env, path, NULL );
+    	TIFFSetTagExtender(TagExtender);
+
 	if((image = TIFFOpen(strPath, "r")) == NULL){
 		__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "Could not open incoming image", strPath);
     	return -1;
@@ -102,7 +130,21 @@ Java_com_tiffdecoder_TiffDecoder_nativeTiffOpen( JNIEnv* env, jobject thiz, jstr
 	TIFFGetField(image, TIFFTAG_IMAGELENGTH, &height);
 	TIFFGetField(image, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel);
 	TIFFGetField(image, TIFFTAG_BITSPERSAMPLE, &bitspersample);
-    TIFFGetField(image, TIFFTAG_GEOTIEPOINTS, latlng);
+	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "before read long/lat");
+	latlng = _TIFFmalloc(24);
+    	TIFFGetField(image, TIFFTAG_GEOTIEPOINTS, &iCount, &latlng);
+	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "count=%d", iCount);
+	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "latlng0=%f", ((double *)latlng)[0]);
+	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "latlng1=%f", ((double *)latlng)[1]);
+	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "latlng2=%f", ((double *)latlng)[2]);
+	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "latlng3=%f", ((double *)latlng)[3]);
+	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "latlng4=%f", ((double *)latlng)[4]);
+	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "latlng5=%f", ((double *)latlng)[5]);
+	scale = _TIFFmalloc(12);
+	TIFFGetField(image, TIFFTAG_GEOPIXELSCALE, &iCount, &scale);
+
+
+	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "after read long/lat");
 	bufferSize = width * height;
 	// Allocate the memory
 	if((buffer = (unsigned int *) _TIFFmalloc(bufferSize * sizeof (unsigned int))) == NULL){
@@ -229,12 +271,17 @@ Java_com_tiffdecoder_TiffDecoder_nativeTiffGetFloats( JNIEnv* env )
 
 jfloat
 Java_com_tiffdecoder_TiffDecoder_nativeTiffGetCornerLatitude( JNIEnv* env ) {
-    return (float)latlng[0][4];
+    return (float)((double *)latlng)[4];
 }
 
 jfloat
 Java_com_tiffdecoder_TiffDecoder_nativeTiffGetCornerLongitude( JNIEnv* env ) {
-    return (float)latlng[0][3];
+    return (float)((double *)latlng)[3];
+}
+
+jfloat
+Java_com_tiffdecoder_TiffDecoder_nativeTiffGetScale( JNIEnv* env ) {
+    return (float)((double *)scale)[0];
 }
 
 jint

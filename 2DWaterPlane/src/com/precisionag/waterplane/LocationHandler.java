@@ -13,13 +13,16 @@ public class LocationHandler implements LocationListener {
 	    public void onLocationChanged(Location location) {
 	      // Called when a new location is found by the network location provider.
 	    	if (!MainActivity.drag_mode) {
+              if (MainActivity.following) {
+                  MainActivity.field.setWaterLevel(MainActivity.field.elevationFromLatLng(MainActivity.userLocation));
+              }
 
 	    	  MainActivity.userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-		      
+
 			  double elevationDouble = MainActivity.field.elevationFromLatLng(MainActivity.userLocation);
 			  double elevationDelta =  elevationDouble - MainActivity.waterLevelMeters;
 			  String ElevationText;
-			  
+
 			  if (elevationDouble == 0.0) {
 				  ElevationText = "You are not in the field.";
 			  }
@@ -34,10 +37,11 @@ public class LocationHandler implements LocationListener {
 			  	  }
 			  }
 			  MainActivity.ElevationTextView.setText(ElevationText);
-			  
+
 			  CustomMarker.setUserElevation(elevationDouble);
 			  MainActivity.userMarker.setPosition(MainActivity.userLocation);
 	    	}
+
 	    }
 
 	    public void onStatusChanged(String provider, int status, Bundle extras) {}

@@ -73,7 +73,7 @@ public class DataPathChooser extends ListActivity {
 		case R.id.menuCancel:
 			if(returnIntent.contentEquals("back") == false){
 				Intent i = new Intent(returnIntent);
-				startActivity(i);
+				//startActivity(i);
 			}
 			finish();
 			break;
@@ -85,7 +85,7 @@ public class DataPathChooser extends ListActivity {
 			editor.commit();
 			if(returnIntent.contentEquals("back") == false){
 				Intent i2 = new Intent(returnIntent);
-				startActivity(i2);
+				//startActivity(i2);
 			}
 			finish();
 			break;
