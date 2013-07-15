@@ -46,6 +46,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -94,6 +95,9 @@ public static Context context;
 static boolean following;
 public static float scale;
 public static Resources resources;
+ArrayList<Dem> dems;
+Dem currentlyLoaded;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
         resources = getResources();
@@ -284,6 +288,7 @@ public static Resources resources;
         String path = Environment.getExternalStorageDirectory().toString()+demDirectory;
         DatabaseHandler dbh = new DatabaseHandler(this);
         Dem dem;
+        dems = new ArrayList<Dem>();
         Log.i("Files", "Path: " + path);
         File f = new File(path);
         if (f.isDirectory()) {
@@ -294,6 +299,7 @@ public static Resources resources;
             {
                 Log.d("Files", "FileName:" + file[i].getName());
                 dem = ReadGeoTiffMetadata.readMetadata(file[i]);
+                dems.add(dem);
                 map.addPolyline(new PolylineOptions().add(new LatLng(dem.getSw_lat(), dem.getSw_long()))
                         .add(new LatLng(dem.getSw_lat(), dem.getNe_long()))
                         .add(new LatLng(dem.getNe_lat(), dem.getNe_long()))
@@ -462,6 +468,11 @@ public static Resources resources;
             return true;
         }
 
+        else if(item.getItemId() == R.id.menu_help) {
+            Intent intent = new Intent(this, HelpActivity.class);
+            startActivity(intent);
+        }
+
 	    else {
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -471,7 +482,6 @@ public static Resources resources;
 	@Override
 	public void onMapClick (LatLng point) {
 		CustomMarker.setSelected(null);
-		updateMarkers();
         showNormalAB();
 		switch(mode) {
 			case ADD_MODE:
@@ -489,8 +499,20 @@ public static Resources resources;
                 showNormalAB();
 				break;
 		}
-		
-	}
+
+        Dem dem;
+        for(int i = 0; i<dems.size(); i++) {
+            dem = dems.get(i);
+            if ( (currentlyLoaded == null) || !dem.getFilename().equals(currentlyLoaded.getFilename())) {
+                if(dem.getBounds().contains(point)) {
+                    currentlyLoaded = dem;
+                    ElevationRaster raster = new ElevationRaster();
+                    new ReadElevationRasterTask(this, raster).execute(dem.getFileUri());
+                }
+            }
+        }
+        updateMarkers();
+    }
 	
 //takes a bitmap, latitude/longitude bounds, and a map to create a map overlay
 private GroundOverlay createOverlay(Bitmap overlayBitmap, LatLngBounds bounds) {
@@ -782,6 +804,10 @@ public static float getAlpha() {
         sliderMin = defaultSliderMin;
         sliderMax = defaultSliderMax;
         updateEditText(sliderMin, sliderMax);
+    }
+
+    public static void deleteMarker(Marker marker) {
+        markers.remove(marker);
     }
 
 }

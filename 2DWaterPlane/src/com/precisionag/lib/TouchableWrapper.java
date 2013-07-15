@@ -15,7 +15,7 @@ public TouchableWrapper(Context context) {
 
 @Override
 public boolean dispatchTouchEvent(MotionEvent ev) {
-	MainActivity.updateMarkers();
+	//MainActivity.updateMarkers();
    return super.dispatchTouchEvent(ev);
  }
 }

@@ -59,9 +59,17 @@
                 android:name="com.precisionag.waterplane.SettingsActivity"
                 android:label="@string/menu_settings" >
         </activity>
+        <activity
+                android:name="com.precisionag.waterplane.HelpActivity"
+                android:label="Waterplane Help" >
+            <intent-filter>
+                <action android:name="com.precisionag.waterplane.HelpActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <meta-data
     		android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyBiWShI8WEZZN1L0oXJL_ZfJyWh9y-djp0"/>
+            android:value="AIzaSyAJVXs0TbvT7N8FSNO-FlQ-CUshRh-9fAo"/>
     </application>
 
 </manifest>

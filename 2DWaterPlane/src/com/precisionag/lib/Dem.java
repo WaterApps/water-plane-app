@@ -1,5 +1,12 @@
 package com.precisionag.lib;
 
+import android.net.Uri;
+
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+
+import java.net.URI;
+
 public class Dem {
     int id;
     float sw_lat;
@@ -8,6 +15,15 @@ public class Dem {
     float ne_long;
     String filename;
     String timestamp;
+    URI fileUri;
+
+    public URI getFileUri() {
+        return fileUri;
+    }
+
+    public void setFileUri(URI fileUri) {
+        this.fileUri = fileUri;
+    }
 
     public Dem(int id, float sw_lat, float sw_long, float ne_lat, float ne_long, String filename, String timestamp) {
         this.id = id;
@@ -19,13 +35,14 @@ public class Dem {
         this.timestamp = timestamp;
     }
 
-    public Dem(float sw_lat, float sw_long, float ne_lat, float ne_long, String filename, String timestamp) {
+    public Dem(float sw_lat, float sw_long, float ne_lat, float ne_long, String filename, String timestamp, URI fileUri) {
         this.sw_lat = sw_lat;
         this.sw_long = sw_long;
         this.ne_lat = ne_lat;
         this.ne_long = ne_long;
         this.filename = filename;
         this.timestamp = timestamp;
+        this.fileUri = fileUri;
     }
 
     public Dem() {
@@ -86,6 +103,10 @@ public class Dem {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public LatLngBounds getBounds() {
+        return new LatLngBounds(new LatLng(sw_lat, sw_long), new LatLng(ne_lat, ne_long));
     }
 
 }

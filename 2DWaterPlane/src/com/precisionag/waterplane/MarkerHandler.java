@@ -59,7 +59,12 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
             MainActivity.showMarkerAB();
         }
         if (marker.getTitle().equals("true")) {
-            marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow));
+            if (marker.equals(CustomMarker.getSelected())) {
+                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow_selected));
+            }
+            else {
+                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow));
+            }
             marker.setTitle("false");
         }
         else if (marker.getTitle().equals("false")) {

@@ -1,5 +1,6 @@
 package com.precisionag.waterplane;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -54,5 +55,11 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
             MainActivity.updateEditText(MainActivity.sliderMin, MainActivity.sliderMax);
             preference.setSummary(sharedPreferences.getString("pref_max_elevation", "300.0"));
         }
+    }
+
+    @Override
+
+    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+        System.out.print("Intent recieved");
     }
 }

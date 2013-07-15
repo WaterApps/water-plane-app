@@ -3,6 +3,7 @@ package com.precisionag.lib;
 import java.text.DecimalFormat;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -24,7 +25,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -86,44 +89,67 @@ public class CustomMarker {
                 .title("true")
                 .position(point)
                 .icon(icon)
-                .anchor(.5f, 1.0f));
+                .anchor(.5f, 1.0f)
+                .draggable(true));
 	}
 	
 	public void updateMarker() {
-        LatLng point = marker.getPosition();
-        double elevationDouble = field.elevationFromLatLng(point);
-        String title;
-        String userDelta;
-        String waterDelta;
 
-        if (elevationDouble == 0.0) {
-            title = "Not in field!";
-            userDelta = "";
-            waterDelta = "";
+        try {
+            MapsInitializer.initialize(MainActivity.context);
+        } catch (GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
         }
-        else {
-            String temp = new DecimalFormat("000.0").format(Math.abs(userElevation-elevationDouble));
-            title = "";
-            if (userElevation-elevationDouble < 0.0) {
-                userDelta = temp+"m above you";
-            } else {
-                userDelta = temp+"m below you";
+        if (marker.isVisible()) {
+            LatLng point = marker.getPosition();
+            double elevationDouble = field.elevationFromLatLng(point);
+            String title;
+            String userDelta;
+            String waterDelta;
+
+            if (elevationDouble == 0.0) {
+                title = "Not in field!";
+                userDelta = "";
+                waterDelta = "";
+            }
+            else {
+                String temp = new DecimalFormat("000.0").format(Math.abs(userElevation-elevationDouble));
+                title = "";
+                if (userElevation-elevationDouble < 0.0) {
+                    userDelta = temp+"m above you";
+                } else {
+                    userDelta = temp+"m below you";
+                }
+
+                temp = new DecimalFormat("000.0").format(Math.abs(waterElevation-elevationDouble));
+                if (waterElevation-elevationDouble < 0.0) {
+                    waterDelta = temp+"m above water";
+                } else {
+                    waterDelta = temp+"m below water";
+                }
             }
 
-            temp = new DecimalFormat("000.0").format(Math.abs(waterElevation-elevationDouble));
-            if (waterElevation-elevationDouble < 0.0) {
-                waterDelta = temp+"m above water";
-            } else {
-                waterDelta = temp+"m below water";
+            Bitmap bitmap = textToBitmap(waterDelta + "\n" + userDelta, marker.equals(selected));
+
+            //BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
+
+            if (marker != null) {
+                if (marker.getTitle().equals("true")) {
+                    marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap));
+                }
+                else {
+                    if (marker.equals(CustomMarker.getSelected())) {
+                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow_selected));
+                        //icon = BitmapDescriptorFactory.fromResource(drawable.arrow_selected);
+                    }
+                    else {
+                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow));
+                        //icon = BitmapDescriptorFactory.fromResource(drawable.arrow);
+                    }
+                }
+                //BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
+                //marker.setIcon(icon);
             }
-        }
-
-        Bitmap bitmap = textToBitmap(waterDelta + "\n" + userDelta, marker.equals(selected));
-
-        BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
-
-        if (marker.getTitle().equals("true")) {
-            marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap));
         }
 	}
 	
@@ -131,7 +157,9 @@ public class CustomMarker {
 		displayWidth = newWidth;
 	}
 	public void removeMarker() {
+        MainActivity.deleteMarker(marker);
 		marker.remove();
+        setSelected(null);
 	}
 	
 	public static void setMap(GoogleMap newMap) {
@@ -191,8 +219,14 @@ public class CustomMarker {
         int width = dpToPx(180);
         int height = dpToPx(80);
 
+        Bitmap arrow;
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Bitmap arrow = BitmapFactory.decodeResource(MainActivity.resources, drawable.arrow);
+        if (isSelected) {
+             arrow = BitmapFactory.decodeResource(MainActivity.resources, drawable.arrow_selected);
+        }
+        else {
+             arrow = BitmapFactory.decodeResource(MainActivity.resources, drawable.arrow);
+        }
         Canvas canvas = new Canvas(bitmap);
         canvas.drawBitmap(bitmap, 0, 0, null);
         canvas.drawBitmap(arrow, null, new RectF((float)dpToPx(80), (float)dpToPx(60), (float)dpToPx(100), (float)dpToPx(80)), null);
