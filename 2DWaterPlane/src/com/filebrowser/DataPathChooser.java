@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +24,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.precisionag.waterplane.MainActivity;
 import com.precisionag.waterplane.R;
 
 public class DataPathChooser extends ListActivity {
@@ -81,7 +83,10 @@ public class DataPathChooser extends ListActivity {
 			SharedPreferences prefs = PreferenceManager
 					.getDefaultSharedPreferences(getBaseContext());
 			SharedPreferences.Editor editor = prefs.edit();
-			editor.putString("dataPath", currentDirectory.toString() + "/");
+			editor.putString("dataPath", currentDirectory.getPath() + "/");
+            editor.putString("dem_dir", currentDirectory.getPath() + "/");
+            MainActivity.scanDEMs();
+            Log.d("dem dir", currentDirectory.toString());
 			editor.commit();
 			if(returnIntent.contentEquals("back") == false){
 				Intent i2 = new Intent(returnIntent);

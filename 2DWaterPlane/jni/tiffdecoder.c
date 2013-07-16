@@ -49,6 +49,7 @@ unsigned int bitspersample = 0;
 unsigned int totalFrame = 0;
 void *latlng;
 void *scale;
+void *params;
 unsigned short iCount;
 
 
@@ -67,7 +68,7 @@ static void TagExtender(TIFF *tiff)
 		{ TIFFTAG_GEODOUBLEPARAMS,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
 		  TRUE,	TRUE,	"GeoDoubleParams" },
 		{ TIFFTAG_GEOASCIIPARAMS,	-1,-1, TIFF_ASCII,	FIELD_CUSTOM,
-		  TRUE,	FALSE,	"GeoASCIIParams" }
+		  TRUE,	TRUE,	"GeoASCIIParams" }
 	    };
 
 	TIFFMergeFieldInfo( tiff, xtiffFieldInfo,
@@ -142,6 +143,8 @@ Java_com_tiffdecoder_TiffDecoder_nativeTiffOpen( JNIEnv* env, jobject thiz, jstr
 	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "latlng5=%f", ((double *)latlng)[5]);
 	scale = _TIFFmalloc(12);
 	TIFFGetField(image, TIFFTAG_GEOPIXELSCALE, &iCount, &scale);
+	params = _TIFFmalloc(1000);
+	TIFFGetField(image, TIFFTAG_GEOASCIIPARAMS, &iCount, &params);
 
 
 	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "after read long/lat");
@@ -267,6 +270,11 @@ Java_com_tiffdecoder_TiffDecoder_nativeTiffGetFloats( JNIEnv* env )
 	__android_log_print(ANDROID_LOG_INFO, "nativeTiffGetFloats", "width is %d", width);
 	__android_log_print(ANDROID_LOG_INFO, "nativeTiffGetFloats", "height is %d", height);
 	return array;
+}
+
+jstring
+Java_com_tiffdecoder_TiffDecoder_nativeTiffGetParams( JNIEnv* env) {
+	return (*env)->NewStringUTF(env, ((char *)params)); 
 }
 
 jfloat

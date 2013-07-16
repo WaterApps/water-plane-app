@@ -78,7 +78,11 @@ public class ReadGeoTiff implements ReadElevationRaster {
         float latitude = TiffDecoder.nativeTiffGetCornerLatitude();
         double latLng[];
         CoordinateConversion conversion = new CoordinateConversion();
-        latLng = conversion.utm2LatLon("16 N " + Integer.toString((int)longitude) + " " + Integer.toString((int)latitude));
+        String UTM = TiffDecoder.nativeTiffGetParams();
+        Log.d("params", UTM);
+        String UTMZone = UTM.substring(18, 20).concat(" ").concat(UTM.substring(20, 21)).concat(" ");
+        Log.d("utmzone", UTMZone);
+        latLng = conversion.utm2LatLon(UTMZone + Integer.toString((int)longitude) + " " + Integer.toString((int)latitude));
         double scale = TiffDecoder.nativeTiffGetScale();
         double width = scale*raster.getNrows()/(111111.0);
         double height = scale*raster.getNcols()/(111111.0*Math.cos(Math.toRadians(latLng[0])));

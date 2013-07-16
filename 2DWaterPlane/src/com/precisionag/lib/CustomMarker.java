@@ -94,7 +94,6 @@ public class CustomMarker {
 	}
 	
 	public void updateMarker() {
-
         try {
             MapsInitializer.initialize(MainActivity.context);
         } catch (GooglePlayServicesNotAvailableException e) {
@@ -131,7 +130,9 @@ public class CustomMarker {
 
             Bitmap bitmap = textToBitmap(waterDelta + "\n" + userDelta, marker.equals(selected));
 
-            //BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
+            BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
+            //marker.setIcon(icon);
+
 
             if (marker != null) {
                 if (marker.getTitle().equals("true")) {
@@ -139,17 +140,18 @@ public class CustomMarker {
                 }
                 else {
                     if (marker.equals(CustomMarker.getSelected())) {
-                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow_selected));
+                        //marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow_selected));
                         //icon = BitmapDescriptorFactory.fromResource(drawable.arrow_selected);
                     }
                     else {
-                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow));
+                        //marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow));
                         //icon = BitmapDescriptorFactory.fromResource(drawable.arrow);
                     }
                 }
                 //BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
                 //marker.setIcon(icon);
             }
+
         }
 	}
 	
@@ -159,6 +161,7 @@ public class CustomMarker {
 	public void removeMarker() {
         MainActivity.deleteMarker(marker);
 		marker.remove();
+        //marker.setVisible(false);
         setSelected(null);
 	}
 	

@@ -12,7 +12,9 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
 	@Override
 	public void onMarkerDrag(Marker marker) {
 		// TODO Auto-generated method stub
-		MainActivity.userLocation = marker.getPosition();
+        if(!marker.getTitle().equals("true") && !marker.getTitle().equals("false")) {
+            MainActivity.userLocation = marker.getPosition();
+        }
         if (MainActivity.following) {
             MainActivity.field.setWaterLevel(MainActivity.field.elevationFromLatLng(MainActivity.userLocation));
             MainActivity.field.updateColors();
@@ -37,7 +39,7 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
 		  MainActivity.ElevationTextView.setText(ElevationText);
 		  
 		  CustomMarker.setUserElevation(elevationDouble);
-		  MainActivity.updateMarkers();
+		  //MainActivity.updateMarkers();
 	}
 
 	@Override
@@ -58,6 +60,7 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
             CustomMarker.setSelected(marker);
             MainActivity.showMarkerAB();
         }
+
         if (marker.getTitle().equals("true")) {
             if (marker.equals(CustomMarker.getSelected())) {
                 marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow_selected));
@@ -70,6 +73,7 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
         else if (marker.getTitle().equals("false")) {
             marker.setTitle("true");
         }
+
         MainActivity.updateMarkers();
         return true;
     }

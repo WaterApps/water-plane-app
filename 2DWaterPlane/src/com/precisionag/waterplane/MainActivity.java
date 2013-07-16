@@ -44,8 +44,11 @@ import com.precisionag.lib.*;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
@@ -95,7 +98,7 @@ public static Context context;
 static boolean following;
 public static float scale;
 public static Resources resources;
-ArrayList<Dem> dems;
+static ArrayList<Dem> dems;
 Dem currentlyLoaded;
 
 	@Override
@@ -103,6 +106,7 @@ Dem currentlyLoaded;
         resources = getResources();
         scale = getResources().getDisplayMetrics().density;
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        demDirectory = prefs.getString("dem_dir", Environment.getExternalStorageDirectory().toString() + "/dem");
         context = this;
         alpha = 0.5f;
         hsvColors = new int[256];
@@ -130,7 +134,6 @@ Dem currentlyLoaded;
         linePoints = new LatLng[2];
 	    getActionBar().setCustomView(R.layout.custom_ab);
         actionBar.setDisplayShowCustomEnabled(true);
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.field);
 		MyMapFragment mapFragment = (MyMapFragment) getFragmentManager().findFragmentById(R.id.map);
 		map = mapFragment.getMap();
 		map.setOnCameraChangeListener(this);
@@ -157,7 +160,8 @@ Dem currentlyLoaded;
 		Field.setMapFragment(mapFrag);
 		SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
 		Field.setSeekBar(seekBar);
-		field = new Field(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.field);
+        field = new Field(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
 		userLocation = new LatLng(0.0, 0.0);
 		markers = new ArrayList<CustomMarker>();
 		mode = 0;
@@ -180,7 +184,7 @@ Dem currentlyLoaded;
 		configSeekbar(field, prevoverlay);
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         List <String> providersList = locationManager.getAllProviders();
-        System.out.println(providersList);
+        //System.out.println(providersList);
         Iterator<String> iterator = providersList.iterator();
         hasGPS = false;
         while (iterator.hasNext()) {
@@ -223,7 +227,7 @@ Dem currentlyLoaded;
             		 marker = i.next();
             		 if (CustomMarker.getSelected() == marker.getMarker()) {
             			 marker.removeMarker();
-            			 markers.remove(marker);
+            			 //markers.remove(marker);
             			 break;
             		 }
             	}
@@ -284,39 +288,20 @@ Dem currentlyLoaded;
             }
         }
 
-        //scan DEM directory
-        String path = Environment.getExternalStorageDirectory().toString()+demDirectory;
-        DatabaseHandler dbh = new DatabaseHandler(this);
-        Dem dem;
-        dems = new ArrayList<Dem>();
-        Log.i("Files", "Path: " + path);
-        File f = new File(path);
-        if (f.isDirectory()) {
-            File file[] = f.listFiles();
-            Log.i("File", file.toString());
+        loadInitialDEM();
+        scanDEMs();
 
-            for (int i=0; i < file.length; i++)
-            {
-                Log.d("Files", "FileName:" + file[i].getName());
-                dem = ReadGeoTiffMetadata.readMetadata(file[i]);
-                dems.add(dem);
-                map.addPolyline(new PolylineOptions().add(new LatLng(dem.getSw_lat(), dem.getSw_long()))
-                        .add(new LatLng(dem.getSw_lat(), dem.getNe_long()))
-                        .add(new LatLng(dem.getNe_lat(), dem.getNe_long()))
-                        .add(new LatLng(dem.getNe_lat(), dem.getSw_long()))
-                        .add(new LatLng(dem.getSw_lat(), dem.getSw_long()))
-                        .color(Color.RED));
-            }
-        }
+        //ElevationRaster raster = new ElevationRaster();
+        //new ReadElevationRasterTask(this, raster).execute(UritoURI(Uri.fromFile(new File("/sdcard/dem/geotiff.tif"))));
 
     }
-	
+
 	@Override
 	public void onPause() {
 		super.onPause();
 		locationManager.removeUpdates(locationListener);
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -324,24 +309,24 @@ Dem currentlyLoaded;
         if (hasGPS)
 		    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	}
-	
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 	  super.onConfigurationChanged(newConfig);
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main_menu, menu);
 		return true;
 	}
-	
+
 	@Override
 	public boolean onPrepareOptionsMenu (Menu menu) {
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection
@@ -434,12 +419,9 @@ Dem currentlyLoaded;
 
         else if (item.getItemId() == R.id.menu_choose_dem) {
             //opens file manager
-            //Intent intent = new Intent("org.openintents.action.PICK_FILE");
-            //intent.setData(Uri.parse("file:///sdcard/dem"));
 
             Intent intent = new Intent("com.filebrowser.DataFileChooser");
-            //intent.setData(Uri.parse("file:///sdcard/dem"));
-            //intent.setDataAndType(Uri.parse("file:///sdcard/dem"), "path");
+            intent.putExtra("path", demDirectory);
             startActivityForResult(intent, 1);
         }
 
@@ -481,6 +463,9 @@ Dem currentlyLoaded;
 	
 	@Override
 	public void onMapClick (LatLng point) {
+
+
+
 		CustomMarker.setSelected(null);
         showNormalAB();
 		switch(mode) {
@@ -489,7 +474,7 @@ Dem currentlyLoaded;
 				CustomMarker newMarker = new CustomMarker(point);
 				newMarker.updateMarker();
 				markers.add(newMarker);
-				updateMarkers();
+				//updateMarkers();
 				mode = 0;
 				break;
 				
@@ -650,6 +635,9 @@ public static void updateMarkers() {
 	Iterator<CustomMarker> i = markers.iterator();
 	CustomMarker marker;
 
+    System.out.print("markers");
+    System.out.print(markers);
+
 	while (i.hasNext()) {
 		 marker = i.next();
 		 marker.updateMarker();
@@ -741,12 +729,10 @@ public static void onFileRead(ElevationRaster raster) {
 	field.setMinElevation(raster.getMinElevation());
 	field.setMaxElevation(raster.getMaxElevation());
 	System.out.println(raster.getBounds());
-    sliderMin = raster.getMinElevation();
-    sliderMax = raster.getMaxElevation();
-    updateEditText(sliderMin, sliderMax);
-
     raster.calculateTenths();
-
+    defaultSliderMin = sliderMin;
+    defaultSliderMax = sliderMax;
+    defaultSlider();
 	map.animateCamera(CameraUpdateFactory.newLatLngBounds(raster.getBounds(), 50));
     field.updatePolyLine();
     field.updateColors();
@@ -804,10 +790,135 @@ public static float getAlpha() {
         sliderMin = defaultSliderMin;
         sliderMax = defaultSliderMax;
         updateEditText(sliderMin, sliderMax);
+        SharedPreferences.Editor edit = prefs.edit();
+        edit.putString("pref_min_elevation", Float.toString(sliderMin));
+        edit.putString("pref_max_elevation", Float.toString(sliderMax));
+        edit.apply();
     }
 
     public static void deleteMarker(Marker marker) {
         markers.remove(marker);
+    }
+
+    private URI UritoURI(Uri fileUri) {
+        URI juri = null;
+        try {
+        juri = new java.net.URI(fileUri.getScheme(),
+                fileUri.getSchemeSpecificPart(),
+                fileUri.getFragment());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return juri;
+    }
+
+    public static void scanDEMs() {
+        //scan DEM directory
+        String path = demDirectory;
+        Dem dem;
+        dems = new ArrayList<Dem>();
+        Log.i("Files", "Path: " + path);
+        File f = new File(path);
+        if (f.isDirectory()) {
+            File file[] = f.listFiles();
+            Log.i("File", file.toString());
+
+            for (int i=0; i < file.length; i++)
+            {
+                Log.d("Files", "FileName:" + file[i].getName());
+                dem = ReadGeoTiffMetadata.readMetadata(file[i]);
+                dems.add(dem);
+                map.addPolyline(new PolylineOptions().add(new LatLng(dem.getSw_lat(), dem.getSw_long()))
+                        .add(new LatLng(dem.getSw_lat(), dem.getNe_long()))
+                        .add(new LatLng(dem.getNe_lat(), dem.getNe_long()))
+                        .add(new LatLng(dem.getNe_lat(), dem.getSw_long()))
+                        .add(new LatLng(dem.getSw_lat(), dem.getSw_long()))
+                        .color(Color.RED));
+            }
+        }
+    }
+
+    private void loadInitialDEM() {
+        String path = demDirectory;
+        File f = new File(path);
+
+        //if DEM dir doesn't exist, create it and copy sample TIFF in, then open it
+        if (!f.isDirectory()) {
+            f.mkdir();
+            copyAssets();
+            ElevationRaster raster = new ElevationRaster();
+            new ReadElevationRasterTask(this, raster).execute(UritoURI(Uri.fromFile(new File(demDirectory+"Feldun.tif"))));
+            return;
+        }
+        //selected directory exists
+        else {
+            //list files in DEM dir
+            File file[] = f.listFiles();
+            ArrayList<File> tiffs = new ArrayList<File>();
+
+            //count number of TIFFs in dir
+            int count = 0;
+            for(int i = 0; i<file.length; i++) {
+                if(file[i].getName().contains(".tif")) {
+                    count++;
+                    tiffs.add(file[i]);
+                }
+            }
+
+            //if no TIFFs, copy sample into dir and open
+            if (count == 0) {
+                copyAssets();
+                ElevationRaster raster = new ElevationRaster();
+                new ReadElevationRasterTask(this, raster).execute(UritoURI(Uri.fromFile(new File(demDirectory+"Feldun.tif"))));
+            }
+            //if one TIFF, open it
+            else if(count == 1) {
+                ElevationRaster raster = new ElevationRaster();
+                new ReadElevationRasterTask(this, raster).execute(UritoURI(Uri.fromFile(tiffs.get(0))));
+            }
+            //if multiple TIFFs, let user choose
+            else {
+                Intent intent = new Intent("com.filebrowser.DataFileChooser");
+                //intent.putExtra("path", Environment.getExternalStorageDirectory().toString()+demDirectory);
+                intent.putExtra("path", demDirectory);
+                //intent.setData(Uri.parse("file:///sdcard/dem"));
+                //intent.setDataAndType(Uri.parse("file:///sdcard/dem"), "path");
+                startActivityForResult(intent, 1);
+            }
+        }
+    }
+
+    private void copyAssets() {
+        AssetManager assetManager = getAssets();
+        String[] files = null;
+        try {
+            files = assetManager.list("");
+        } catch (IOException e) {
+            Log.e("tag", "Failed to get asset file list.", e);
+        }
+        String filename = "Feldun.tif";
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+                in = assetManager.open(filename);
+                File outFile = new File(demDirectory, filename);
+                out = new FileOutputStream(outFile);
+                copyFile(in, out);
+                in.close();
+                in = null;
+                out.flush();
+                out.close();
+                out = null;
+            } catch(IOException e) {
+                Log.e("tag", "Failed to copy asset file: " + filename, e);
+            }
+        }
+    private void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while((read = in.read(buffer)) != -1){
+            out.write(buffer, 0, read);
+        }
     }
 
 }
