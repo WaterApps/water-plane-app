@@ -34,6 +34,7 @@
 #define TIFFTAG_GEOKEYDIRECTORY      34735
 #define TIFFTAG_GEODOUBLEPARAMS      34736
 #define TIFFTAG_GEOASCIIPARAMS       34737
+#define TIFFTAG_GDAL_NODATA	     42113
 #define FALSE 0
 #define TRUE 1
 
@@ -51,7 +52,7 @@ void *latlng;
 void *scale;
 void *params;
 unsigned short iCount;
-
+void *noData;
 
 static void TagExtender(TIFF *tiff)
 {
@@ -68,7 +69,9 @@ static void TagExtender(TIFF *tiff)
 		{ TIFFTAG_GEODOUBLEPARAMS,	-1,-1, TIFF_DOUBLE,	FIELD_CUSTOM,
 		  TRUE,	TRUE,	"GeoDoubleParams" },
 		{ TIFFTAG_GEOASCIIPARAMS,	-1,-1, TIFF_ASCII,	FIELD_CUSTOM,
-		  TRUE,	TRUE,	"GeoASCIIParams" }
+		  TRUE,	TRUE,	"GeoASCIIParams" },
+		{ TIFFTAG_GDAL_NODATA,	-1,-1, TIFF_ASCII,	FIELD_CUSTOM,
+		  TRUE,	TRUE,	"NoData" }
 	    };
 
 	TIFFMergeFieldInfo( tiff, xtiffFieldInfo,
@@ -145,6 +148,8 @@ Java_com_tiffdecoder_TiffDecoder_nativeTiffOpen( JNIEnv* env, jobject thiz, jstr
 	TIFFGetField(image, TIFFTAG_GEOPIXELSCALE, &iCount, &scale);
 	params = _TIFFmalloc(1000);
 	TIFFGetField(image, TIFFTAG_GEOASCIIPARAMS, &iCount, &params);
+	noData = _TIFFmalloc(1000);
+	TIFFGetField(image, TIFFTAG_GDAL_NODATA, &iCount, &noData);
 
 
 	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "after read long/lat");
@@ -275,6 +280,11 @@ Java_com_tiffdecoder_TiffDecoder_nativeTiffGetFloats( JNIEnv* env )
 jstring
 Java_com_tiffdecoder_TiffDecoder_nativeTiffGetParams( JNIEnv* env) {
 	return (*env)->NewStringUTF(env, ((char *)params)); 
+}
+
+jstring
+Java_com_tiffdecoder_TiffDecoder_nativeTiffGetNoData( JNIEnv* env) {
+	return (*env)->NewStringUTF(env, ((char *)noData)); 
 }
 
 jfloat

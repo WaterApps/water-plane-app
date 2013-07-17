@@ -24,6 +24,8 @@ public class TiffDecoder {
 
     public static native String nativeTiffGetParams();
 
+    public static native String nativeTiffGetNoData();
+
     public static native float nativeTiffGetCornerLatitude();
 
     public static native float nativeTiffGetCornerLongitude();
