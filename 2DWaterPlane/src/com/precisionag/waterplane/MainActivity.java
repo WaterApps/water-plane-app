@@ -74,7 +74,6 @@ public static boolean transparency;
 public static boolean coloring;
 public static boolean hasGPS;
 public static Button buttonDelete;
-LatLng[] linePoints;
 public static float sliderMin;
 public static float sliderMax;
 public static float defaultSliderMin;
@@ -93,7 +92,6 @@ static ArrayList<Dem> dems;
 Dem currentlyLoaded;
 private boolean firstStart;
 public static LatLngBounds demBounds;
-public static boolean showMultipleDEM;
 static SeekBar seekBar;
 static MapFragment mapFrag;
 private static final int FIRST_START = 42;
@@ -126,7 +124,6 @@ public static boolean mapReady;
             hsvTransparentColors[i] = HSVToColor(128, hsvComponents);
         }
 		super.onCreate(savedInstanceState);
-        showMultipleDEM = false;
         sliderMin = 241.94f;
         sliderMax = 250.925f;
         defaultSliderMin = 241.94f;
@@ -135,8 +132,6 @@ public static boolean mapReady;
 		setContentView(R.layout.activity_main);
         editMin = (TextView) findViewById(R.id.editMin);
         editMax = (TextView) findViewById(R.id.editMax);
-
-
         elevationControls = (LinearLayout) findViewById(R.id.elevationControls);
         markerBottomText = (LinearLayout) findViewById(R.id.markerControls);
         actionBar = getActionBar();
@@ -146,7 +141,6 @@ public static boolean mapReady;
         coloring = prefs.getBoolean("coloring", false);
         drag_mode = prefs.getBoolean("drag_mode", false);
 
-        linePoints = new LatLng[2];
 	    getActionBar().setCustomView(R.layout.custom_ab);
         actionBar.setDisplayShowCustomEnabled(true);
 		MyMapFragment mapFragment = (MyMapFragment) getFragmentManager().findFragmentById(R.id.map);
@@ -157,15 +151,16 @@ public static boolean mapReady;
 		UiSettings uiSettings = map.getUiSettings();
         waterElevationTextView = (TextView) findViewById(R.id.text);
 		ElevationTextView = (TextView) findViewById(R.id.text2);
-		
+
+        //set ups markers
 		userMarker = map.addMarker(new MarkerOptions()
         .position(map.getCameraPosition().target)
         .title("You are here"));
-				
 		MarkerHandler markerListener = new MarkerHandler();
 		map.setOnMarkerDragListener(markerListener);
         map.setOnMarkerClickListener(markerListener);
-		
+
+        //set up map ui
 		uiSettings.setRotateGesturesEnabled(false);
 		uiSettings.setTiltGesturesEnabled(false);
 		uiSettings.setZoomControlsEnabled(false);
@@ -176,7 +171,6 @@ public static boolean mapReady;
         seekBar.setMax(255);
         seekBar.setProgress(128);
 		Field.setSeekBar(seekBar);
-        //Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.field);
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
         field = new Field(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
 		userLocation = new LatLng(0.0, 0.0);
@@ -209,6 +203,8 @@ public static boolean mapReady;
         }
 
 		//set button listeners
+
+        //increments elevation
 		final Button buttonPlus = (Button) findViewById(R.id.buttonPlus);
         buttonPlus.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -218,7 +214,8 @@ public static boolean mapReady;
             	updateColors(field);
             }
         });
-        
+
+        //decrements elevation
         final Button buttonMinus = (Button) findViewById(R.id.buttonMinus);
         buttonMinus.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -229,10 +226,10 @@ public static boolean mapReady;
             }
         });
 
-        buttonDelete = (Button) findViewById(R.id.buttonDeleteMarker);
 
         appName = (TextView)findViewById(R.id.appName);
 
+        //hides currently selected marker text
         hideButton = (Button)findViewById(R.id.buttonHideMarker);
         hideButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -251,7 +248,9 @@ public static boolean mapReady;
                 showHiddenMarkerAB();
             }
         });
+        hideButton.setVisibility(View.GONE);
 
+        //shows currently selected marker text
         showButton = (Button)findViewById(R.id.buttonShowMarker);
         showButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -270,9 +269,10 @@ public static boolean mapReady;
                 showMarkerAB();
             }
         });
-
-        hideButton.setVisibility(View.GONE);
         showButton.setVisibility(View.GONE);
+
+        //deletes currently selected marker
+        buttonDelete = (Button) findViewById(R.id.buttonDeleteMarker);
         buttonDelete.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
             	Iterator<CustomMarker> i = markers.iterator();
