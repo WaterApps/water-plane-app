@@ -7,6 +7,8 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.precisionag.lib.Field;
 
@@ -59,9 +61,19 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.settings_menu, menu);
+        return true;
+    }
 
-    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
-        System.out.print("Intent recieved");
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+
+        if (item.getItemId() == R.id.menuDone) {
+            finish();
+        }
+        return true;
     }
 
     public static void updateDemFolder() {

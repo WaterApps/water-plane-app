@@ -362,7 +362,7 @@ public static boolean mapReady;
         firstStart = prefs.getBoolean("first_start", true);
         if (firstStart) {
             //show help
-            Intent intent = new Intent(this, HelpActivity.class);
+            Intent intent = new Intent(this, IntroActivity.class);
             startActivityForResult(intent, FIRST_START);
 
             //keep it from happening again

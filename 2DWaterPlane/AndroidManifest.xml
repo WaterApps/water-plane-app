@@ -60,6 +60,10 @@
                 android:label="@string/menu_settings" >
         </activity>
         <activity
+                android:name="com.precisionag.waterplane.IntroActivity"
+                android:label="Intro" >
+        </activity>
+        <activity
                 android:name="com.precisionag.waterplane.HelpActivity"
                 android:label="Waterplane Help" >
             <intent-filter>
