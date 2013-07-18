@@ -298,8 +298,13 @@ Java_com_tiffdecoder_TiffDecoder_nativeTiffGetCornerLongitude( JNIEnv* env ) {
 }
 
 jfloat
-Java_com_tiffdecoder_TiffDecoder_nativeTiffGetScale( JNIEnv* env ) {
+Java_com_tiffdecoder_TiffDecoder_nativeTiffGetScaleX( JNIEnv* env ) {
     return (float)((double *)scale)[0];
+}
+
+jfloat
+Java_com_tiffdecoder_TiffDecoder_nativeTiffGetScaleY( JNIEnv* env ) {
+    return (float)((double *)scale)[1];
 }
 
 jint

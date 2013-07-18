@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 
 import com.precisionag.waterplane.MainActivity;
 import com.precisionag.waterplane.R;
+import com.precisionag.waterplane.SettingsActivity;
 
 public class DataPathChooser extends ListActivity {
 	private enum DISPLAYMODE {
@@ -90,6 +92,7 @@ public class DataPathChooser extends ListActivity {
             MainActivity.removeDemOutlines();
             MainActivity.scanDEMs();
             editor.commit();
+            SettingsActivity.updateDemFolder();
 			if(returnIntent.contentEquals("back") == false){
 				Intent i2 = new Intent(returnIntent);
 				//startActivity(i2);

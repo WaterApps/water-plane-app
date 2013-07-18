@@ -25,9 +25,10 @@
             android:title="Reset Slider Elevations"/>
 
     <Preference
+        android:key="dem_dir"
         android:title="Choose DEM Folder">
         <intent
-                android:action="com.filebrowser.DataPathChooser"/>
+                android:action="com.filebrowser.DataPathChooserWaterplane"/>
     </Preference>
     <com.precisionag.waterplane.GMapsLegalDialog
             android:key="pref_legal"

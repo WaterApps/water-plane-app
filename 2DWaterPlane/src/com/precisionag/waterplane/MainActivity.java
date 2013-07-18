@@ -20,6 +20,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.*;
@@ -525,7 +526,7 @@ public static boolean mapReady;
         else if (item.getItemId() == R.id.menu_choose_dem) {
             //opens file manager
 
-            Intent intent = new Intent("com.filebrowser.DataFileChooser");
+            Intent intent = new Intent("com.filebrowser.DataFileChooserWaterplane");
             intent.putExtra("path", demDirectory);
             startActivityForResult(intent, 1);
         }
@@ -535,23 +536,9 @@ public static boolean mapReady;
             item.setChecked(following);
         }
 
-        /*
-        else if (item.getItemId() == R.id.menu_set_folder) {
-            Bundle data = new Bundle();
-            data.putString(Environment.getExternalStorageDirectory().getPath(), ""); //Starting path
-            data.putString("returnIntent", "back"); //After choose return back to this
-            Intent i = new Intent("com.filebrowser.DataPathChooser");
-            i.putExtras(data);
-            startActivity(i);
-            prefs.registerOnSharedPreferenceChangeListener(this);
-            return true;
-        }
-        */
-
         else if(item.getItemId() == R.id.menu_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
-            //prefs.registerOnSharedPreferenceChangeListener(this);
             return true;
         }
 
@@ -812,6 +799,9 @@ protected void onActivityResult (int requestCode, int resultCode, Intent data) {
         return;
     }
 
+    System.out.print("Intent Handler");
+    System.out.print(data);
+
     if (data != null) {
         if (data.getData().toString().contains(".tif")) {
             fileUri = data.getData();
@@ -829,6 +819,7 @@ protected void onActivityResult (int requestCode, int resultCode, Intent data) {
             SharedPreferences.Editor editor = prefs.edit();
             editor.putString("last_dem", fileUri.getPath());
             editor.commit();
+            setCurrentlyLoaded(prefs.getString("last_dem", "foo"));
             return;
         }
         else {
@@ -837,11 +828,11 @@ protected void onActivityResult (int requestCode, int resultCode, Intent data) {
         }
     }
 
-    if (requestCode == INITIAL_LOAD) {
-        ElevationRaster raster = new ElevationRaster();
-        Dem demToLoad = dems.get(0);
-        String filename = demToLoad.getFilename();
-        new ReadElevationRasterTask(this, raster, filename).execute(demToLoad.getFileUri());
+    if (requestCode == INITIAL_LOAD && data == null) {
+            ElevationRaster raster = new ElevationRaster();
+            Dem demToLoad = dems.get(0);
+            String filename = demToLoad.getFilename();
+            new ReadElevationRasterTask(this, raster, filename).execute(demToLoad.getFileUri());
     }
 }
 
@@ -1059,7 +1050,7 @@ public static float getAlpha() {
             }
             //if multiple TIFFs, let user choose
             else {
-                Intent intent = new Intent("com.filebrowser.DataFileChooser");
+                Intent intent = new Intent("com.filebrowser.DataFileChooserWaterplane");
                 intent.putExtra("path", demDirectory);
                 startActivityForResult(intent, INITIAL_LOAD);
             }

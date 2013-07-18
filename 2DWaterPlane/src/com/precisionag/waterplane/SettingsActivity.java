@@ -16,6 +16,7 @@ import java.text.DecimalFormat;
  * Created by steve on 6/27/13.
  */
 public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+    static Preference demDirPref;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         DecimalFormat df = new DecimalFormat("#.#");
@@ -27,6 +28,9 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         preference.setSummary(preferences.getString("pref_min_elevation", "100.0")  + ", field min is " + df.format(MainActivity.field.getMinElevation()));
         preference = findPreference("pref_max_elevation");
         preference.setSummary(preferences.getString("pref_max_elevation", "300.0") + ", field max is " + df.format(MainActivity.field.getMaxElevation()));
+        preference = findPreference("dem_dir");
+        demDirPref = preference;
+        preference.setSummary(preferences.getString("dem_dir", "/dem"));
     }
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -58,5 +62,10 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
         System.out.print("Intent recieved");
+    }
+
+    public static void updateDemFolder() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.context);
+        demDirPref.setSummary(preferences.getString("dem_dir", "/dem"));
     }
 }

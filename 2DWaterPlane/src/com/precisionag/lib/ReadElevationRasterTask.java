@@ -61,7 +61,6 @@ public class ReadElevationRasterTask extends AsyncTask <URI, Integer, ElevationR
 	
 	protected void onPostExecute(ElevationRaster rasters) {
 		dialog.dismiss();
-		Toast.makeText(context, "File load complete", Toast.LENGTH_LONG).show();
 		MainActivity.onFileRead(rasters);
 	}
 
