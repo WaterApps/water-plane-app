@@ -46,7 +46,6 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
 
         if (MainActivity.following) {
             MainActivity.field.setWaterLevel(MainActivity.field.elevationFromLatLng(MainActivity.userLocation));
-            MainActivity.field.updateColors();
         }
 		double elevationDouble = MainActivity.field.elevationFromLatLng(MainActivity.userLocation);
 		  double elevationDelta =  elevationDouble - MainActivity.waterLevelMeters;

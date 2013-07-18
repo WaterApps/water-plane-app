@@ -49,7 +49,6 @@ public class CustomMarker {
 	CheckBox checkBox;
 	static Context context;
 	private static RelativeLayout layout;
-	static int displayWidth;
 	private static Marker selected;
 	static final int blue = 0xFF33B5E5;
 	public CustomMarker(LatLng point) {
@@ -152,10 +151,6 @@ public class CustomMarker {
             }
 
         }
-	}
-	
-	public static void setDisplayWidth(int newWidth) {
-		displayWidth = newWidth;
 	}
 
 	public void removeMarker() {

@@ -28,7 +28,7 @@
           android:checked="false"/>
 
     <item android:id="@+id/menu_follow"
-          android:title="Follow Elevation"
+          android:title="Follow My Elevation"
           android:showAsAction="never"
           android:checked="false"/>
 </group>

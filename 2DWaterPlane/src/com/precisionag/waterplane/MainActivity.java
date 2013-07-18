@@ -1,6 +1,5 @@
 package com.precisionag.waterplane;
 
-import com.ibm.util.CoordinateConversion;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,17 +13,14 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.*;
-import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -35,19 +31,16 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.*;
 import com.precisionag.lib.*;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -58,10 +51,8 @@ import java.util.List;
 
 import static android.graphics.Color.HSVToColor;
 
-public class MainActivity extends Activity implements OnMapClickListener, OnCameraChangeListener, OnTouchListener {
+public class MainActivity extends Activity implements OnMapClickListener {
 private static final int ADD_MODE = 1;
-//static final int DRAG_MODE = 2;
-
 GroundOverlay prevoverlay;
 static Field field;
 static List<CustomMarker> markers;
@@ -153,13 +144,13 @@ public static boolean mapReady;
         //set display mode
         transparency = prefs.getBoolean("transparency_bool", true);
         coloring = prefs.getBoolean("coloring", false);
+        drag_mode = prefs.getBoolean("drag_mode", false);
 
         linePoints = new LatLng[2];
 	    getActionBar().setCustomView(R.layout.custom_ab);
         actionBar.setDisplayShowCustomEnabled(true);
 		MyMapFragment mapFragment = (MyMapFragment) getFragmentManager().findFragmentById(R.id.map);
 		map = mapFragment.getMap();
-		map.setOnCameraChangeListener(this);
 		map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 		map.setMyLocationEnabled(true);
 		map.setOnMapClickListener(this);
@@ -191,20 +182,13 @@ public static boolean mapReady;
 		userLocation = new LatLng(0.0, 0.0);
 		markers = new ArrayList<CustomMarker>();
 		mode = 0;
-		
-		Display display = getWindowManager().getDefaultDisplay();
-		Point size = new Point();
-		display.getSize(size);
-		int width = size.x;
-		
-		CustomMarker.setDisplayWidth(width);
+
 		CustomMarker.setField(field);
 		CustomMarker.setMap(map);
 		CustomMarker.setContext(context);
 		CustomMarker.setLayout((RelativeLayout)findViewById(R.id.TopLevelView));
 		RelativeLayout lay = (RelativeLayout) findViewById(R.id.TopLevelView);
-		lay.setOnTouchListener(this);
-		
+
 		field.prevoverlay = field.createOverlay(map);
 		configSeekbar(field, prevoverlay);
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -305,38 +289,28 @@ public static boolean mapReady;
             }
         });
         buttonDelete.setVisibility(View.GONE);
-        /*
-        final Button buttonOpenDem = (Button) findViewById(R.id.buttonOpenDem);
-        buttonOpenDem.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-            	//opens file manager
-            	Intent intent = new Intent("org.openintents.action.PICK_FILE");
-            	intent.setData(Uri.parse("file:///sdcard/dem"));
-            	startActivityForResult(intent, 1);
-            }
-        });
-		*/
         
 		updateColors(field);
 
+        //if GPS isn't enabled, ask user to enable it
         if(hasGPS) {
             if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ) {
                 if (!drag_mode) {
+                    drag_mode = true;
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                             context);
 
-                        // set title
+                        //set title
                         alertDialogBuilder.setTitle("GPS is not enabled");
 
-                        // set dialog message
+                        //set dialog message
                         alertDialogBuilder
-                            .setMessage("Please enable GPS!")
+                            .setMessage("Please enable GPS if you want to use the location tracking feature")
                             .setCancelable(false)
-                            .setPositiveButton("Exit",new DialogInterface.OnClickListener() {
+                            .setPositiveButton("Continue anyway",new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,int id) {
                                     // if this button is clicked, close
                                     // current activity
-                                    MainActivity.this.finish();
                                 }
                               })
                             .setNegativeButton("GPS Settings",new DialogInterface.OnClickListener() {
@@ -356,6 +330,7 @@ public static boolean mapReady;
             }
         }
 
+        //display DEM outlines
         scanDEMs();
 
         //show help on first app start
@@ -376,10 +351,6 @@ public static boolean mapReady;
         if(!firstStart) {
             loadInitialDEM();
         }
-
-        //ElevationRaster raster = new ElevationRaster();
-        //new ReadElevationRasterTask(this, raster).execute(UritoURI(Uri.fromFile(new File("/sdcard/dem/geotiff.tif"))));
-
     }
 
 	@Override
@@ -421,25 +392,15 @@ public static boolean mapReady;
 
 	@Override
 	public boolean onPrepareOptionsMenu (Menu menu) {
-		return true;
-	}
+        menu.findItem(R.id.menu_coloring).setChecked(coloring);
+        menu.findItem(R.id.menu_transparency).setChecked(transparency);
+        menu.findItem(R.id.menu_drag).setChecked(!drag_mode);
+        return true;
+    }
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection
-
-        /*
-	    if (item.getItemId() == R.id.item_legal) {
-	        	  String LicenseInfo = GooglePlayServicesUtil.getOpenSourceSoftwareLicenseInfo(
-	              getApplicationContext());
-	              AlertDialog.Builder LicenseDialog = new AlertDialog.Builder(MainActivity.this);
-	              LicenseDialog.setTitle("Legal Notices");
-	              LicenseDialog.setMessage(LicenseInfo);
-	              LicenseDialog.show();
-	        	  return true;
-	    }
-	    */
-
 	    if (item.getItemId() == R.id.menu_add) {
         	mode = ADD_MODE;
             Toast toast = Toast.makeText(this, "Tap on the map to place the marker.", Toast.LENGTH_LONG);
@@ -450,33 +411,46 @@ public static boolean mapReady;
 
 	    else if (item.getItemId() == R.id.menu_drag) {
             if (drag_mode) {
-                drag_mode = false;
-	    		userLocation = new LatLng(
-	    				locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude(), 
-	    				locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude());
-	    		
-	    	  double elevationDouble = field.elevationFromLatLng(userLocation);
-	  		  double elevationDelta =  elevationDouble - waterLevelMeters;
-	  		  String ElevationText;
-	  		  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
-	  		  
-	  		  if (elevationDouble == 0.0) {
-	  			  ElevationText = "You are not in the field.";
-	  		  }
-	  		  else {
-	  		  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
-	  		  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
-	  		  	  if (elevationDelta >= 0.0) {
-	  		  		  ElevationText = "You: " + elevationDeltaString + "m above water (" + elevationString + "m)";
-	  		  	  }
-	  		  	  else {
-	  		  		ElevationText = "You: " + elevationDeltaString + "m below water (" + elevationString + "m)";
-	  		  	  }
-	  		  }
-	  		  ElevationTextView.setText(ElevationText);
-	  		  
-	  		  CustomMarker.setUserElevation(elevationDouble);
-	  		  userMarker.setPosition(userLocation);
+                //if gps is enabled, use it
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ) {
+
+                    drag_mode = false;
+                    SharedPreferences.Editor edit = prefs.edit();
+                    edit.putBoolean("drag_mode", drag_mode);
+                    edit.commit();
+                    userLocation = new LatLng(
+                            locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude(),
+                            locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude());
+
+                    double elevationDouble = field.elevationFromLatLng(userLocation);
+                    double elevationDelta =  elevationDouble - waterLevelMeters;
+                    String ElevationText;
+                    TextView ElevationTextView = (TextView) findViewById(R.id.text2);
+
+                    if (elevationDouble == 0.0) {
+                      ElevationText = "You are not in the field.";
+                    }
+                    else {
+                      String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
+                      String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
+                      if (elevationDelta >= 0.0) {
+                          ElevationText = "You: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+                      }
+                      else {
+                        ElevationText = "You: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+                      }
+                    }
+                    ElevationTextView.setText(ElevationText);
+
+                    CustomMarker.setUserElevation(elevationDouble);
+                    userMarker.setPosition(userLocation);
+                }
+                else {
+                    //if gps is not enabled, inform the user
+                    Toast toast = Toast.makeText(this, "GPS must be enabled to use this feature.", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL, 0, 100);
+                    toast.show();
+                }
 	    	}
 
 	    	else {
@@ -489,6 +463,9 @@ public static boolean mapReady;
 	    	}
 	    	userMarker.setDraggable(drag_mode);
             item.setChecked(!drag_mode);
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putBoolean("drag_mode", drag_mode);
+            edit.commit();
 	    }
 
         else if (item.getItemId() == R.id.menu_center) {
@@ -534,6 +511,9 @@ public static boolean mapReady;
         else if(item.getItemId() == R.id.menu_follow) {
             following = !following;
             item.setChecked(following);
+            if (following) {
+                field.setWaterLevel(field.elevationFromLatLng(userLocation));
+            }
         }
 
         else if(item.getItemId() == R.id.menu_settings) {
@@ -596,345 +576,311 @@ public static boolean mapReady;
         updateMarkers();
     }
 	
-//takes a bitmap, latitude/longitude bounds, and a map to create a map overlay
-private static GroundOverlay createOverlay(Bitmap overlayBitmap, LatLngBounds bounds) {
-	//MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-	BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(overlayBitmap);
-	GoogleMap map = mapFrag.getMap();
-	GroundOverlay groundOverlay = map.addGroundOverlay(new GroundOverlayOptions()
-     .image(image)
-     .positionFromBounds(bounds)
-     .transparency(0));
-	groundOverlay.setVisible(true);
-	return groundOverlay;
-}
-	
-public static void updateColors(Field field) {
-    if (!currentlyDrawing) {
-        currentlyDrawing = true;
-        //get level from seekbar
-        double distanceFromBottom = waterLevelMeters - field.getMinElevation();
-        double fieldRange = field.getMaxElevation() - field.getMinElevation();
-
-        double level = 255.0*distanceFromBottom/fieldRange;
-
-        int waterLevel = (int)level;
-        int width = field.getElevationBitmap().getWidth();
-        int height = field.getElevationBitmap().getHeight();
-        int[] pixels = new int[width * height];
-        field.getElevationBitmap().getPixels(pixels, 0, width, 0, 0, width, height);
-        Bitmap bitmap = field.getElevationBitmap().copy(field.getElevationBitmap().getConfig(), true);
-        int c;
-        //test each pixel, if below water level set blue, else set transparent
-        if (!coloring) {
-            for (int i = 0; i < (width * height); i++) {
-                if ((pixels[i] & 0x000000FF) < waterLevel) {
-                    //water is visible, set pixel to blue
-                    //pixels[i] = transparency ? 0x880000FF : 0xFF0000FF;
-                    pixels[i] = 0xFF0000FF;
-                } else {
-                    //no water, set pixel transparent
-                    pixels[i] = 0x00000000;
-                }
-            }
-        }
-        else {
-            for (int i = 0; i < (width * height); i++) {
-                if ((pixels[i] & 0x000000FF) < waterLevel) {
-                    //water is visible, set pixel to color
-                    c=pixels[i] & 0xFF;
-                    pixels[i] =  hsvColors[c];
-                } else {
-                    //no water, set pixel transparent
-                    pixels[i] = 0x00000000;
-                }
-            }
-        }
-        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
-
-        //remove old map overlay and create new one
-        GroundOverlay ppo = field.prevoverlay;
-        field.prevoverlay = createOverlay(bitmap, field.getFieldBounds());
-        if (transparency) {
-            field.prevoverlay.setTransparency(alpha);
-        }
-        ppo.remove();
-        currentlyDrawing = false;
-    }
-}
-
-private void configSeekbar(final Field field, final GroundOverlay overlay) {
-	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
-	seekBar.setMax(255);
-    seekBar.setProgress(128);
-	seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-		@Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-			if (userLocation != null ) {
-				//get level from seekbar
-				int waterLevel = seekBar.getProgress();
-				
-				//update text block
-				waterLevelMeters = sliderMin + ((double)waterLevel*(sliderMax-sliderMin)/255.0);
-				TextView waterElevationTextView = (TextView) findViewById(R.id.text);
-				String elevation = new DecimalFormat("#.#").format(waterLevelMeters);
-				String waterElevationText = "Elevation: " + elevation + "m";
-				waterElevationTextView.setText(waterElevationText);
-				
-				//update other text block
-				  double elevationDouble = field.elevationFromLatLng(userLocation);
-				  double elevationDelta =  elevationDouble - waterLevelMeters;
-				  String ElevationText;
-				  TextView ElevationTextView = (TextView) findViewById(R.id.text2);
-				  
-				  if (elevationDouble == 0.0) {
-					  ElevationText = "No data for your location";
-				  }
-				  else {
-				  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
-				  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
-				  	  if (elevationDelta >= 0.0) {
-				  		  ElevationText = "You: " + elevationDeltaString + "m above water (" + elevationString + "m)";
-				  	  }
-				  	  else {
-				  		ElevationText = "You: " + elevationDeltaString + "m below water (" + elevationString + "m)";
-				  	  }
-				  }
-				  ElevationTextView.setText(ElevationText);
-				  
-				  //update marker text
-				  CustomMarker.setWaterElevation(waterLevelMeters);
-				  				  
-				  //visual updates
-				  updateMarkers();
-				  updateColors(field);
-			}
-			
-		}
-		
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {}
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-        	updateColors(field);
-        	updateMarkers();
-        }
-	});
-	seekBar.setProgress(seekBar.getMax()/2);
-}
-
-public static void updateMarkers() {
-	Iterator<CustomMarker> i = markers.iterator();
-	CustomMarker marker;
-
-    System.out.print("markers");
-    System.out.print(markers);
-
-	while (i.hasNext()) {
-		 marker = i.next();
-		 marker.updateMarker();
-	}
-}
-
-private void readDataFile(Field field) {
-	try {
-		
-		//read data from string
-		AssetManager am = getApplicationContext().getAssets();
-		BufferedReader dataIO = new BufferedReader(new InputStreamReader(am.open("field.latlng")));
-	    String dataString = null;
-
-	    dataString = dataIO.readLine();
-	    double north = Double.parseDouble(dataString);
-	    dataString = dataIO.readLine();
-	    double east = Double.parseDouble(dataString);
-	    dataString = dataIO.readLine();
-	    double south = Double.parseDouble(dataString);
-	    dataString = dataIO.readLine();
-	    double west = Double.parseDouble(dataString);
-	    
-	    LatLng northEast = new LatLng(north, east);
-	    LatLng southWest = new LatLng(south, west);
-	    
-	    dataString = dataIO.readLine();
-	    double minElevation = Double.parseDouble(dataString);
-	    dataString = dataIO.readLine();
-	    double maxElevation = Double.parseDouble(dataString);
-	    
-	    //set corresponding parameters in field
-	    field.setBounds(new LatLngBounds(northEast, southWest));
-	    field.setNortheast(northEast);
-	    field.setSouthwest(southWest);
-	    field.setMinElevation(minElevation);
-	    field.setMaxElevation(maxElevation);
-	    
-	    dataIO.close();
-	    
-	
-	}
-	catch  (IOException e) {
-	}
-
-
-}
-
-LocationListener locationListener = new LocationHandler();
-
-@Override
-public void onCameraChange(CameraPosition position) {
-	updateMarkers();
-}
-
-@Override
-public boolean onTouch(View arg0, MotionEvent arg1) {
-	updateMarkers();
-	return false;
-}
-
-protected void onActivityResult (int requestCode, int resultCode, Intent data) {
-	//handle data from file manager
-
-    if (requestCode == FIRST_START) {
-        loadInitialDEM();
-        return;
+    //takes a bitmap, latitude/longitude bounds, and a map to create a map overlay
+    private static GroundOverlay createOverlay(Bitmap overlayBitmap, LatLngBounds bounds) {
+        //MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(overlayBitmap);
+        GoogleMap map = mapFrag.getMap();
+        GroundOverlay groundOverlay = map.addGroundOverlay(new GroundOverlayOptions()
+         .image(image)
+         .positionFromBounds(bounds)
+         .transparency(0));
+        groundOverlay.setVisible(true);
+        return groundOverlay;
     }
 
-    System.out.print("Intent Handler");
-    System.out.print(data);
+    //updates colors when elevation is changed
+    public static void updateColors(Field field) {
+        if (!currentlyDrawing) {
+            currentlyDrawing = true;
+            //get level from seekbar
+            double distanceFromBottom = waterLevelMeters - field.getMinElevation();
+            double fieldRange = field.getMaxElevation() - field.getMinElevation();
 
-    if (data != null) {
-        if (data.getData().toString().contains(".tif")) {
-            fileUri = data.getData();
-            java.net.URI juri = null;
-            try {
-                juri = new java.net.URI(fileUri.getScheme(),
-                        fileUri.getSchemeSpecificPart(),
-                        fileUri.getFragment());
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
+            double level = 255.0*distanceFromBottom/fieldRange;
+
+            int waterLevel = (int)level;
+            int width = field.getElevationBitmap().getWidth();
+            int height = field.getElevationBitmap().getHeight();
+            int[] pixels = new int[width * height];
+            field.getElevationBitmap().getPixels(pixels, 0, width, 0, 0, width, height);
+            Bitmap bitmap = field.getElevationBitmap().copy(field.getElevationBitmap().getConfig(), true);
+            int c;
+            if (!coloring) {
+                //test each pixel, if below water level set blue, else set transparent
+                for (int i = 0; i < (width * height); i++) {
+                    if ((pixels[i] & 0x000000FF) < waterLevel) {
+                        //water is visible, set pixel to blue
+                        //pixels[i] = transparency ? 0x880000FF : 0xFF0000FF;
+                        pixels[i] = 0xFF0000FF;
+                    } else {
+                        //no water, set pixel transparent
+                        pixels[i] = 0x00000000;
+                    }
+                }
             }
-            ElevationRaster raster = new ElevationRaster();
-            String filename = fileUri.getPath().split("/")[fileUri.getPath().split("/").length-1];
-            new ReadElevationRasterTask(this, raster, filename).execute(juri);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("last_dem", fileUri.getPath());
-            editor.commit();
-            setCurrentlyLoaded(prefs.getString("last_dem", "foo"));
+            else {
+                //elevation shading is being used
+                for (int i = 0; i < (width * height); i++) {
+                    if ((pixels[i] & 0x000000FF) < waterLevel) {
+                        //water is visible, set pixel to appropriate color
+                        c=pixels[i] & 0xFF;
+                        pixels[i] =  hsvColors[c];
+                    } else {
+                        //no water, set pixel transparent
+                        pixels[i] = 0x00000000;
+                    }
+                }
+            }
+            bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
+
+            //remove old map overlay and create new one
+            //this unfortunately creates annoying flickering
+            //currently not aware of any way to avoid this
+            GroundOverlay ppo = field.prevoverlay;
+            field.prevoverlay = createOverlay(bitmap, field.getFieldBounds());
+            if (transparency) {
+                field.prevoverlay.setTransparency(alpha);
+            }
+            ppo.remove();
+            currentlyDrawing = false;
+        }
+    }
+
+    //sets up the seekbar object and text above it
+    private void configSeekbar(final Field field, final GroundOverlay overlay) {
+        SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
+        seekBar.setMax(255);
+        seekBar.setProgress(128);
+        seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (userLocation != null ) {
+                    //get level from seekbar
+                    int waterLevel = seekBar.getProgress();
+
+                    //update text block
+                    waterLevelMeters = sliderMin + ((double)waterLevel*(sliderMax-sliderMin)/255.0);
+                    TextView waterElevationTextView = (TextView) findViewById(R.id.text);
+                    String elevation = new DecimalFormat("#.#").format(waterLevelMeters);
+                    String waterElevationText = "Elevation: " + elevation + "m";
+                    waterElevationTextView.setText(waterElevationText);
+
+                    //update other text block
+                      double elevationDouble = field.elevationFromLatLng(userLocation);
+                      double elevationDelta =  elevationDouble - waterLevelMeters;
+                      String ElevationText;
+                      TextView ElevationTextView = (TextView) findViewById(R.id.text2);
+
+                      if (elevationDouble == 0.0) {
+                          ElevationText = "No data for your location";
+                      }
+                      else {
+                          String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
+                          String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
+                          if (elevationDelta >= 0.0) {
+                              ElevationText = "You: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+                          }
+                          else {
+                            ElevationText = "You: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+                          }
+                      }
+                      ElevationTextView.setText(ElevationText);
+
+                      //update marker text
+                      CustomMarker.setWaterElevation(waterLevelMeters);
+
+                      //visual updates
+                      updateMarkers();
+                      updateColors(field);
+                }
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                updateColors(field);
+                updateMarkers();
+            }
+        });
+        seekBar.setProgress(seekBar.getMax()/2);
+    }
+
+    public static void updateMarkers() {
+        Iterator<CustomMarker> i = markers.iterator();
+        CustomMarker marker;
+
+        System.out.print("markers");
+        System.out.print(markers);
+
+        while (i.hasNext()) {
+             marker = i.next();
+             marker.updateMarker();
+        }
+    }
+
+    LocationListener locationListener = new LocationHandler();
+
+    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+        //handle data from file manager
+
+        if (requestCode == FIRST_START) {
+            loadInitialDEM();
             return;
         }
-        else {
-            Toast toast = Toast.makeText(this, "File selected was not a GEOTiff file.", Toast.LENGTH_LONG);
-            toast.show();
+
+        System.out.print("Intent Handler");
+        System.out.print(data);
+
+        if (data != null) {
+            if (data.getData().toString().contains(".tif")) {
+                fileUri = data.getData();
+                java.net.URI juri = null;
+                try {
+                    juri = new java.net.URI(fileUri.getScheme(),
+                            fileUri.getSchemeSpecificPart(),
+                            fileUri.getFragment());
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+                ElevationRaster raster = new ElevationRaster();
+                String filename = fileUri.getPath().split("/")[fileUri.getPath().split("/").length-1];
+                new ReadElevationRasterTask(this, raster, filename).execute(juri);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("last_dem", fileUri.getPath());
+                editor.commit();
+                setCurrentlyLoaded(prefs.getString("last_dem", "foo"));
+                return;
+            }
+            else {
+                Toast toast = Toast.makeText(this, "File selected was not a GEOTiff file.", Toast.LENGTH_LONG);
+                toast.show();
+            }
+        }
+
+        if (requestCode == INITIAL_LOAD && data == null) {
+                ElevationRaster raster = new ElevationRaster();
+                Dem demToLoad = dems.get(0);
+                String filename = demToLoad.getFilename();
+                new ReadElevationRasterTask(this, raster, filename).execute(demToLoad.getFileUri());
         }
     }
 
-    if (requestCode == INITIAL_LOAD && data == null) {
-            ElevationRaster raster = new ElevationRaster();
-            Dem demToLoad = dems.get(0);
-            String filename = demToLoad.getFilename();
-            new ReadElevationRasterTask(this, raster, filename).execute(demToLoad.getFileUri());
+    public static void onFileRead(ElevationRaster raster) {
+
+        field.setBounds(raster.getBounds());
+        System.out.println(raster.getBounds());
+        raster.calculateTenths();
+        field.setMinElevation(raster.getMinElevation());
+        field.setMaxElevation(raster.getMaxElevation());
+        field.setBitmap(raster.getBitmap());
+        defaultSliderMin = sliderMin;
+        defaultSliderMax = sliderMax;
+        defaultSlider();
+        field.updatePolyLine();
+
+        //if user is outside of field, turn off location tracking
+        if(!raster.getBounds().contains(userLocation)) {
+            drag_mode = true;
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putBoolean("drag_mode", drag_mode);
+            edit.commit();
+            userLocation = raster.getCenter();
+            userMarker.setPosition(userLocation);
+            userMarker.setDraggable(true);
+            MarkerHandler.setText();
+            Toast toast = Toast.makeText(context, "Press and hold the location marker to drag.", Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 100);
+            toast.show();
+        }
+
+        if (following) {
+            field.setWaterLevel(field.elevationFromLatLng(raster.getCenter()));
+            Log.d("following", "water level is set");
+        }
+
+        updateColors(field);
+        updateSlider();
+
+        map.animateCamera(CameraUpdateFactory.newLatLngBounds(raster.getBounds(), 50));
+
     }
-}
 
-public static void onFileRead(ElevationRaster raster) {
-
-	field.setBounds(raster.getBounds());
-	System.out.println(raster.getBounds());
-    raster.calculateTenths();
-    field.setMinElevation(raster.getMinElevation());
-    field.setMaxElevation(raster.getMaxElevation());
-    field.setBitmap(raster.getBitmap());
-    defaultSliderMin = sliderMin;
-    defaultSliderMax = sliderMax;
-    defaultSlider();
-	map.animateCamera(CameraUpdateFactory.newLatLngBounds(raster.getBounds(), 50));
-    field.updatePolyLine();
-    updateColors(field);
-    updateSlider();
-
-    //if user is outside of field, turn off location tracking
-    if(!raster.getBounds().contains(userLocation)) {
-        drag_mode = true;
-        userLocation = raster.getCenter();
-        userMarker.setPosition(userLocation);
-        userMarker.setDraggable(true);
-        MarkerHandler.setText();
-        Toast toast = Toast.makeText(context, "Press and hold the location marker to drag.", Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 100);
-        toast.show();
+    public static void hideElevationControls() {
+        //LinearLayout elevationControls = (LinearLayout) findViewById(R.id.elevationControls);
+        elevationControls.setVisibility(View.GONE);
     }
-}
 
-public static void hideElevationControls() {
-    //LinearLayout elevationControls = (LinearLayout) findViewById(R.id.elevationControls);
-    elevationControls.setVisibility(View.GONE);
-}
+    public static void showElevationControls() {
+        elevationControls.setVisibility(View.VISIBLE);
+    }
 
-public static void showElevationControls() {
-    elevationControls.setVisibility(View.VISIBLE);
-}
+    public static void hideMarkerBottomText() {
+        markerBottomText.setVisibility(View.GONE);
+    }
 
-public static void hideMarkerBottomText() {
-    markerBottomText.setVisibility(View.GONE);
-}
+    public static void showMarkerBottomText() {
+        markerBottomText.setVisibility(View.VISIBLE);
+    }
 
-public static void showMarkerBottomText() {
-    markerBottomText.setVisibility(View.VISIBLE);
-}
+    public static void showMarkerAB() {
+        //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
+        //actionBar.setCustomView(R.layout.custom_ab);
+        buttonDelete.setVisibility(View.VISIBLE);
+        appName.setVisibility(View.GONE);
+        hideButton.setVisibility(View.VISIBLE);
+        showButton.setVisibility(View.GONE);
+        //markerAB = true;
+        //invalidateOptionsMenu();
+    }
 
-public static void showMarkerAB() {
-    //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
-    //actionBar.setCustomView(R.layout.custom_ab);
-    buttonDelete.setVisibility(View.VISIBLE);
-    appName.setVisibility(View.GONE);
-    hideButton.setVisibility(View.VISIBLE);
-    showButton.setVisibility(View.GONE);
-    //markerAB = true;
-    //invalidateOptionsMenu();
-}
+    public static void showHiddenMarkerAB() {
+        //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
+        //actionBar.setCustomView(R.layout.custom_ab);
+        buttonDelete.setVisibility(View.VISIBLE);
+        appName.setVisibility(View.GONE);
+        hideButton.setVisibility(View.GONE);
+        showButton.setVisibility(View.VISIBLE);
+        //markerAB = true;
+        //invalidateOptionsMenu();
+    }
 
-public static void showHiddenMarkerAB() {
-    //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
-    //actionBar.setCustomView(R.layout.custom_ab);
-    buttonDelete.setVisibility(View.VISIBLE);
-    appName.setVisibility(View.GONE);
-    hideButton.setVisibility(View.GONE);
-    showButton.setVisibility(View.VISIBLE);
-    //markerAB = true;
-    //invalidateOptionsMenu();
-}
+    public static void showNormalAB() {
+        //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
+        buttonDelete.setVisibility(View.GONE);
+        appName.setVisibility(View.VISIBLE);
+        hideButton.setVisibility(View.GONE);
+        showButton.setVisibility(View.GONE);
+        //markerAB = false;
+        //invalidateOptionsMenu();
+    }
 
-public static void showNormalAB() {
-    //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
-    buttonDelete.setVisibility(View.GONE);
-    appName.setVisibility(View.VISIBLE);
-    hideButton.setVisibility(View.GONE);
-    showButton.setVisibility(View.GONE);
-    //markerAB = false;
-    //invalidateOptionsMenu();
-}
 
-public static void updateEditText(float min, float max) {
-    DecimalFormat df = new DecimalFormat("#.#");
-    editMin.setText(df.format(min));
-    editMax.setText(df.format(max));
-}
+    public static void updateEditText(float min, float max) {
+        DecimalFormat df = new DecimalFormat("#.#");
+        editMin.setText(df.format(min));
+        editMax.setText(df.format(max));
+    }
 
-public float distanceBetween(LatLng p1, LatLng p2) {
-    double metersPerDegree = 111222.0;
-    double longDistance = (p1.longitude-p2.longitude)*metersPerDegree*Math.cos((p1.latitude+p2.latitude)/2);
-    double latDistance = (p1.latitude-p2.latitude)*metersPerDegree;
-    return (float)Math.sqrt((latDistance*latDistance) + (longDistance*longDistance));
-}
+    //calculates distance between two latlng objects
+    public float distanceBetween(LatLng p1, LatLng p2) {
+        double metersPerDegree = 111222.0;
+        double longDistance = (p1.longitude-p2.longitude)*metersPerDegree*Math.cos((p1.latitude+p2.latitude)/2);
+        double latDistance = (p1.latitude-p2.latitude)*metersPerDegree;
+        return (float)Math.sqrt((latDistance*latDistance) + (longDistance*longDistance));
+    }
 
-public static void setAlpha(float a) {
-    alpha = a;
-}
+    public static void setAlpha(float a) {
+        alpha = a;
+    }
 
-public static float getAlpha() {
-    return alpha;
-}
+    public static float getAlpha() {
+        return alpha;
+    }
 
+    //sets elevation slider min/max back to default values
     public static void defaultSlider() {
         DecimalFormat df = new DecimalFormat("#.#");
         sliderMin = defaultSliderMin;
@@ -946,11 +892,13 @@ public static float getAlpha() {
         edit.apply();
     }
 
+    //remove the marker from visibility and the list of markers
     public static void deleteMarker(CustomMarker marker) {
         markers.remove(marker);
         marker.getMarker().remove();
     }
 
+    //converts Android Uri to Java URI
     private URI UritoURI(Uri fileUri) {
         URI juri = null;
         try {
@@ -963,6 +911,7 @@ public static float getAlpha() {
         return juri;
     }
 
+    //looks through contents of DEM directory and displays outlines of all DEMs there
     public static void scanDEMs() {
         //scan DEM directory
         String path = demDirectory;
@@ -998,6 +947,7 @@ public static float getAlpha() {
         }
     }
 
+    //picks which DEM to load upon app start
     public void loadInitialDEM() {
         //attempt to load last used DEM, if it still exists
         Log.d("demfilename", prefs.getString("last_dem", "foo"));
@@ -1057,6 +1007,7 @@ public static float getAlpha() {
         }
     }
 
+    //copies a file from assets to SD
     private void copyAssets() {
         AssetManager assetManager = getAssets();
         String[] files = null;
@@ -1082,6 +1033,7 @@ public static float getAlpha() {
                 Log.e("tag", "Failed to copy asset file: " + filename, e);
             }
         }
+
     private void copyFile(InputStream in, OutputStream out) throws IOException {
         byte[] buffer = new byte[1024];
         int read;
@@ -1090,6 +1042,7 @@ public static float getAlpha() {
         }
     }
 
+    //tell app which DEM is currently loaded, so it isn't reloaded if clicked on
     public void setCurrentlyLoaded(String filename) {
         Dem dem;
         for(int i = 0; i<dems.size(); i++) {
@@ -1106,7 +1059,6 @@ public static float getAlpha() {
         if (userLocation != null ) {
             //get level from seekbar
             seekBar.setMax(255);
-            seekBar.setProgress(128);
             int waterLevel = seekBar.getProgress();
 
             //update text block
@@ -1141,6 +1093,7 @@ public static float getAlpha() {
         updateColors(field);
     }
 
+    //remove polylines showing DEM outlines, for use when DEM folder is changed
     public static void removeDemOutlines() {
         Iterator<Polyline> outlines = demOutlines.iterator();
         while(outlines.hasNext()) {

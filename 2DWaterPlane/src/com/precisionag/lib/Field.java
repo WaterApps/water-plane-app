@@ -160,58 +160,6 @@ public class Field {
 		}
 	}
 	
-	public void updateColors() {
-		prevoverlay.remove();
-		
-		//get level from seekbar
-		seekBar.setMax(255);
-        double level = getMinElevation()-MainActivity.waterLevelMeters + ((MainActivity.waterLevelMeters-getMinElevation())*255.0/(getMaxElevation()-getMinElevation()));
-
-        int waterLevel = (int)level;
-		
-		int width = elevationBitmap.getWidth();
-		int height = elevationBitmap.getHeight();
-		int[] pixels = new int[width * height];
-		elevationBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
-		Bitmap bitmap = elevationBitmap.copy(elevationBitmap.getConfig(), true);
-
-        int c;
-        //test each pixel, if below water level set blue, else set transparent
-        if (!MainActivity.coloring) {
-            for (int i = 0; i < (width * height); i++) {
-                if ((pixels[i] & 0x000000FF) < waterLevel) {
-                    //water is visible, set pixel to blue
-                    pixels[i] = 0xFF0000FF;
-                } else {
-                    //no water, set pixel transparent
-                    pixels[i] = 0x00000000;
-                }
-            }
-        }
-        else {
-            for (int i = 0; i < (width * height); i++) {
-                if ((pixels[i] & 0x000000FF) < waterLevel) {
-                    //water is visible, set pixel to color
-                    //hsv[0] = pixels[i]&0xFF;
-                    c=pixels[i] & 0xFF;
-                    //pixels[i] = HSVToColor(transparency ? 0x88 : 0xFF, hsv);
-                    pixels[i] = MainActivity.hsvColors[c];
-                } else {
-                    //no water, set pixel transparent
-                    pixels[i] = 0x00000000;
-                }
-            }
-        }
-		bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
-		
-		//remove old map overlay and create new one
-		prevoverlay = createOverlay(bitmap, getFieldBounds());
-        if (MainActivity.transparency) {
-            prevoverlay.setTransparency(MainActivity.getAlpha());
-        }
-		
-	}
-	
 	private GroundOverlay createOverlay(Bitmap overlayBitmap, LatLngBounds bounds) {
 		BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(overlayBitmap);
 		GoogleMap map = mapFragment.getMap();
