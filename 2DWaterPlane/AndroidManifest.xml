@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.precisionag.waterplane"
-    android:versionCode="5"
-    android:versionName="0.5" >
+    android:versionCode="6"
+    android:versionName="0.6" >
 
     <uses-sdk
         android:minSdkVersion="11"
@@ -69,7 +69,7 @@
         </activity>
         <meta-data
     		android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyAJVXs0TbvT7N8FSNO-FlQ-CUshRh-9fAo"/>
+            android:value="AIzaSyBiWShI8WEZZN1L0oXJL_ZfJyWh9y-djp0"/>
     </application>
 
 </manifest>

@@ -5,6 +5,7 @@ import java.net.URI;
 import com.precisionag.waterplane.MainActivity;
 
 
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -17,18 +18,26 @@ public class ReadElevationRasterTask extends AsyncTask <URI, Integer, ElevationR
 	Context context;
 	ElevationRaster data;
 	ProgressDialog dialog;
+    String filename;
 	
 	public ReadElevationRasterTask(Context con, ElevationRaster raster) {
 		context = con;
 		data = raster;
+        filename = "the default elevation file";
 	}
+
+    public ReadElevationRasterTask(Context con, ElevationRaster raster, String filename) {
+        context = con;
+        data = raster;
+        this.filename = filename;
+    }
 
 	@Override
 	protected void onPreExecute() {
 		dialog = new ProgressDialog(context);
 		//dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		dialog.setMax(100);
-		dialog.setMessage("Please wait while file is read...");
+		dialog.setMessage("Loading elevations into map from " + filename);
 		dialog.show();
 	}
 	

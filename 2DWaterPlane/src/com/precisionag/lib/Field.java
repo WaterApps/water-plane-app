@@ -110,7 +110,7 @@ public class Field {
 		return groundOverlay;
 	}
 
-    public void updatePolyLine() {
+    public Polyline updatePolyLine() {
         polyline.remove();
         PolylineOptions rectOptions = new PolylineOptions()
                 .add(new LatLng(sw.latitude, ne.longitude))
@@ -119,7 +119,7 @@ public class Field {
                 .add(ne)
                 .add(new LatLng(sw.latitude, ne.longitude))
                 .zIndex(1.0f); // Closes the polyline.
-         polyline = mapFragment.getMap().addPolyline(rectOptions);
+         return polyline = mapFragment.getMap().addPolyline(rectOptions);
     }
 	//returns elevation of given point
 	public double elevationFromLatLng(LatLng point) {
@@ -131,27 +131,16 @@ public class Field {
 		if (getFieldBounds().contains(point)) {
 			//use linear interpolation to figure out which pixel to get data from
 			//should be accurate since fields <= ~1 mile wide
-			double north = ne.longitude;
-			double east = ne.latitude;
-			double south = sw.longitude;
-			double west = sw.latitude;
+			double north = ne.latitude;
+			double east = ne.longitude;
+			double south = sw.latitude;
+			double west = sw.longitude;
 			
 			int width = getElevationBitmap().getWidth();
 			int height = getElevationBitmap().getHeight();
-			
-			double x = (double)width*(point.latitude-west)/(east-west);
-			double y = (double)height*(point.longitude-south)/(north-south);
 
-            /*
-			System.out.println(east);
-			System.out.println(west);
-			System.out.println(north);
-			System.out.println(south);
-			System.out.println(width);
-			System.out.println(height);
-			System.out.println(x);
-			System.out.println(y);
-			*/
+            double x = (double) width*(point.longitude-west)/(east-west);
+            double y = (double) height*(north - point.latitude)/(north-south);
 
 			//retrieve packed int
 			int waterLevel = getElevationBitmap().getPixel((int)x, (int)y);
@@ -331,6 +320,7 @@ public class Field {
 
     public void setWaterLevel(double level) {
         seekBar.setProgress((int)(255.0*(level-MainActivity.sliderMin)/(MainActivity.sliderMax-MainActivity.sliderMin)));
-        updateColors();
+        //updateColors();
+        MainActivity.updateColors(this);
     }
 }

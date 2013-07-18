@@ -10,24 +10,27 @@ import android.util.Log;
 
 import com.precisionag.lib.Field;
 
+import java.text.DecimalFormat;
+
 /**
  * Created by steve on 6/27/13.
  */
 public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        DecimalFormat df = new DecimalFormat("#.#");
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
         MainActivity.prefs.registerOnSharedPreferenceChangeListener(this);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.context);
         Preference preference = findPreference("pref_min_elevation");
-        preference.setSummary(preferences.getString("pref_min_elevation", "100.0"));
+        preference.setSummary(preferences.getString("pref_min_elevation", "100.0")  + ", field min is " + df.format(MainActivity.field.getMinElevation()));
         preference = findPreference("pref_max_elevation");
-        preference.setSummary(preferences.getString("pref_max_elevation", "100.0"));
+        preference.setSummary(preferences.getString("pref_max_elevation", "300.0") + ", field max is " + df.format(MainActivity.field.getMaxElevation()));
     }
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Log.i("preference", key);
+        DecimalFormat df = new DecimalFormat("#.#");
         Preference preference = findPreference(key);
         if (key.equals("pref_key_trans_level")) {
             int alpha = sharedPreferences.getInt(key, 50);
@@ -41,19 +44,13 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         }
         else if (key.equals("pref_min_elevation")) {
             MainActivity.sliderMin = Float.parseFloat(sharedPreferences.getString("pref_min_elevation", "100.0"));
-            if (MainActivity.sliderMin < MainActivity.field.getMinElevation()) {
-                MainActivity.sliderMin = (float)MainActivity.field.getMinElevation();
-            }
             MainActivity.updateEditText(MainActivity.sliderMin, MainActivity.sliderMax);
-            preference.setSummary(sharedPreferences.getString("pref_min_elevation", "100.0"));
+            preference.setSummary(sharedPreferences.getString("pref_min_elevation", "100.0")  + ", field min is " + df.format(MainActivity.field.getMinElevation()));
         }
         else if (key.equals("pref_max_elevation")) {
             MainActivity.sliderMax = Float.parseFloat(sharedPreferences.getString("pref_max_elevation", "300.0"));
-            if (MainActivity.sliderMax > MainActivity.field.getMaxElevation()) {
-                MainActivity.sliderMax = (float)MainActivity.field.getMaxElevation();
-            }
             MainActivity.updateEditText(MainActivity.sliderMin, MainActivity.sliderMax);
-            preference.setSummary(sharedPreferences.getString("pref_max_elevation", "300.0"));
+            preference.setSummary(sharedPreferences.getString("pref_max_elevation", "300.0") + ", field max is " + df.format(MainActivity.field.getMaxElevation()));
         }
     }
 

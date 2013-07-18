@@ -23,13 +23,16 @@
     <com.precisionag.waterplane.MyDialogPreference
             android:key="pref_reset"
             android:title="Reset Slider Elevations"/>
-    <com.precisionag.waterplane.MyDialogPreference
-        android:key="pref_legal"
-        android:title="Legal Notice"/>
+
     <Preference
         android:title="Choose DEM Folder">
-        android:key="
         <intent
                 android:action="com.filebrowser.DataPathChooser"/>
     </Preference>
+    <com.precisionag.waterplane.GMapsLegalDialog
+            android:key="pref_legal"
+            android:title="Google Maps Legal Notice"/>
+    <com.precisionag.waterplane.LicenceDialog
+            android:key="pref_licence"
+            android:title="Licence"/>
 </PreferenceScreen>

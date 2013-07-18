@@ -61,6 +61,15 @@ public class ElevationRaster {
 	public LatLngBounds getBounds() {
 		return new LatLngBounds(getLowerLeft(), getUpperRight());
 	}
+
+    public LatLng getCenter() {
+        LatLngBounds bounds = getBounds();
+        LatLng sw = bounds.southwest;
+        LatLng ne = bounds.northeast;
+        double newLat = (sw.latitude + ne.latitude)/2;
+        double newLong = (sw.longitude + ne.longitude)/2;
+        return new LatLng(newLat, newLong);
+    }
 	
 	public Bitmap getBitmap() {
         Log.i("bitmap", "bitmap being created");

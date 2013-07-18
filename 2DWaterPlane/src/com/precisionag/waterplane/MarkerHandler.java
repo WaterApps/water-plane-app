@@ -5,16 +5,45 @@ import java.text.DecimalFormat;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.precisionag.lib.CustomMarker;
 
 public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerClickListener {
+
+    public static void setText() {
+        double elevationDouble = MainActivity.field.elevationFromLatLng(MainActivity.userLocation);
+        double elevationDelta =  elevationDouble - MainActivity.waterLevelMeters;
+        String ElevationText;
+
+        if (elevationDouble == 0.0) {
+            ElevationText = "You are not in the field.";
+        }
+        else {
+            String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
+            String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
+            if (elevationDelta >= 0.0) {
+                ElevationText = "You: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+            }
+            else {
+                ElevationText = "You: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+            }
+        }
+        MainActivity.ElevationTextView.setText(ElevationText);
+
+        CustomMarker.setUserElevation(elevationDouble);
+        //MainActivity.updateMarkers();
+    }
+
 	@Override
 	public void onMarkerDrag(Marker marker) {
 		// TODO Auto-generated method stub
         if(!marker.getTitle().equals("true") && !marker.getTitle().equals("false")) {
             MainActivity.userLocation = marker.getPosition();
+            MainActivity.updateMarkers();
+
         }
+
         if (MainActivity.following) {
             MainActivity.field.setWaterLevel(MainActivity.field.elevationFromLatLng(MainActivity.userLocation));
             MainActivity.field.updateColors();
@@ -39,12 +68,11 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
 		  MainActivity.ElevationTextView.setText(ElevationText);
 		  
 		  CustomMarker.setUserElevation(elevationDouble);
-		  //MainActivity.updateMarkers();
 	}
 
 	@Override
 	public void onMarkerDragEnd(Marker marker) {
-		// TODO Auto-generated method stub
+		MainActivity.updateMarkers();
 		
 	}
 
@@ -58,10 +86,11 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
     public boolean onMarkerClick(Marker marker) {
         if(marker.getTitle().equals("true") | marker.getTitle().equals("false")) {
             CustomMarker.setSelected(marker);
-            MainActivity.showMarkerAB();
         }
 
+        /*
         if (marker.getTitle().equals("true")) {
+            MainActivity.showHiddenMarkerAB();
             if (marker.equals(CustomMarker.getSelected())) {
                 marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow_selected));
             }
@@ -72,6 +101,15 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
         }
         else if (marker.getTitle().equals("false")) {
             marker.setTitle("true");
+            MainActivity.showMarkerAB();
+        }
+        */
+
+        if (marker.getTitle().equals("true")) {
+            MainActivity.showMarkerAB();
+        }
+        if (marker.getTitle().equals("false")) {
+            MainActivity.showHiddenMarkerAB();
         }
 
         MainActivity.updateMarkers();

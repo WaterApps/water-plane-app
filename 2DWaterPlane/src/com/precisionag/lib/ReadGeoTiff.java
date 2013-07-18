@@ -26,15 +26,20 @@ public class ReadGeoTiff implements ReadElevationRaster {
         raster.elevationData = new float[raster.getNrows()][raster.getNcols()];
         String noDataString = TiffDecoder.nativeTiffGetNoData();
         float nodata = Float.parseFloat(noDataString);
+        //float nodata = -9999.0f;
 
         for(int i=0; i<raster.getNrows(); i++) {
             for(int j=0; j<raster.getNcols(); j++) {
                 raster.elevationData[i][raster.getNcols()-1-j] = pixels[j+(raster.getNcols()*i)];
-                //Log.i("Elevation", Float.toString(raster.elevationData[i][raster.getNcols()-1-j]));
-                if (Math.abs(raster.getElevationData()[i][raster.getNcols()-1-j]-nodata) > 5.0) {
+                //Log.e("elevation", Double.toString(raster.getElevationData()[i][raster.getNcols()-1-j]));
+                if (raster.getElevationData()[i][raster.getNcols()-1-j] != nodata ) {
                     if (raster.getElevationData()[i][raster.getNcols()-1-j] < raster.getMinElevation()) raster.setMinElevation(raster.getElevationData()[i][raster.getNcols()-1-j]);
                     if (raster.getElevationData()[i][raster.getNcols()-1-j] > raster.getMaxElevation()) raster.setMaxElevation(raster.getElevationData()[i][raster.getNcols()-1-j]);
                 }
+                else {
+                    raster.elevationData[i][raster.getNcols()-1-j] = raster.getMinElevation();
+                }
+
             }
         }
 

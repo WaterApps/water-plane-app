@@ -107,12 +107,12 @@ public class CustomMarker {
             String waterDelta;
 
             if (elevationDouble == 0.0) {
-                title = "Not in field!";
-                userDelta = "";
-                waterDelta = "";
+                title = "";
+                userDelta = "available";
+                waterDelta = "No elevation data";
             }
             else {
-                String temp = new DecimalFormat("000.0").format(Math.abs(userElevation-elevationDouble));
+                String temp = new DecimalFormat("#.#").format(Math.abs(userElevation-elevationDouble));
                 title = "";
                 if (userElevation-elevationDouble < 0.0) {
                     userDelta = temp+"m above you";
@@ -120,7 +120,7 @@ public class CustomMarker {
                     userDelta = temp+"m below you";
                 }
 
-                temp = new DecimalFormat("000.0").format(Math.abs(waterElevation-elevationDouble));
+                temp = new DecimalFormat("#.#").format(Math.abs(waterElevation-elevationDouble));
                 if (waterElevation-elevationDouble < 0.0) {
                     waterDelta = temp+"m above water";
                 } else {
@@ -130,26 +130,25 @@ public class CustomMarker {
 
             Bitmap bitmap = textToBitmap(waterDelta + "\n" + userDelta, marker.equals(selected));
 
-            BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
-            //marker.setIcon(icon);
-
+            BitmapDescriptor icon;
 
             if (marker != null) {
                 if (marker.getTitle().equals("true")) {
-                    marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap));
+                    icon = BitmapDescriptorFactory.fromBitmap(bitmap);
                 }
                 else {
                     if (marker.equals(CustomMarker.getSelected())) {
-                        //marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow_selected));
-                        //icon = BitmapDescriptorFactory.fromResource(drawable.arrow_selected);
+                        icon = BitmapDescriptorFactory.fromResource(drawable.arrow_selected);
                     }
                     else {
-                        //marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow));
-                        //icon = BitmapDescriptorFactory.fromResource(drawable.arrow);
+                        icon = BitmapDescriptorFactory.fromResource(drawable.arrow);
                     }
                 }
-                //BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
-                //marker.setIcon(icon);
+                try {
+                    marker.setIcon(icon);
+                } catch (java.lang.IllegalArgumentException e) {
+                    System.out.println(e);
+                }
             }
 
         }
@@ -158,11 +157,10 @@ public class CustomMarker {
 	public static void setDisplayWidth(int newWidth) {
 		displayWidth = newWidth;
 	}
+
 	public void removeMarker() {
-        MainActivity.deleteMarker(marker);
-		marker.remove();
-        //marker.setVisible(false);
         setSelected(null);
+        MainActivity.deleteMarker(this);
 	}
 	
 	public static void setMap(GoogleMap newMap) {
