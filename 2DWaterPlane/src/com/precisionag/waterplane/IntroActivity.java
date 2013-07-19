@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 /**
  * Created by steve on 7/18/13.
@@ -17,6 +18,15 @@ public class IntroActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
+        ImageView iv = (ImageView) findViewById(R.id.imageView);
+        iv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+        Toast toast = Toast.makeText(MainActivity.context, "Tap anywhere to dismiss.", Toast.LENGTH_LONG);
+        toast.show();
     }
 
     @Override
