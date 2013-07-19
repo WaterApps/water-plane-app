@@ -1,14 +1,12 @@
-package com.precisionag.lib;
+package com.waterapps.lib;
 
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.tiffdecoder.TiffDecoder;
 
-import java.io.File;
 import java.net.URI;
 
-import static com.tiffdecoder.TiffDecoder.nativeTiffGetCornerLatitude;
 import com.ibm.util.CoordinateConversion;
 
 /**

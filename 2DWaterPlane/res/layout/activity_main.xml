@@ -22,7 +22,7 @@
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_weight="5"
-                  class="com.precisionag.lib.MyMapFragment"
+                  class="com.waterapps.lib.MyMapFragment"
                   map:cameraTargetLat="40.9779943136"
                   map:cameraTargetLng="-86.1949964826"
                   map:cameraZoom="15"

@@ -1,6 +1,4 @@
-package com.precisionag.lib;
-
-import android.net.Uri;
+package com.waterapps.lib;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;

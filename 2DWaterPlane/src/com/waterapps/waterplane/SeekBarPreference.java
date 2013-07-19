@@ -1,4 +1,4 @@
-package com.precisionag.waterplane;
+package com.waterapps.waterplane;
 
 import android.content.Context;
 import android.content.res.TypedArray;

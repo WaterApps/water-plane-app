@@ -1,4 +1,4 @@
-package com.precisionag.lib;
+package com.waterapps.lib;
 
 import android.net.Uri;
 

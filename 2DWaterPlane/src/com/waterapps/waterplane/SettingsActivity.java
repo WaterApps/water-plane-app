@@ -1,16 +1,12 @@
-package com.precisionag.waterplane;
+package com.waterapps.waterplane;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import com.precisionag.lib.Field;
 
 import java.text.DecimalFormat;
 

@@ -1,13 +1,8 @@
-package com.precisionag.waterplane;
+package com.waterapps.waterplane;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.preference.DialogPreference;
-import android.preference.Preference;
-import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.SeekBar;
 
 /**
  * Created by steve on 6/27/13.

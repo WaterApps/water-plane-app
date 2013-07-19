@@ -2,7 +2,7 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:robobunny="http://robobunny.com">
-    <com.precisionag.waterplane.SeekBarPreference
+    <com.waterapps.waterplane.SeekBarPreference
             android:key="pref_key_trans_level"
             android:title = "Transparency Level"
             android:defaultValue="50"
@@ -20,7 +20,7 @@
             android:defaultValue="250.925"
             android:inputType="numberDecimal"
             android:summary="250.925"/>
-    <com.precisionag.waterplane.MyDialogPreference
+    <com.waterapps.waterplane.MyDialogPreference
             android:key="pref_reset"
             android:title="Reset Slider Elevations"/>
 
@@ -30,10 +30,10 @@
         <intent
                 android:action="com.filebrowser.DataPathChooserWaterplane"/>
     </Preference>
-    <com.precisionag.waterplane.GMapsLegalDialog
+    <com.waterapps.waterplane.GMapsLegalDialog
             android:key="pref_legal"
             android:title="Google Maps Legal Notice"/>
-    <com.precisionag.waterplane.LicenceDialog
+    <com.waterapps.waterplane.LicenceDialog
             android:key="pref_licence"
             android:title="Licence"/>
 </PreferenceScreen>
