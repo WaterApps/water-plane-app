@@ -73,10 +73,10 @@
         </activity>
         <meta-data
     		android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyAY8BOg0EEGKWKw4GacgquGVe6_KY9wjds.."/>
+            android:value="AIzaSyAY8BOg0EEGKWKw4GacgquGVe6_KY9wjds"/>
     </application>
 
 </manifest>
 
-<!-- debug:   android:value="AIzaSyAJVXs0TbvT7N8FSNO-FlQ-CUshRh-9fAo"
-     release: android:value="AIzaSyBiWShI8WEZZN1L0oXJL_ZfJyWh9y-djp0"  -->
+<!-- debug:   android:value="AIzaSyCOx0sss9I42uQceTX7wl7L3ZN3fQVRUXk"
+     release: android:value="AIzaSyAY8BOg0EEGKWKw4GacgquGVe6_KY9wjds"  -->
