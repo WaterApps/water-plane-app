@@ -5,7 +5,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.net.URI;
 
-public class Dem {
+public class DemFile {
     int id;
     float sw_lat;
     float sw_long;
@@ -23,7 +23,7 @@ public class Dem {
         this.fileUri = fileUri;
     }
 
-    public Dem(int id, float sw_lat, float sw_long, float ne_lat, float ne_long, String filename, String timestamp) {
+    public DemFile(int id, float sw_lat, float sw_long, float ne_lat, float ne_long, String filename, String timestamp) {
         this.id = id;
         this.sw_lat = sw_lat;
         this.sw_long = sw_long;
@@ -33,7 +33,7 @@ public class Dem {
         this.timestamp = timestamp;
     }
 
-    public Dem(float sw_lat, float sw_long, float ne_lat, float ne_long, String filename, String timestamp, URI fileUri) {
+    public DemFile(float sw_lat, float sw_long, float ne_lat, float ne_long, String filename, String timestamp, URI fileUri) {
         this.sw_lat = sw_lat;
         this.sw_long = sw_long;
         this.ne_lat = ne_lat;
@@ -43,7 +43,7 @@ public class Dem {
         this.fileUri = fileUri;
     }
 
-    public Dem() {
+    public DemFile() {
 
     }
 
