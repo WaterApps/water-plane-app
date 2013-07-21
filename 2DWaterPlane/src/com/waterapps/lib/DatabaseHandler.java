@@ -49,22 +49,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addDem(Dem dem) {
+    public void addDem(DemFile demFile) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_SW_LAT, dem.getSw_lat());
-        values.put(KEY_SW_LONG, dem.getSw_long());
-        values.put(KEY_NE_LAT, dem.getNe_lat());
-        values.put(KEY_NE_LONG, dem.getNe_long());
-        values.put(KEY_FILENAME, dem.getFilename());
-        values.put(KEY_TIMESTAMP, dem.getTimestamp());
+        values.put(KEY_SW_LAT, demFile.getSw_lat());
+        values.put(KEY_SW_LONG, demFile.getSw_long());
+        values.put(KEY_NE_LAT, demFile.getNe_lat());
+        values.put(KEY_NE_LONG, demFile.getNe_long());
+        values.put(KEY_FILENAME, demFile.getFilename());
+        values.put(KEY_TIMESTAMP, demFile.getTimestamp());
 
         db.insert(TABLE_NAME, null, values);
         db.close();
     }
 
-    public Dem getDem(int id) {
+    public DemFile getDem(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_NAME, new String[] {KEY_ID, KEY_SW_LAT, KEY_SW_LONG,
@@ -74,7 +74,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor != null)
             cursor.moveToFirst();
 
-        Dem dem = new Dem(Integer.parseInt(cursor.getString(0)),
+        DemFile demFile = new DemFile(Integer.parseInt(cursor.getString(0)),
                 Float.parseFloat(cursor.getString(1)),
                 Float.parseFloat(cursor.getString(2)),
                 Float.parseFloat(cursor.getString(3)),
@@ -83,11 +83,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 cursor.getString(6)
                 );
 
-        return dem;
+        return demFile;
     }
 
-    public List<Dem> getAllDems() {
-        List<Dem> demList = new ArrayList<Dem>();
+    public List<DemFile> getAllDems() {
+        List<DemFile> demFileList = new ArrayList<DemFile>();
         // Select All Query
         String selectQuery = "SELECT  * FROM " + TABLE_NAME;
 
@@ -97,7 +97,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                Dem dem = new Dem(Integer.parseInt(cursor.getString(0)),
+                DemFile demFile = new DemFile(Integer.parseInt(cursor.getString(0)),
                         Float.parseFloat(cursor.getString(1)),
                         Float.parseFloat(cursor.getString(2)),
                         Float.parseFloat(cursor.getString(3)),
@@ -106,14 +106,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                         cursor.getString(6)
                 );
 
-                demList.add(dem);
+                demFileList.add(demFile);
             } while (cursor.moveToNext());
         }
 
         cursor.close();
         db.close();
 
-        return demList;
+        return demFileList;
     }
 
     public int getDemCount() {
@@ -126,28 +126,28 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return count;
     }
 
-    public int updateDem(Dem dem) {
+    public int updateDem(DemFile demFile) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_SW_LAT, dem.getSw_lat());
-        values.put(KEY_SW_LONG, dem.getSw_long());
-        values.put(KEY_NE_LAT, dem.getNe_lat());
-        values.put(KEY_NE_LONG, dem.getNe_long());
-        values.put(KEY_FILENAME, dem.getFilename());
-        values.put(KEY_TIMESTAMP, dem.getTimestamp());
+        values.put(KEY_SW_LAT, demFile.getSw_lat());
+        values.put(KEY_SW_LONG, demFile.getSw_long());
+        values.put(KEY_NE_LAT, demFile.getNe_lat());
+        values.put(KEY_NE_LONG, demFile.getNe_long());
+        values.put(KEY_FILENAME, demFile.getFilename());
+        values.put(KEY_TIMESTAMP, demFile.getTimestamp());
 
         // updating row
         int result = db.update(TABLE_NAME, values, KEY_ID + " = ?",
-                new String[] { String.valueOf(dem.getId()) });
+                new String[] { String.valueOf(demFile.getId()) });
         db.close();
         return result;
     }
 
-    public void deleteDem(Dem dem) {
+    public void deleteDem(DemFile demFile) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_NAME, KEY_ID + " = ?",
-                new String[] { String.valueOf(dem.getId()) });
+                new String[] { String.valueOf(demFile.getId()) });
         db.close();
     }
 }

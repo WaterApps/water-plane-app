@@ -13,7 +13,7 @@ import java.text.DateFormat;
  * Created by steve on 6/7/13.
  */
 public class ReadGeoTiffMetadata {
-    public static Dem readMetadata(File file) {
+    public static DemFile readMetadata(File file) {
         String fileName = file.getPath();
         DateFormat df = DateFormat.getDateInstance();
         String timeStamp = df.format(file.lastModified());
@@ -33,6 +33,6 @@ public class ReadGeoTiffMetadata {
         double width = scaleX*TiffDecoder.nativeTiffGetHeight()/(111111.0);
         double height = scaleY*TiffDecoder.nativeTiffGetWidth()/(111111.0*Math.cos(Math.toRadians(latLng[0])));
 
-        return new Dem((float)(latLng[0]-width), ((float)latLng[1]), (float)latLng[0], (float)(latLng[1]+height), fileName, timeStamp, fileUri);
+        return new DemFile((float)(latLng[0]-width), ((float)latLng[1]), (float)latLng[0], (float)(latLng[1]+height), fileName, timeStamp, fileUri);
     }
 }
