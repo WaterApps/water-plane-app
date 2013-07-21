@@ -27,7 +27,7 @@ import com.waterapps.waterplane.R.drawable;
  */
 public class CustomMarker {
 	private static GoogleMap map;
-	private static Field field;
+	private static DemData demData;
 	private static double userElevation;
 	private static double waterElevation;
     private Marker marker;
@@ -40,13 +40,13 @@ public class CustomMarker {
      * @param point the location to place the marker
      */
 	public CustomMarker(LatLng point) {
-		double elevationDouble = field.elevationFromLatLng(point);
+		double elevationDouble = demData.elevationFromLatLng(point);
 		String title;
 		String userDelta;
 		String waterDelta;
 		
 		if (elevationDouble == 0.0) {
-			title = "Not in field!";
+			title = "Not in demData!";
 			userDelta = "";
 			waterDelta = "";
 		}
@@ -99,7 +99,7 @@ public class CustomMarker {
         }
         if (marker.isVisible()) {
             LatLng point = marker.getPosition();
-            double elevationDouble = field.elevationFromLatLng(point);
+            double elevationDouble = demData.elevationFromLatLng(point);
             String title;
             String userDelta;
             String waterDelta;
@@ -169,13 +169,13 @@ public class CustomMarker {
 	}
 
     /**
-     * Set the Field object.
+     * Set the DemData object.
      * Used to get elevation data.
-     * {@link Field}
-     * @param newField field to use
+     * {@link DemData}
+     * @param newField demData to use
      */
-	public static void setField(Field newField) {
-		field = newField;
+	public static void setDemData(DemData newField) {
+		demData = newField;
 	}
 
     /**

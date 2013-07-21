@@ -23,7 +23,6 @@ import android.util.Log;
 import android.view.*;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -54,7 +53,7 @@ import static android.graphics.Color.HSVToColor;
 public class MainActivity extends Activity implements OnMapClickListener {
 private static final int ADD_MODE = 1;
 GroundOverlay prevoverlay;
-static Field field;
+static DemData demData;
 static List<CustomMarker> markers;
 static LatLng userLocation;
 static int mode;
@@ -165,22 +164,22 @@ public static boolean mapReady;
 		uiSettings.setZoomControlsEnabled(false);
 		
 		mapFrag = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-		Field.setMapFragment(mapFrag);
+		demData.setMapFragment(mapFrag);
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setMax(255);
         seekBar.setProgress(128);
-		Field.setSeekBar(seekBar);
+		demData.setSeekBar(seekBar);
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-        field = new Field(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
+        demData = new DemData(bitmap, new LatLng(0.0, 0.0), new LatLng(0.0, 0.0), 0.0, 0.0);
 		userLocation = new LatLng(0.0, 0.0);
 		markers = new ArrayList<CustomMarker>();
 		mode = 0;
 
-		CustomMarker.setField(field);
+		CustomMarker.setDemData(demData);
 		CustomMarker.setMap(map);
 
-		field.prevoverlay = field.createOverlay(map);
-		configSeekbar(field, prevoverlay);
+		demData.prevoverlay = demData.createOverlay(map);
+		configSeekbar(demData, prevoverlay);
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         //figure out if device has GPS
@@ -207,7 +206,7 @@ public static boolean mapReady;
                 // Increase elevation
             	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
             	seekBar.setProgress(seekBar.getProgress()+2);
-            	updateColors(field);
+            	updateColors(demData);
             }
         });
 
@@ -218,7 +217,7 @@ public static boolean mapReady;
             	// Decrease elevation
             	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
             	seekBar.setProgress(seekBar.getProgress()-2);
-            	updateColors(field);
+            	updateColors(demData);
             }
         });
 
@@ -286,7 +285,7 @@ public static boolean mapReady;
         });
         buttonDelete.setVisibility(View.GONE);
         
-		updateColors(field);
+		updateColors(demData);
 
         //if GPS isn't enabled, ask user to enable it
         if(hasGPS) {
@@ -358,7 +357,7 @@ public static boolean mapReady;
 	@Override
 	public void onResume() {
 		super.onResume();
-        updateColors(field);
+        updateColors(demData);
         if (hasGPS)
 		    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 	}
@@ -418,13 +417,13 @@ public static boolean mapReady;
                             locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude(),
                             locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude());
 
-                    double elevationDouble = field.elevationFromLatLng(userLocation);
+                    double elevationDouble = demData.elevationFromLatLng(userLocation);
                     double elevationDelta =  elevationDouble - waterLevelMeters;
                     String ElevationText;
                     TextView ElevationTextView = (TextView) findViewById(R.id.text2);
 
                     if (elevationDouble == 0.0) {
-                      ElevationText = "You are not in the field.";
+                      ElevationText = "You are not in the demData.";
                     }
                     else {
                       String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
@@ -465,7 +464,7 @@ public static boolean mapReady;
 	    }
 
         else if (item.getItemId() == R.id.menu_center) {
-            map.animateCamera(CameraUpdateFactory.newLatLngBounds(field.getFieldBounds(), 50));
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(demData.getFieldBounds(), 50));
         }
 
         else if(item.getItemId() == R.id.menu_coloring) {
@@ -479,7 +478,7 @@ public static boolean mapReady;
             edit.putBoolean("coloring", coloring);
             edit.commit();
             item.setChecked(coloring);
-            updateColors(field);
+            updateColors(demData);
         }
 
         else if(item.getItemId() == R.id.menu_transparency) {
@@ -493,7 +492,7 @@ public static boolean mapReady;
             edit.putBoolean("transparency_bool", transparency);
             edit.commit();
             item.setChecked(transparency);
-            updateColors(field);
+            updateColors(demData);
         }
 
         else if (item.getItemId() == R.id.menu_choose_dem) {
@@ -508,7 +507,7 @@ public static boolean mapReady;
             following = !following;
             item.setChecked(following);
             if (following) {
-                field.setWaterLevel(field.elevationFromLatLng(userLocation));
+                demData.setWaterLevel(demData.elevationFromLatLng(userLocation));
             }
         }
 
@@ -561,8 +560,8 @@ public static boolean mapReady;
             if ( (currentlyLoaded == null) || !demFile.getFilename().equals(currentlyLoaded.getFilename())) {
                 if(demFile.getBounds().contains(point)) {
                     currentlyLoaded = demFile;
-                    ElevationRaster raster = new ElevationRaster();
-                    new ReadElevationRasterTask(this, raster, demFile.getFilename()).execute(demFile.getFileUri());
+                    DemData raster = new DemData();
+                    new ReadDemDataTask(this, raster, demFile.getFilename()).execute(demFile.getFileUri());
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString("last_dem", demFile.getFileUri().getPath());
                     editor.commit();
@@ -586,7 +585,7 @@ public static boolean mapReady;
     }
 
     //updates colors when elevation is changed
-    public static void updateColors(Field field) {
+    public static void updateColors(DemData field) {
         if (!currentlyDrawing) {
             currentlyDrawing = true;
             //get level from seekbar
@@ -644,7 +643,7 @@ public static boolean mapReady;
     }
 
     //sets up the seekbar object and text above it
-    private void configSeekbar(final Field field, final GroundOverlay overlay) {
+    private void configSeekbar(final DemData field, final GroundOverlay overlay) {
         SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setMax(255);
         seekBar.setProgress(128);
@@ -741,9 +740,9 @@ public static boolean mapReady;
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                 }
-                ElevationRaster raster = new ElevationRaster();
+                DemData raster = new DemData();
                 String filename = fileUri.getPath().split("/")[fileUri.getPath().split("/").length-1];
-                new ReadElevationRasterTask(this, raster, filename).execute(juri);
+                new ReadDemDataTask(this, raster, filename).execute(juri);
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString("last_dem", fileUri.getPath());
                 editor.commit();
@@ -757,27 +756,27 @@ public static boolean mapReady;
         }
 
         if (requestCode == INITIAL_LOAD && data == null) {
-                ElevationRaster raster = new ElevationRaster();
+                DemData raster = new DemData();
                 DemFile demFileToLoad = demFiles.get(0);
                 String filename = demFileToLoad.getFilename();
-                new ReadElevationRasterTask(this, raster, filename).execute(demFileToLoad.getFileUri());
+                new ReadDemDataTask(this, raster, filename).execute(demFileToLoad.getFileUri());
         }
     }
 
-    public static void onFileRead(ElevationRaster raster) {
+    public static void onFileRead(DemData raster) {
 
-        field.setBounds(raster.getBounds());
+        demData.setBounds(raster.getBounds());
         System.out.println(raster.getBounds());
         raster.calculateTenths();
-        field.setMinElevation(raster.getMinElevation());
-        field.setMaxElevation(raster.getMaxElevation());
-        field.setBitmap(raster.getBitmap());
+        demData.setMinElevation((float)raster.getMinElevation());
+        demData.setMaxElevation((float)raster.getMaxElevation());
+        demData.setBitmap(raster.getBitmap());
         defaultSliderMin = sliderMin;
         defaultSliderMax = sliderMax;
         defaultSlider();
-        field.updatePolyLine();
+        demData.updatePolyLine();
 
-        //if user is outside of field, turn off location tracking
+        //if user is outside of demData, turn off location tracking
         if(!raster.getBounds().contains(userLocation)) {
             drag_mode = true;
             SharedPreferences.Editor edit = prefs.edit();
@@ -793,11 +792,11 @@ public static boolean mapReady;
         }
 
         if (following) {
-            field.setWaterLevel(field.elevationFromLatLng(raster.getCenter()));
+            demData.setWaterLevel(demData.elevationFromLatLng(raster.getCenter()));
             Log.d("following", "water level is set");
         }
 
-        updateColors(field);
+        updateColors(demData);
         updateSlider();
 
         map.animateCamera(CameraUpdateFactory.newLatLngBounds(raster.getBounds(), 50));
@@ -949,8 +948,8 @@ public static boolean mapReady;
         Log.d("demfilename", prefs.getString("last_dem", "foo"));
         File demFile = new File(prefs.getString("last_dem", "foo"));
         if(demFile.isFile()) {
-            ElevationRaster raster = new ElevationRaster();
-            new ReadElevationRasterTask(this, raster, demFile.getName()).execute(UritoURI(Uri.fromFile(demFile)));
+            DemData raster = new DemData();
+            new ReadDemDataTask(this, raster, demFile.getName()).execute(UritoURI(Uri.fromFile(demFile)));
             setCurrentlyLoaded(prefs.getString("last_dem", "foo"));
             return;
         }
@@ -961,8 +960,8 @@ public static boolean mapReady;
         if (!f.isDirectory()) {
             f.mkdir();
             copyAssets();
-            ElevationRaster raster = new ElevationRaster();
-            new ReadElevationRasterTask(this, raster).execute(UritoURI(Uri.fromFile(new File(demDirectory+"Feldun.tif"))));
+            DemData raster = new DemData();
+            new ReadDemDataTask(this, raster).execute(UritoURI(Uri.fromFile(new File(demDirectory+"Feldun.tif"))));
             setCurrentlyLoaded(demDirectory+"Feldun.tif");
             return;
         }
@@ -984,14 +983,14 @@ public static boolean mapReady;
             //if no TIFFs, copy sample into dir and open
             if (count == 0) {
                 copyAssets();
-                ElevationRaster raster = new ElevationRaster();
-                new ReadElevationRasterTask(this, raster).execute(UritoURI(Uri.fromFile(new File(demDirectory+"Feldun.tif"))));
+                DemData raster = new DemData();
+                new ReadDemDataTask(this, raster).execute(UritoURI(Uri.fromFile(new File(demDirectory+"Feldun.tif"))));
                 setCurrentlyLoaded(demDirectory+"Feldun.tif");
             }
             //if one TIFF, open it
             else if(count == 1) {
-                ElevationRaster raster = new ElevationRaster();
-                new ReadElevationRasterTask(this, raster, tiffs.get(0).getName()).execute(UritoURI(Uri.fromFile(tiffs.get(0))));
+                DemData raster = new DemData();
+                new ReadDemDataTask(this, raster, tiffs.get(0).getName()).execute(UritoURI(Uri.fromFile(tiffs.get(0))));
                 setCurrentlyLoaded(tiffs.get(0).getPath());
             }
             //if multiple TIFFs, let user choose
@@ -1064,12 +1063,12 @@ public static boolean mapReady;
             waterElevationTextView.setText(waterElevationText);
 
             //update other text block
-            double elevationDouble = field.elevationFromLatLng(userLocation);
+            double elevationDouble = demData.elevationFromLatLng(userLocation);
             double elevationDelta =  elevationDouble - waterLevelMeters;
             String ElevationText;
 
             if (elevationDouble == 0.0) {
-                ElevationText = "You are not in the field.";
+                ElevationText = "You are not in the demData.";
             }
             else {
                 String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
@@ -1086,7 +1085,7 @@ public static boolean mapReady;
             //update marker text
             CustomMarker.setWaterElevation(waterLevelMeters);
         }
-        updateColors(field);
+        updateColors(demData);
     }
 
     //remove polylines showing DEM outlines, for use when DEM folder is changed

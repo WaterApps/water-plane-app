@@ -23,9 +23,9 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         MainActivity.prefs.registerOnSharedPreferenceChangeListener(this);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.context);
         Preference preference = findPreference("pref_min_elevation");
-        preference.setSummary(preferences.getString("pref_min_elevation", "100.0")  + ", field min is " + df.format(MainActivity.field.getMinElevation()));
+        preference.setSummary(preferences.getString("pref_min_elevation", "100.0")  + ", demData min is " + df.format(MainActivity.demData.getMinElevation()));
         preference = findPreference("pref_max_elevation");
-        preference.setSummary(preferences.getString("pref_max_elevation", "300.0") + ", field max is " + df.format(MainActivity.field.getMaxElevation()));
+        preference.setSummary(preferences.getString("pref_max_elevation", "300.0") + ", demData max is " + df.format(MainActivity.demData.getMaxElevation()));
         preference = findPreference("dem_dir");
         demDirPref = preference;
         preference.setSummary(preferences.getString("dem_dir", "/dem"));
@@ -47,12 +47,12 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         else if (key.equals("pref_min_elevation")) {
             MainActivity.sliderMin = Float.parseFloat(sharedPreferences.getString("pref_min_elevation", "100.0"));
             MainActivity.updateEditText(MainActivity.sliderMin, MainActivity.sliderMax);
-            preference.setSummary(sharedPreferences.getString("pref_min_elevation", "100.0")  + ", field min is " + df.format(MainActivity.field.getMinElevation()));
+            preference.setSummary(sharedPreferences.getString("pref_min_elevation", "100.0")  + ", demData min is " + df.format(MainActivity.demData.getMinElevation()));
         }
         else if (key.equals("pref_max_elevation")) {
             MainActivity.sliderMax = Float.parseFloat(sharedPreferences.getString("pref_max_elevation", "300.0"));
             MainActivity.updateEditText(MainActivity.sliderMin, MainActivity.sliderMax);
-            preference.setSummary(sharedPreferences.getString("pref_max_elevation", "300.0") + ", field max is " + df.format(MainActivity.field.getMaxElevation()));
+            preference.setSummary(sharedPreferences.getString("pref_max_elevation", "300.0") + ", demData max is " + df.format(MainActivity.demData.getMaxElevation()));
         }
     }
 

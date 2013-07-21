@@ -12,10 +12,10 @@ import com.ibm.util.CoordinateConversion;
 /**
  * Created by steve on 5/30/13.
  */
-public class ReadGeoTiff implements ReadElevationRaster {
+public class ReadGeoTiff implements ReadDemData {
 
-    public ElevationRaster readFromFile(URI fileUri) {
-        ElevationRaster raster = new ElevationRaster();
+    public DemData readFromFile(URI fileUri) {
+        DemData raster = new DemData();
         raster.setMaxElevation(Float.NEGATIVE_INFINITY);
         raster.setMinElevation(Float.POSITIVE_INFINITY);
         TiffDecoder.nativeTiffOpen(fileUri.getPath());
@@ -35,14 +35,14 @@ public class ReadGeoTiff implements ReadElevationRaster {
                     if (raster.getElevationData()[i][raster.getNcols()-1-j] > raster.getMaxElevation()) raster.setMaxElevation(raster.getElevationData()[i][raster.getNcols()-1-j]);
                 }
                 else {
-                    raster.elevationData[i][raster.getNcols()-1-j] = raster.getMinElevation();
+                    raster.elevationData[i][raster.getNcols()-1-j] = (float)raster.getMinElevation();
                 }
 
             }
         }
 
-        Log.i("min elevation", Float.toString(raster.getMinElevation()));
-        Log.i("max elevation", Float.toString(raster.getMaxElevation()));
+        Log.i("min elevation", Double.toString(raster.getMinElevation()));
+        Log.i("max elevation", Double.toString(raster.getMaxElevation()));
         //float []anchor = nativeTiffGetCornerLatitude();
         float longitude = TiffDecoder.nativeTiffGetCornerLongitude();
         float latitude = TiffDecoder.nativeTiffGetCornerLatitude();
@@ -58,8 +58,8 @@ public class ReadGeoTiff implements ReadElevationRaster {
 
         double width = scaleX*raster.getNrows()/(111111.0);
         double height = scaleY*raster.getNcols()/(111111.0*Math.cos(Math.toRadians(latLng[0])));
-        raster.setLowerLeft(new LatLng(latLng[0]-width, latLng[1]));
-        raster.setUpperRight(new LatLng(latLng[0], latLng[1]+height));
+        raster.setSouthWest(new LatLng(latLng[0] - width, latLng[1]));
+        raster.setNorthEast(new LatLng(latLng[0], latLng[1] + height));
         return raster;
     }
 

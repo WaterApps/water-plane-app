@@ -1,3 +1,4 @@
-Play Store version -> commit id
+Play Store version -> most recent commit
 
-1.0 -> c982f4cc87
+1.0 -> c982f4cc87ba524307b524ea9337ee9d4e2fdf51
+1.0.1 -> 439d873828557a17552bb6a1168b691602cad637

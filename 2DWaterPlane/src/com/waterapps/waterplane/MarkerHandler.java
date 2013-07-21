@@ -10,12 +10,12 @@ import com.waterapps.lib.CustomMarker;
 public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerClickListener {
 
     public static void setText() {
-        double elevationDouble = MainActivity.field.elevationFromLatLng(MainActivity.userLocation);
+        double elevationDouble = MainActivity.demData.elevationFromLatLng(MainActivity.userLocation);
         double elevationDelta =  elevationDouble - MainActivity.waterLevelMeters;
         String ElevationText;
 
         if (elevationDouble == 0.0) {
-            ElevationText = "You are not in the field.";
+            ElevationText = "You are not in the demData.";
         }
         else {
             String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
@@ -43,14 +43,14 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
         }
 
         if (MainActivity.following) {
-            MainActivity.field.setWaterLevel(MainActivity.field.elevationFromLatLng(MainActivity.userLocation));
+            MainActivity.demData.setWaterLevel(MainActivity.demData.elevationFromLatLng(MainActivity.userLocation));
         }
-		double elevationDouble = MainActivity.field.elevationFromLatLng(MainActivity.userLocation);
+		double elevationDouble = MainActivity.demData.elevationFromLatLng(MainActivity.userLocation);
 		  double elevationDelta =  elevationDouble - MainActivity.waterLevelMeters;
 		  String ElevationText;
 		  
 		  if (elevationDouble == 0.0) {
-			  ElevationText = "You are not in the field.";
+			  ElevationText = "You are not in the demData.";
 		  }
 		  else {
 		  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
