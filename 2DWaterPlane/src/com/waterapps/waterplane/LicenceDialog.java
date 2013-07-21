@@ -12,7 +12,7 @@ public class LicenceDialog extends DialogPreference {
         super(context, attrs);
         CharSequence licence= "The MIT License (MIT)\n" +
                 "\n" +
-                "Copyright (c) 2013 Steven Ellis\n" +
+                "Copyright (c) 2013 Purdue University\n" +
                 "\n" +
                 "Permission is hereby granted, free of charge, to any person obtaining a copy\n" +
                 "of this software and associated documentation files (the \"Software\"), to deal\n" +
