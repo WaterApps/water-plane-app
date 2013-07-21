@@ -86,10 +86,9 @@ static float alpha;
 public static SharedPreferences prefs;
 public static Context context;
 static boolean following;
-public static float scale;
 public static Resources resources;
-static ArrayList<Dem> dems;
-Dem currentlyLoaded;
+static ArrayList<DemFile> demFiles;
+DemFile currentlyLoaded;
 private boolean firstStart;
 public static LatLngBounds demBounds;
 static SeekBar seekBar;
@@ -109,7 +108,7 @@ public static boolean mapReady;
         demOutlines = new ArrayList<Polyline>();
         markerAB = false;
         resources = getResources();
-        scale = getResources().getDisplayMetrics().density;
+        CustomMarker.setDensity(getResources().getDisplayMetrics().density);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         demDirectory = prefs.getString("dem_dir", Environment.getExternalStorageDirectory().toString() + "/dem");
@@ -179,9 +178,6 @@ public static boolean mapReady;
 
 		CustomMarker.setField(field);
 		CustomMarker.setMap(map);
-		CustomMarker.setContext(context);
-		CustomMarker.setLayout((RelativeLayout)findViewById(R.id.TopLevelView));
-		RelativeLayout lay = (RelativeLayout) findViewById(R.id.TopLevelView);
 
 		field.prevoverlay = field.createOverlay(map);
 		configSeekbar(field, prevoverlay);
@@ -559,16 +555,16 @@ public static boolean mapReady;
 		}
 
         //load DEM if clicked on
-        Dem dem;
-        for(int i = 0; i<dems.size(); i++) {
-            dem = dems.get(i);
-            if ( (currentlyLoaded == null) || !dem.getFilename().equals(currentlyLoaded.getFilename())) {
-                if(dem.getBounds().contains(point)) {
-                    currentlyLoaded = dem;
+        DemFile demFile;
+        for(int i = 0; i< demFiles.size(); i++) {
+            demFile = demFiles.get(i);
+            if ( (currentlyLoaded == null) || !demFile.getFilename().equals(currentlyLoaded.getFilename())) {
+                if(demFile.getBounds().contains(point)) {
+                    currentlyLoaded = demFile;
                     ElevationRaster raster = new ElevationRaster();
-                    new ReadElevationRasterTask(this, raster, dem.getFilename()).execute(dem.getFileUri());
+                    new ReadElevationRasterTask(this, raster, demFile.getFilename()).execute(demFile.getFileUri());
                     SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("last_dem", dem.getFileUri().getPath());
+                    editor.putString("last_dem", demFile.getFileUri().getPath());
                     editor.commit();
                 }
             }
@@ -762,9 +758,9 @@ public static boolean mapReady;
 
         if (requestCode == INITIAL_LOAD && data == null) {
                 ElevationRaster raster = new ElevationRaster();
-                Dem demToLoad = dems.get(0);
-                String filename = demToLoad.getFilename();
-                new ReadElevationRasterTask(this, raster, filename).execute(demToLoad.getFileUri());
+                DemFile demFileToLoad = demFiles.get(0);
+                String filename = demFileToLoad.getFilename();
+                new ReadElevationRasterTask(this, raster, filename).execute(demFileToLoad.getFileUri());
         }
     }
 
@@ -915,8 +911,8 @@ public static boolean mapReady;
     public static void scanDEMs() {
         //scan DEM directory
         String path = demDirectory;
-        Dem dem;
-        dems = new ArrayList<Dem>();
+        DemFile demFile;
+        demFiles = new ArrayList<DemFile>();
         Log.i("Files", "Path: " + path);
         File f = new File(path);
         Polyline outline;
@@ -929,20 +925,20 @@ public static boolean mapReady;
             for (int i=0; i < file.length; i++)
             {
                 Log.d("Files", "FileName:" + file[i].getName());
-                dem = ReadGeoTiffMetadata.readMetadata(file[i]);
+                demFile = ReadGeoTiffMetadata.readMetadata(file[i]);
                 if(i==0) {
-                    demBounds = new LatLngBounds(new LatLng(dem.getSw_lat(), dem.getSw_long()),
-                            new LatLng(dem.getNe_lat(), dem.getNe_long()));
+                    demBounds = new LatLngBounds(new LatLng(demFile.getSw_lat(), demFile.getSw_long()),
+                            new LatLng(demFile.getNe_lat(), demFile.getNe_long()));
                 }
-                dems.add(dem);
-                demOutlines.add(map.addPolyline(new PolylineOptions().add(new LatLng(dem.getSw_lat(), dem.getSw_long()))
-                        .add(new LatLng(dem.getSw_lat(), dem.getNe_long()))
-                        .add(new LatLng(dem.getNe_lat(), dem.getNe_long()))
-                        .add(new LatLng(dem.getNe_lat(), dem.getSw_long()))
-                        .add(new LatLng(dem.getSw_lat(), dem.getSw_long()))
+                demFiles.add(demFile);
+                demOutlines.add(map.addPolyline(new PolylineOptions().add(new LatLng(demFile.getSw_lat(), demFile.getSw_long()))
+                        .add(new LatLng(demFile.getSw_lat(), demFile.getNe_long()))
+                        .add(new LatLng(demFile.getNe_lat(), demFile.getNe_long()))
+                        .add(new LatLng(demFile.getNe_lat(), demFile.getSw_long()))
+                        .add(new LatLng(demFile.getSw_lat(), demFile.getSw_long()))
                         .color(Color.RED)));
-                demBounds = demBounds.including(new LatLng(dem.getSw_lat(), dem.getSw_long()));
-                demBounds = demBounds.including(new LatLng(dem.getNe_lat(), dem.getNe_long()));
+                demBounds = demBounds.including(new LatLng(demFile.getSw_lat(), demFile.getSw_long()));
+                demBounds = demBounds.including(new LatLng(demFile.getNe_lat(), demFile.getNe_long()));
             }
         }
     }
@@ -1044,13 +1040,13 @@ public static boolean mapReady;
 
     //tell app which DEM is currently loaded, so it isn't reloaded if clicked on
     public void setCurrentlyLoaded(String filename) {
-        Dem dem;
-        for(int i = 0; i<dems.size(); i++) {
-            dem = dems.get(i);
+        DemFile demFile;
+        for(int i = 0; i< demFiles.size(); i++) {
+            demFile = demFiles.get(i);
             Log.d("filename", filename);
-            Log.d("dem filename", dem.getFilename());
-            if (filename.equals(dem.getFilename())) {
-                currentlyLoaded = dem;
+            Log.d("demFile filename", demFile.getFilename());
+            if (filename.equals(demFile.getFilename())) {
+                currentlyLoaded = demFile;
             }
         }
     }

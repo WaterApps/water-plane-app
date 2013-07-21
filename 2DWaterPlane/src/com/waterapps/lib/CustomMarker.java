@@ -2,7 +2,6 @@ package com.waterapps.lib;
 
 import java.text.DecimalFormat;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -10,9 +9,6 @@ import android.graphics.RectF;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.RelativeLayout;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.GoogleMap;
@@ -25,21 +21,25 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.waterapps.waterplane.MainActivity;
 import com.waterapps.waterplane.R.drawable;
 
+/**
+ * A custom Google Maps marker showing elevation information.
+ * It wraps rather than extends the Marker class because Google doesn't allow extensions of it.
+ */
 public class CustomMarker {
 	private static GoogleMap map;
 	private static Field field;
 	private static double userElevation;
 	private static double waterElevation;
     private Marker marker;
-	private LatLng location;
-	private Button button;
-	CheckBox checkBox;
-	static Context context;
-	private static RelativeLayout layout;
 	private static Marker selected;
 	static final int blue = 0xFF33B5E5;
+    static float density;
+
+    /**
+     * Creates a marker at the given location.
+     * @param point the location to place the marker
+     */
 	public CustomMarker(LatLng point) {
-		location = point;
 		double elevationDouble = field.elevationFromLatLng(point);
 		String title;
 		String userDelta;
@@ -78,7 +78,19 @@ public class CustomMarker {
                 .anchor(.5f, 1.0f)
                 .draggable(true));
 	}
-	
+
+    /**
+     * Sets display density.
+     * Can be obtained in Activity from getResources().getDisplayMetrics().density;
+     * @param newDensity the density to use
+     */
+    public static void setDensity(float newDensity) {
+        density = newDensity;
+    }
+
+    /**
+     * Updates the marker graphics.
+     */
 	public void updateMarker() {
         try {
             MapsInitializer.initialize(MainActivity.context);
@@ -140,64 +152,87 @@ public class CustomMarker {
         }
 	}
 
+    /**
+     * Deletes the marker.
+     */
 	public void removeMarker() {
         setSelected(null);
         MainActivity.deleteMarker(this);
 	}
-	
+
+    /**
+     * Set GoogleMap object to display the markers on.
+     * @param newMap the map
+     */
 	public static void setMap(GoogleMap newMap) {
 		map = newMap;
 	}
-	
-	public static void setLayout(RelativeLayout newLayout) {
-		layout = newLayout;
-	}
-	
-	public static void setContext(Context newContext) {
-		context = newContext;
-	}
-	
+
+    /**
+     * Set the Field object.
+     * Used to get elevation data.
+     * {@link Field}
+     * @param newField field to use
+     */
 	public static void setField(Field newField) {
 		field = newField;
 	}
-	
+
+    /**
+     * Set user's current elevation.
+     * @param elevation user elevation
+     */
 	public static void setUserElevation(double elevation) {
 		userElevation = elevation;
 	}
-	
+
+    /**
+     * Set water level.
+     * @param elevation water level
+     */
 	public static void setWaterElevation(double elevation) {
 		waterElevation = elevation;
 	}
-	
-	public boolean inBounds(LatLng point) {
-		//return overlay.getBounds().contains(point);
-		return true;
-	}
 
+    /**
+     * Gets the currently selected Marker.
+     * May be null.
+     * @return the selected marker
+     */
 	public static Marker getSelected() {
 		return selected;
 	}
 
+    /**
+     * Sets the currently selected Marker.
+     * @param selection marker to select
+     */
 	public static void setSelected(Marker selection) {
         selected = selection;
    	}
 
-	public static RelativeLayout getLayout() {
-		return layout;
-	}
-
-	public Button getButton() {
-		return button;
-	}
-
-	public void setButton(Button button) {
-		this.button = button;
-	}
-
+    /**
+     * Gets the Marker object.
+     * @return the marker
+     */
     public Marker getMarker() {
         return marker;
     }
 
+    /**
+     * Get the location of the marker.
+     * @return marker location
+     */
+    public LatLng getLocation() {
+        return marker.getPosition();
+    }
+
+    /**
+     * Creates icon bitmap from given text.
+     * @param text text to display on marker
+     * @param isSelected whether or not this marker is currently selected
+     * @return icon to display on the marker
+     */
     Bitmap textToBitmap(String text, boolean isSelected) {
         int width = dpToPx(180);
         int height = dpToPx(80);
@@ -224,14 +259,19 @@ public class CustomMarker {
         }
         TextPaint textPaint = new TextPaint();
         textPaint.setAntiAlias(true);
-        textPaint.setTextSize(16.0f * MainActivity.scale);
+        textPaint.setTextSize(16.0f * density);
         StaticLayout sl= new StaticLayout(text, textPaint, bitmap.getWidth()-8, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
-        canvas.translate((int)(3.0f * MainActivity.scale), (int)(10.0f * MainActivity.scale));
+        canvas.translate((int)(3.0f * density), (int)(10.0f * density));
         sl.draw(canvas);
         return bitmap;
     }
 
+    /**
+     * Converts dp (display-independent pixels) to physical pixels based on density.
+     * @param dp display pixels
+     * @return physical pixels
+     */
     int dpToPx(int dp) {
-        return (int) (dp * MainActivity.scale + 0.5f);
+        return (int) (dp * density + 0.5f);
     }
 }
