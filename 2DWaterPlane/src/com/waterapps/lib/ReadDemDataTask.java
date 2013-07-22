@@ -18,12 +18,23 @@ public class ReadDemDataTask extends AsyncTask<URI, Integer, DemData> {
     ProgressDialog dialog;
     String filename;
 
+    /**
+     * Default constructor
+     * @param con
+     * @param raster
+     */
     public ReadDemDataTask(Context con, DemData raster) {
         context = con;
         data = raster;
         filename = "the default elevation file";
     }
 
+    /**
+     * Constructor which includes filename to display in progress bar
+     * @param con
+     * @param raster
+     * @param filename
+     */
     public ReadDemDataTask(Context con, DemData raster, String filename) {
         context = con;
         data = raster;
@@ -41,6 +52,11 @@ public class ReadDemDataTask extends AsyncTask<URI, Integer, DemData> {
         dialog.show();
     }
 
+    /**
+     * The actual file reading part
+     * @param params URI of file to be read
+     * @return DEM data
+     */
     protected DemData doInBackground(URI... params) {
         publishProgress(0);
 
