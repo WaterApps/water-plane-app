@@ -10,7 +10,7 @@ import com.waterapps.waterplane.MainActivity;
 import java.net.URI;
 
 /**
- * Created by Steve on 7/21/13.
+ * Makes ReadDemData interface into an AsyncTask to run off of UI thread
  */
 public class ReadDemDataTask extends AsyncTask<URI, Integer, DemData> {
     Context context;
@@ -30,10 +30,12 @@ public class ReadDemDataTask extends AsyncTask<URI, Integer, DemData> {
         this.filename = filename;
     }
 
+    /**
+     * Creates progress bar before file is read
+     */
     @Override
     protected void onPreExecute() {
         dialog = new ProgressDialog(context);
-        //dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         dialog.setMax(100);
         dialog.setMessage("Loading elevations into map from " + filename);
         dialog.show();
@@ -45,6 +47,7 @@ public class ReadDemDataTask extends AsyncTask<URI, Integer, DemData> {
         ReadDemData readObject = null;
 
         //select proper reader for filetype
+        //only geotiff supported for now
         if (params[0].getPath().contains(".tif")) readObject = new ReadGeoTiff();
         data = readObject.readFromFile(params[0]);
         publishProgress(100);
@@ -55,6 +58,10 @@ public class ReadDemDataTask extends AsyncTask<URI, Integer, DemData> {
         dialog.setProgress(progress[0]);
     }
 
+    /**
+     * Once the file read is complete, pass data to handler in MainActivity
+     * @param rasters
+     */
     protected void onPostExecute(DemData rasters) {
         dialog.dismiss();
         MainActivity.onFileRead(rasters);
