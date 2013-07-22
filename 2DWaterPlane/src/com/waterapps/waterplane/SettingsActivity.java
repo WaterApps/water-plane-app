@@ -21,7 +21,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
         MainActivity.prefs.registerOnSharedPreferenceChangeListener(this);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.context);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
         Preference preference = findPreference("pref_min_elevation");
         preference.setSummary(preferences.getString("pref_min_elevation", "100.0")  + ", demData min is " + df.format(MainActivity.demData.getMinElevation()));
         preference = findPreference("pref_max_elevation");
@@ -73,7 +73,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     }
 
     public static void updateDemFolder() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.context);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getContext());
         demDirPref.setSummary(preferences.getString("dem_dir", "/dem"));
     }
 }

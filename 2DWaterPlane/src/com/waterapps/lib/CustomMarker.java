@@ -93,7 +93,7 @@ public class CustomMarker {
      */
 	public void updateMarker() {
         try {
-            MapsInitializer.initialize(MainActivity.context);
+            MapsInitializer.initialize(MainActivity.getContext());
         } catch (GooglePlayServicesNotAvailableException e) {
             e.printStackTrace();
         }
@@ -240,10 +240,10 @@ public class CustomMarker {
         Bitmap arrow;
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         if (isSelected) {
-             arrow = BitmapFactory.decodeResource(MainActivity.resources, drawable.arrow_selected);
+             arrow = BitmapFactory.decodeResource(MainActivity.getResource(), drawable.arrow_selected);
         }
         else {
-             arrow = BitmapFactory.decodeResource(MainActivity.resources, drawable.arrow);
+             arrow = BitmapFactory.decodeResource(MainActivity.getResource(), drawable.arrow);
         }
         Canvas canvas = new Canvas(bitmap);
         canvas.drawBitmap(bitmap, 0, 0, null);

@@ -86,9 +86,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
     public static int hsvTransparentColors[];
     static float alpha;
     public static SharedPreferences prefs;
-    public static Context context;
+    private static Context context;
     static boolean following;
-    public static Resources resources;
     static ArrayList<DemFile> demFiles;
     DemFile currentlyLoaded;
     private boolean firstStart;
@@ -104,13 +103,18 @@ public class MainActivity extends Activity implements OnMapClickListener {
     static Button hideButton;
     static ArrayList<Polyline> demOutlines;
     public static boolean mapReady;
+    static Resources resources;
+
+    public static Context getContext() {
+        return context;
+    }
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
+        resources = getResources();
         mapReady = false;
         demOutlines = new ArrayList<Polyline>();
         markerAB = false;
-        resources = getResources();
         CustomMarker.setDensity(getResources().getDisplayMetrics().density);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -297,7 +301,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 if (!drag_mode) {
                     drag_mode = true;
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                            context);
+                            getContext());
 
                         //set title
                         alertDialogBuilder.setTitle("GPS is not enabled");
@@ -378,14 +382,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
             getMenuInflater().inflate(R.menu.marker_menu, menu);
         }
         else {
+            //set all checkboxes to the correct value
             getMenuInflater().inflate(R.menu.main_menu, menu);
             menu.findItem(R.id.menu_coloring).setChecked(coloring);
             menu.findItem(R.id.menu_transparency).setChecked(transparency);
             menu.findItem(R.id.menu_drag).setChecked(!drag_mode);
         }
-
-
-
 		return true;
 	}
 
@@ -531,7 +533,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
 	    }
         return true;
 	}
-	
+
+    /**
+     * Handles user clicks on the map.
+     * Adds markers when needed and loads DEMs if they are clicked on.
+     * @param point Location where click occured
+     */
 	@Override
 	public void onMapClick (LatLng point) {
         //handle markers
@@ -574,8 +581,13 @@ public class MainActivity extends Activity implements OnMapClickListener {
         }
         updateMarkers();
     }
-	
-    //takes a bitmap, latitude/longitude bounds, and a map to create a map overlay
+
+    /**
+     * Takes a bitmap, latitude/longitude bounds, and a map to create a map overlay
+     * @param overlayBitmap Bitmap to display
+     * @param bounds Area to display bitmap on
+     * @return Google Maps GroundOverlay object
+     */
     private static GroundOverlay createOverlay(Bitmap overlayBitmap, LatLngBounds bounds) {
         //MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(overlayBitmap);
@@ -790,7 +802,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
             userMarker.setPosition(userLocation);
             userMarker.setDraggable(true);
             MarkerHandler.setText();
-            Toast toast = Toast.makeText(context, "Press and hold the location marker to drag.", Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getContext(), "Press and hold the location marker to drag.", Toast.LENGTH_LONG);
             toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 100);
             toast.show();
         }
@@ -808,7 +820,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     public static void hideElevationControls() {
-        //LinearLayout elevationControls = (LinearLayout) findViewById(R.id.elevationControls);
         elevationControls.setVisibility(View.GONE);
     }
 
@@ -824,6 +835,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
         markerBottomText.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Displays the action bar for when a marker is selected and its text is visible
+     */
     public static void showMarkerAB() {
         //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
         //actionBar.setCustomView(R.layout.custom_ab);
@@ -835,6 +849,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
         //invalidateOptionsMenu();
     }
 
+    /**
+     * Displays the action bar for when a marker is selected but its text is hidden
+     */
     public static void showHiddenMarkerAB() {
         //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
         //actionBar.setCustomView(R.layout.custom_ab);
@@ -846,6 +863,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
         //invalidateOptionsMenu();
     }
 
+    /**
+     * Displays the action bar for when no marker is selected
+     */
     public static void showNormalAB() {
         //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
         buttonDelete.setVisibility(View.GONE);
@@ -857,13 +877,23 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
 
+    /**
+     * Updates the textboxes which show slider min/max values
+     * @param min Slider min value
+     * @param max Slider max value
+     */
     public static void updateEditText(float min, float max) {
         DecimalFormat df = new DecimalFormat("#.#");
         editMin.setText(df.format(min));
         editMax.setText(df.format(max));
     }
 
-    //calculates distance between two latlng objects
+    /**
+     * Calculates distance between two LatLng objects
+     * @param p1 Point 1
+     * @param p2 Point 2
+     * @return Distance between Point 1 and Point 2
+     */
     public float distanceBetween(LatLng p1, LatLng p2) {
         double metersPerDegree = 111222.0;
         double longDistance = (p1.longitude-p2.longitude)*metersPerDegree*Math.cos((p1.latitude+p2.latitude)/2);
@@ -871,15 +901,25 @@ public class MainActivity extends Activity implements OnMapClickListener {
         return (float)Math.sqrt((latDistance*latDistance) + (longDistance*longDistance));
     }
 
+    /**
+     * Set alpha/transparency of map DEM overlay
+     * @param a Alpha to set
+     */
     public static void setAlpha(float a) {
         alpha = a;
     }
 
+    /**
+     * Gets the alpha/transparency value of map DEM overlay
+     * @return Alpha of DEM overlay
+     */
     public static float getAlpha() {
         return alpha;
     }
 
-    //sets elevation slider min/max back to default values
+    /**
+     * Sets elevation slider min/max back to default values
+     */
     public static void defaultSlider() {
         DecimalFormat df = new DecimalFormat("#.#");
         sliderMin = defaultSliderMin;
@@ -891,13 +931,20 @@ public class MainActivity extends Activity implements OnMapClickListener {
         edit.apply();
     }
 
-    //remove the marker from visibility and the list of markers
+    /**
+     * Remove the marker from visibility and the list of markers
+     * @param marker Marker to be removed
+     */
     public static void deleteMarker(CustomMarker marker) {
         markers.remove(marker);
         marker.getMarker().remove();
     }
 
-    //converts Android Uri to Java URI
+    /**
+     *Converts Android Uri to Java URI
+     * @param fileUri Uri to be converted
+     * @return Converted URI
+     */
     private URI UritoURI(Uri fileUri) {
         URI juri = null;
         try {
@@ -910,7 +957,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
         return juri;
     }
 
-    //looks through contents of DEM directory and displays outlines of all DEMs there
+    /**
+     *Looks through contents of DEM directory and displays outlines of all DEMs there
+     */
     public static void scanDEMs() {
         //scan DEM directory
         String path = demDirectory;
@@ -946,8 +995,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
         }
     }
 
-    //picks which DEM to load upon app start
-    public void loadInitialDEM() {
+    /**
+     * Picks which DEM to load upon app start
+     */
+    private void loadInitialDEM() {
         //attempt to load last used DEM, if it still exists
         Log.d("demfilename", prefs.getString("last_dem", "foo"));
         File demFile = new File(prefs.getString("last_dem", "foo"));
@@ -1027,7 +1078,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
         }
     }
 
-    //copies a file from assets to SD
+    /**
+     * Copies a file from assets to SD
+     * @param path Path to asset
+     */
     private void copyAssets(String path) {
         AssetManager assetManager = getAssets();
         String[] files = null;
@@ -1062,7 +1116,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
         }
     }
 
-    //tell app which DEM is currently loaded, so it isn't reloaded if clicked on
+    /**
+     * Tell which DEM is currently loaded, so it isn't reloaded if clicked on
+     * @param filename Filename of currently loaded DEM
+     */
     public void setCurrentlyLoaded(String filename) {
         DemFile demFile;
         for(int i = 0; i< demFiles.size(); i++) {
@@ -1075,6 +1132,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
         }
     }
 
+    /**
+     * Updates the text near the slider bar
+     */
     public static void updateSlider() {
         if (userLocation != null ) {
             //get level from seekbar
@@ -1113,12 +1173,18 @@ public class MainActivity extends Activity implements OnMapClickListener {
         updateColors(demData);
     }
 
-    //remove polylines showing DEM outlines, for use when DEM folder is changed
+    /**
+     *Removes polylines showing DEM outlines, for use when DEM folder is changed
+     */
     public static void removeDemOutlines() {
         Iterator<Polyline> outlines = demOutlines.iterator();
         while(outlines.hasNext()) {
             outlines.next().remove();
         }
+    }
+
+    public static Resources getResource() {
+        return resources;
     }
 
 }

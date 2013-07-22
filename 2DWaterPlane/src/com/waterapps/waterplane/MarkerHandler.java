@@ -84,6 +84,7 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+        MainActivity.hideElevationControls();
         if(marker.getTitle().equals("true") | marker.getTitle().equals("false")) {
             CustomMarker.setSelected(marker);
         }

@@ -23,7 +23,7 @@ public class IntroActivity extends Activity {
                 finish();
             }
         });
-        Toast toast = Toast.makeText(MainActivity.context, "Tap anywhere to dismiss.", Toast.LENGTH_LONG);
+        Toast toast = Toast.makeText(MainActivity.getContext(), "Tap anywhere to dismiss.", Toast.LENGTH_LONG);
         toast.show();
     }
 

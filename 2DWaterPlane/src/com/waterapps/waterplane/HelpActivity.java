@@ -22,7 +22,7 @@ public class HelpActivity extends Activity {
         webview.setWebViewClient(new WebViewClient(){
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.contains("intro-url")) {
-                    startActivity(new Intent(MainActivity.context, IntroActivity.class));
+                    startActivity(new Intent(MainActivity.getContext(), IntroActivity.class));
                     return true;
                 } else {
                     return false;
