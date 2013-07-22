@@ -23,8 +23,8 @@ public class ReadGeoTiff implements ReadDemData {
         float[] pixels = TiffDecoder.nativeTiffGetFloats();
         raster.elevationData = new float[raster.getNrows()][raster.getNcols()];
         String noDataString = TiffDecoder.nativeTiffGetNoData();
-        float nodata = Float.parseFloat(noDataString);
-        //float nodata = -9999.0f;
+        //float nodata = Float.parseFloat(noDataString);
+        float nodata = -9999.0f;
 
         for(int i=0; i<raster.getNrows(); i++) {
             for(int j=0; j<raster.getNcols(); j++) {

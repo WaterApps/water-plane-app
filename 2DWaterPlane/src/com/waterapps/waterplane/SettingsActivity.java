@@ -11,7 +11,7 @@ import android.view.MenuItem;
 import java.text.DecimalFormat;
 
 /**
- * Created by steve on 6/27/13.
+ * An implementation of PreferenceActivity.
  */
 public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     static Preference demDirPref;

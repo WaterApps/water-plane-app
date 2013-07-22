@@ -9,6 +9,10 @@ import android.os.Bundle;
 import com.google.android.gms.maps.model.LatLng;
 import com.waterapps.lib.CustomMarker;
 
+/**
+ * An implementation of LocationListener.
+ */
+
 public class LocationHandler implements LocationListener {
 	    public void onLocationChanged(Location location) {
 	      // Called when a new location is found by the network location provider.

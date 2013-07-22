@@ -7,7 +7,7 @@ import android.util.AttributeSet;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 /**
- * Created by steve on 7/17/13.
+ * DialogPreference that displays the Google Maps legal information.
  */
 public class GMapsLegalDialog extends DialogPreference {
     public GMapsLegalDialog(Context context, AttributeSet attrs) {

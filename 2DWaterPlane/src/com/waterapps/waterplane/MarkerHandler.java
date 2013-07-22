@@ -7,6 +7,9 @@ import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.model.Marker;
 import com.waterapps.lib.CustomMarker;
 
+/**
+ * An implementation of the Google Maps marker callbacks.
+ */
 public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerClickListener {
 
     public static void setText() {

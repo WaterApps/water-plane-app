@@ -5,7 +5,7 @@ import android.preference.DialogPreference;
 import android.util.AttributeSet;
 
 /**
- * Created by steve on 7/17/13.
+ * DialogPreference that shows licencing (MIT) information.
  */
 public class LicenceDialog extends DialogPreference {
     public LicenceDialog(Context context, AttributeSet attrs) {

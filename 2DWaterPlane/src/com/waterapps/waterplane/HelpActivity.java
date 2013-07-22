@@ -9,7 +9,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 /**
- * Created by steve on 7/15/13.
+ * An Activity that displays help info.
  */
 public class HelpActivity extends Activity {
     @Override

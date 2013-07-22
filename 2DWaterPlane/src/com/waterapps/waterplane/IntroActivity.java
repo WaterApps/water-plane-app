@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 /**
- * Created by steve on 7/18/13.
+ * Activity that introduces the user to the app on first start.
  */
 public class IntroActivity extends Activity {
     @Override

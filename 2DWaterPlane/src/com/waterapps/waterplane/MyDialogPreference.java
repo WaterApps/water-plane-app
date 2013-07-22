@@ -5,7 +5,7 @@ import android.preference.DialogPreference;
 import android.util.AttributeSet;
 
 /**
- * Created by steve on 6/27/13.
+ * A very barebones extension of DialogPreference.
  */
 public class MyDialogPreference extends DialogPreference {
 

@@ -14,6 +14,10 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+/**
+ * A custom Preference object using a SeekBar.
+ */
+
 public class SeekBarPreference extends Preference implements OnSeekBarChangeListener {
 	
 	private final String TAG = getClass().getName();
