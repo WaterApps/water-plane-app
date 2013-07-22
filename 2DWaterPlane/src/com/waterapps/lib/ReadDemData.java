@@ -6,6 +6,15 @@ package com.waterapps.lib;
 
 import java.net.URI;
 
+/**
+ * An interface to read DEM data from files
+ */
 public interface ReadDemData {
+
+    /**
+     * Reads a DemData object from a specified file
+     * @param fileUri File location to be read
+     * @return DemData object read from file
+     */
     public DemData readFromFile(URI fileUri);
 }
