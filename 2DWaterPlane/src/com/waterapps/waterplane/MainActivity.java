@@ -558,8 +558,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
 				break;
 				
 			default:
-                hideMarkerBottomText();
-                showElevationControls();
                 showNormalAB();
 				break;
 		}

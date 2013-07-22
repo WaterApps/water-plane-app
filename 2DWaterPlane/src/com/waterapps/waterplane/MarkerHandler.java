@@ -12,6 +12,9 @@ import com.waterapps.lib.CustomMarker;
  */
 public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerClickListener {
 
+    /**
+     * Updates text display in ManinActivity
+     */
     public static void setText() {
         double elevationDouble = MainActivity.demData.elevationFromLatLng(MainActivity.userLocation);
         double elevationDelta =  elevationDouble - MainActivity.waterLevelMeters;
@@ -36,6 +39,10 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
         //MainActivity.updateMarkers();
     }
 
+    /**
+     * When a marker is dragged, continually update text
+     * @param marker The marker being dragged
+     */
 	@Override
 	public void onMarkerDrag(Marker marker) {
 		// TODO Auto-generated method stub
@@ -70,45 +77,42 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
 		  CustomMarker.setUserElevation(elevationDouble);
 	}
 
+    /**
+     * Update marker graphics when a drag is completed
+     * @param marker
+     */
 	@Override
 	public void onMarkerDragEnd(Marker marker) {
 		MainActivity.updateMarkers();
-		
 	}
 
+    /**
+     * Do nothing when a marker drag begins
+     * @param marker
+     */
 	@Override
 	public void onMarkerDragStart(Marker marker) {
 		// TODO Auto-generated method stub
 		
 	}
 
+    /**
+     * When a marker is clicked, set it as selected
+     * @param marker The marker being clicked
+     * @return Whether or not click was handled
+     */
     @Override
     public boolean onMarkerClick(Marker marker) {
-        MainActivity.hideElevationControls();
+        //if this isn't the user location marker, set it as selected.
         if(marker.getTitle().equals("true") | marker.getTitle().equals("false")) {
             CustomMarker.setSelected(marker);
         }
 
-        /*
-        if (marker.getTitle().equals("true")) {
-            MainActivity.showHiddenMarkerAB();
-            if (marker.equals(CustomMarker.getSelected())) {
-                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow_selected));
-            }
-            else {
-                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.arrow));
-            }
-            marker.setTitle("false");
-        }
-        else if (marker.getTitle().equals("false")) {
-            marker.setTitle("true");
-            MainActivity.showMarkerAB();
-        }
-        */
-
+        //if the marker text is visible
         if (marker.getTitle().equals("true")) {
             MainActivity.showMarkerAB();
         }
+        //if the marker text is hidden
         if (marker.getTitle().equals("false")) {
             MainActivity.showHiddenMarkerAB();
         }
