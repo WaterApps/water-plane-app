@@ -10,10 +10,15 @@ import java.net.URI;
 import com.ibm.util.CoordinateConversion;
 
 /**
- * Created by steve on 5/30/13.
+ * Reads data from a GeoTIFF into a DemData object
  */
 public class ReadGeoTiff implements ReadDemData {
 
+    /**
+     * Reads data from a GeoTIFF into a DemData object
+     * @param fileUri File location to be read
+     * @return The DEM data
+     */
     public DemData readFromFile(URI fileUri) {
         DemData raster = new DemData();
         raster.setMaxElevation(Float.NEGATIVE_INFINITY);
@@ -26,10 +31,10 @@ public class ReadGeoTiff implements ReadDemData {
         //float nodata = Float.parseFloat(noDataString);
         float nodata = -9999.0f;
 
+        //loop throuogh each pixel, calculating min and max along the way and not setting nodata points
         for(int i=0; i<raster.getNrows(); i++) {
             for(int j=0; j<raster.getNcols(); j++) {
                 raster.elevationData[i][raster.getNcols()-1-j] = pixels[j+(raster.getNcols()*i)];
-                //Log.e("elevation", Double.toString(raster.getElevationData()[i][raster.getNcols()-1-j]));
                 if (raster.getElevationData()[i][raster.getNcols()-1-j] != nodata ) {
                     if (raster.getElevationData()[i][raster.getNcols()-1-j] < raster.getMinElevation()) raster.setMinElevation(raster.getElevationData()[i][raster.getNcols()-1-j]);
                     if (raster.getElevationData()[i][raster.getNcols()-1-j] > raster.getMaxElevation()) raster.setMaxElevation(raster.getElevationData()[i][raster.getNcols()-1-j]);
@@ -41,21 +46,20 @@ public class ReadGeoTiff implements ReadDemData {
             }
         }
 
-        Log.i("min elevation", Double.toString(raster.getMinElevation()));
-        Log.i("max elevation", Double.toString(raster.getMaxElevation()));
-        //float []anchor = nativeTiffGetCornerLatitude();
+        //read latitude and longitude (assumed to the UTM format)
         float longitude = TiffDecoder.nativeTiffGetCornerLongitude();
         float latitude = TiffDecoder.nativeTiffGetCornerLatitude();
         double latLng[];
+
+        //convert from UTM->LatLng as GMaps expects
         CoordinateConversion conversion = new CoordinateConversion();
         String UTM = TiffDecoder.nativeTiffGetParams();
-        Log.d("params", UTM);
         String UTMZone = UTM.substring(18, 20).concat(" ").concat(UTM.substring(20, 21)).concat(" ");
-        Log.d("utmzone", UTMZone);
         latLng = conversion.utm2LatLon(UTMZone + Integer.toString((int)longitude) + " " + Integer.toString((int)latitude));
         double scaleX = TiffDecoder.nativeTiffGetScaleX();
         double scaleY = TiffDecoder.nativeTiffGetScaleY();
 
+        //calculate position of northeast corner, as only southwest and scale are provided
         double width = scaleX*raster.getNrows()/(111111.0);
         double height = scaleY*raster.getNcols()/(111111.0*Math.cos(Math.toRadians(latLng[0])));
         raster.setSouthWest(new LatLng(latLng[0] - width, latLng[1]));
