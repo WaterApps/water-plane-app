@@ -470,7 +470,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
 	    }
 
         else if (item.getItemId() == R.id.menu_center) {
-            map.animateCamera(CameraUpdateFactory.newLatLngBounds(demData.getFieldBounds(), 50));
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(demData.getDemBounds(), 50));
         }
 
         else if(item.getItemId() == R.id.menu_coloring) {
@@ -647,7 +647,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
             //this unfortunately creates annoying flickering
             //currently not aware of any way to avoid this
             GroundOverlay ppo = field.prevoverlay;
-            field.prevoverlay = createOverlay(bitmap, field.getFieldBounds());
+            field.prevoverlay = createOverlay(bitmap, field.getDemBounds());
             if (transparency) {
                 field.prevoverlay.setTransparency(alpha);
             }

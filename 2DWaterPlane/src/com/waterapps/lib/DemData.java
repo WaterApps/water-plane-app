@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by Steve on 7/21/13.
+ * Stores data read in from a DEM, as both raw floats and a bitmap representation.
  */
 public class DemData {
     private int ncols;
@@ -40,7 +40,7 @@ public class DemData {
     Polyline polyline;
 
     //defines the edges of the field
-    private LatLngBounds fieldBounds;
+    private LatLngBounds demBounds;
 
     static MapFragment mapFragment;
     public static SeekBar seekBar;
@@ -50,10 +50,10 @@ public class DemData {
         setElevationBitmap(bitmap);
         sw = southwest;
         ne = northeast;
-        setFieldBounds(new LatLngBounds(sw, ne));
+        setDemBounds(new LatLngBounds(sw, ne));
         setMinElevation((float)minHeight);
         setMaxElevation((float)maxHeight);
-        prevoverlay = createOverlay(bitmap, getFieldBounds());
+        prevoverlay = createOverlay(bitmap, getDemBounds());
     }
 
     public DemData(int w, int h, float [][]data) {
@@ -94,6 +94,10 @@ public class DemData {
         return new LatLngBounds(getLowerLeft(), getUpperRight());
     }
 
+    /**
+     * Calculates the center of the DEM area
+     * @return Calculated center
+     */
     public LatLng getCenter() {
         LatLngBounds bounds = getBounds();
         LatLng sw = bounds.southwest;
@@ -103,6 +107,10 @@ public class DemData {
         return new LatLng(newLat, newLong);
     }
 
+    /**
+     * Generates a bitmap from the raw float data
+     * @return Generated bitmap
+     */
     public Bitmap getBitmap() {
         Log.i("bitmap", "bitmap being created");
         Bitmap bitmap;
@@ -189,6 +197,9 @@ public class DemData {
         this.ne = upperRight;
     }
 
+    /**
+     * Calculates the upper and lower slider values to set for the field, based on upper/lower 3% of data
+     */
     public void calculateTenths() {
         int size = nrows*ncols;
         float []tempArray = new float[size];
@@ -219,7 +230,7 @@ public class DemData {
     }
 
     public void setBounds(LatLngBounds bounds) {
-        setFieldBounds(bounds);
+        setDemBounds(bounds);
         ne = bounds.northeast;
         sw = bounds.southwest;
     }
@@ -232,7 +243,11 @@ public class DemData {
         sw = southwest;
     }
 
-    //creates an overlay view of the field on the specified map object
+    /**
+     * Creates an overlay view of the field on the specified map object
+     * @param map Map to overlay on
+     * @return Generated overlay
+     */
     public GroundOverlay createOverlay(GoogleMap map) {
         PolylineOptions rectOptions = new PolylineOptions()
                 .add(new LatLng(sw.latitude, ne.longitude))
@@ -244,12 +259,16 @@ public class DemData {
 
         GroundOverlay groundOverlay = map.addGroundOverlay(new GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromBitmap(getElevationBitmap()))
-                .positionFromBounds(getFieldBounds())
+                .positionFromBounds(getDemBounds())
                 .transparency(0));
         groundOverlay.setVisible(true);
         return groundOverlay;
     }
 
+    /**
+     * Draws a PolyLine around the boundaries of the DEM data
+     * @return Generated PolyLine
+     */
     public Polyline updatePolyLine() {
         polyline.remove();
         PolylineOptions rectOptions = new PolylineOptions()
@@ -261,14 +280,15 @@ public class DemData {
                 .zIndex(1.0f); // Closes the polyline.
         return polyline = mapFragment.getMap().addPolyline(rectOptions);
     }
-    //returns elevation of given point
-    public double elevationFromLatLng(LatLng point) {
-        /*
-		System.out.println(getFieldBounds());
-		System.out.println(point);
-		*/
 
-        if (getFieldBounds().contains(point)) {
+    /**
+     * Gets elevation of a point
+     * @param point Location to get elevation from
+     * @return Elevation of the point
+     */
+    public double elevationFromLatLng(LatLng point) {
+
+        if (getDemBounds().contains(point)) {
             //use linear interpolation to figure out which pixel to get data from
             //should be accurate since fields <= ~1 mile wide
             double north = ne.latitude;
@@ -300,6 +320,12 @@ public class DemData {
         }
     }
 
+    /**
+     * Creates a Google Maps overlay of the given bitmap at the given location
+     * @param overlayBitmap Bitmap to draw
+     * @param bounds Location to draw
+     * @return The generated Google Maps GroundOverlay object
+     */
     private GroundOverlay createOverlay(Bitmap overlayBitmap, LatLngBounds bounds) {
         BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(overlayBitmap);
         GoogleMap map = mapFragment.getMap();
@@ -327,19 +353,29 @@ public class DemData {
         this.elevationBitmap = elevationBitmap;
     }
 
-    public LatLngBounds getFieldBounds() {
-        return fieldBounds;
+    public LatLngBounds getDemBounds() {
+        return demBounds;
     }
 
-    public void setFieldBounds(LatLngBounds fieldBounds) {
-        this.fieldBounds = fieldBounds;
+    /**
+     * Sets the bounds of the DEM
+     * @param demBounds
+     */
+    public void setDemBounds(LatLngBounds demBounds) {
+        this.demBounds = demBounds;
     }
 
+    /**
+     * Finds min and max elevation along a line between two points
+     * @param p1 Point 1
+     * @param p2 Point 2
+     * @return [min elevation, max elevation] along line
+     */
     public float[] getMinMaxLine(LatLng p1, LatLng p2) {
 
         List<Integer> values = new ArrayList<Integer>();
         int x1 = 1, x2 = 1, y1 = 1, y2 = 1;
-        if (getFieldBounds().contains(p1) && getFieldBounds().contains(p2)) {
+        if (getDemBounds().contains(p1) && getDemBounds().contains(p2)) {
             //use linear interpolation to figure out which pixel to get data from
             //should be accurate since fields <= ~1 mile wide
             double north = ne.longitude;
@@ -406,10 +442,13 @@ public class DemData {
         return returnValue;
     }
 
+    /**
+     * Takes a new water elevation and updates the bitmap to reflect the change
+     * @param level New water level
+     */
     public void setWaterLevel(double level) {
         seekBar.setProgress((int)(255.0*(level-MainActivity.sliderMin)/(MainActivity.sliderMax-MainActivity.sliderMin)));
-        //updateColors();
-        //MainActivity.updateColors(this);
+        MainActivity.updateColors(this);
     }
 
 }
