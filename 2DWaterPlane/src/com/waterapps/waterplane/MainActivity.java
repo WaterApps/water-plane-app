@@ -50,57 +50,61 @@ import java.util.List;
 
 import static android.graphics.Color.HSVToColor;
 
+/**
+ * The app's main activity.
+ */
 public class MainActivity extends Activity implements OnMapClickListener {
-private static final int ADD_MODE = 1;
-GroundOverlay prevoverlay;
-static DemData demData;
-static List<CustomMarker> markers;
-static LatLng userLocation;
-static int mode;
-public static double waterLevelMeters;
-LocationManager locationManager;
-static Marker userMarker;
-private Uri fileUri;
-static TextView ElevationTextView;
-static GoogleMap map;
-public static String demDirectory = "/dem";
-static boolean drag_mode = false;
-static LinearLayout elevationControls;
-static LinearLayout markerBottomText;
-static ActionBar actionBar;
-static boolean currentlyDrawing;
-public static boolean transparency;
-public static boolean coloring;
-public static boolean hasGPS;
-public static Button buttonDelete;
-public static float sliderMin;
-public static float sliderMax;
-public static float defaultSliderMin;
-public static float defaultSliderMax;
-static TextView editMin;
-static TextView editMax;
-public static int hsvColors[];
-public static int hsvTransparentColors[];
-static float alpha;
-public static SharedPreferences prefs;
-public static Context context;
-static boolean following;
-public static Resources resources;
-static ArrayList<DemFile> demFiles;
-DemFile currentlyLoaded;
-private boolean firstStart;
-public static LatLngBounds demBounds;
-static SeekBar seekBar;
-static MapFragment mapFrag;
-private static final int FIRST_START = 42;
-private static final int INITIAL_LOAD = 6502;
-static TextView waterElevationTextView;
-static boolean markerAB;
-static TextView appName;
-static Button showButton;
-static Button hideButton;
-static ArrayList<Polyline> demOutlines;
-public static boolean mapReady;
+    private static final int ADD_MODE = 1;
+    GroundOverlay prevoverlay;
+    static DemData demData;
+    static List<CustomMarker> markers;
+    static LatLng userLocation;
+    static int mode;
+    public static double waterLevelMeters;
+    LocationManager locationManager;
+    static Marker userMarker;
+    private Uri fileUri;
+    static TextView ElevationTextView;
+    static GoogleMap map;
+    public static String demDirectory = "/dem";
+    static boolean drag_mode = false;
+    static LinearLayout elevationControls;
+    static LinearLayout markerBottomText;
+    static ActionBar actionBar;
+    static boolean currentlyDrawing;
+    public static boolean transparency;
+    public static boolean coloring;
+    public static boolean hasGPS;
+    public static Button buttonDelete;
+    public static float sliderMin;
+    public static float sliderMax;
+    public static float defaultSliderMin;
+    public static float defaultSliderMax;
+    static TextView editMin;
+    static TextView editMax;
+    public static int hsvColors[];
+    public static int hsvTransparentColors[];
+    static float alpha;
+    public static SharedPreferences prefs;
+    public static Context context;
+    static boolean following;
+    public static Resources resources;
+    static ArrayList<DemFile> demFiles;
+    DemFile currentlyLoaded;
+    private boolean firstStart;
+    public static LatLngBounds demBounds;
+    static SeekBar seekBar;
+    static MapFragment mapFrag;
+    private static final int FIRST_START = 42;
+    private static final int INITIAL_LOAD = 6502;
+    static TextView waterElevationTextView;
+    static boolean markerAB;
+    static TextView appName;
+    static Button showButton;
+    static Button hideButton;
+    static ArrayList<Polyline> demOutlines;
+    public static boolean mapReady;
+
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         mapReady = false;
@@ -947,7 +951,7 @@ public static boolean mapReady;
         //attempt to load last used DEM, if it still exists
         Log.d("demfilename", prefs.getString("last_dem", "foo"));
         File demFile = new File(prefs.getString("last_dem", "foo"));
-        if(demFile.isFile()) {
+        if(demFile.exists() && demFile.isFile()) {
             DemData raster = new DemData();
             new ReadDemDataTask(this, raster, demFile.getName()).execute(UritoURI(Uri.fromFile(demFile)));
             setCurrentlyLoaded(prefs.getString("last_dem", "foo"));
@@ -957,12 +961,33 @@ public static boolean mapReady;
         File f = new File(path);
 
         //if DEM dir doesn't exist, create it and copy sample TIFF in, then open it
-        if (!f.isDirectory()) {
+        if (!f.exists()) {
             f.mkdir();
-            copyAssets();
+            copyAssets(path);
             DemData raster = new DemData();
-            new ReadDemDataTask(this, raster).execute(UritoURI(Uri.fromFile(new File(demDirectory+"Feldun.tif"))));
-            setCurrentlyLoaded(demDirectory+"Feldun.tif");
+            new ReadDemDataTask(this, raster).execute(UritoURI(Uri.fromFile(new File(path+"Feldun.tif"))));
+            setCurrentlyLoaded(path+"Feldun.tif");
+            return;
+        }
+        //exists, but is a file
+        else if(f.isFile()) {
+            for(int i=0; i<10; i++) {
+                path = demDirectory + Integer.toString(i);
+                f = new File(path);
+                if (!f.exists()) {
+                    f.mkdir();
+                    copyAssets(path);
+                    DemData raster = new DemData();
+                    Log.e("MainActivity", "dem dir was a file");
+                    new ReadDemDataTask(this, raster).execute(UritoURI(Uri.fromFile(new File(path+"/Feldun.tif"))));
+                    setCurrentlyLoaded(path+"Feldun.tif");
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("last_dem", path+"/Feldun.tif");
+                    editor.putString("dem_dir", path);
+                    editor.commit();
+                    return;
+                }
+            }
             return;
         }
         //selected directory exists
@@ -982,7 +1007,7 @@ public static boolean mapReady;
 
             //if no TIFFs, copy sample into dir and open
             if (count == 0) {
-                copyAssets();
+                copyAssets(path);
                 DemData raster = new DemData();
                 new ReadDemDataTask(this, raster).execute(UritoURI(Uri.fromFile(new File(demDirectory+"Feldun.tif"))));
                 setCurrentlyLoaded(demDirectory+"Feldun.tif");
@@ -1003,7 +1028,7 @@ public static boolean mapReady;
     }
 
     //copies a file from assets to SD
-    private void copyAssets() {
+    private void copyAssets(String path) {
         AssetManager assetManager = getAssets();
         String[] files = null;
         try {
@@ -1016,7 +1041,7 @@ public static boolean mapReady;
             OutputStream out = null;
             try {
                 in = assetManager.open(filename);
-                File outFile = new File(demDirectory, filename);
+                File outFile = new File(path, filename);
                 out = new FileOutputStream(outFile);
                 copyFile(in, out);
                 in.close();
