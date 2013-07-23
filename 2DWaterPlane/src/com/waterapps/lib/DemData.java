@@ -21,6 +21,7 @@ import com.waterapps.waterplane.MainActivity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -302,6 +303,7 @@ public class DemData {
             double x = (double) width*(point.longitude-west)/(east-west);
             double y = (double) height*(north - point.latitude)/(north-south);
 
+            Log.d("x", Double.toString(x));
             //retrieve packed int
             int waterLevel = getElevationBitmap().getPixel((int)x, (int)y);
 
@@ -318,6 +320,24 @@ public class DemData {
             //point isn't in the field
             return 0.0;
         }
+    }
+
+    ElevationPoint elevationPointFromPixel(int x, int y) {
+        double north = ne.latitude;
+        double east = ne.longitude;
+        double south = sw.latitude;
+        double west = sw.longitude;
+        double longitude = west+(((double)y/(double)nrows)*(east-west));
+        double latitude = south+(((double)x/(double)ncols)*(north-south));
+        LatLng location = new LatLng(latitude, longitude);
+
+        Log.d("blarg north", Double.toString(north));
+        Log.d("blarg south", Double.toString(south));
+        Log.d("blarg east", Double.toString(east));
+        Log.d("blarg west", Double.toString(west));
+        Log.d("blarg lat", Double.toString(latitude));
+        Log.d("blarg long", Double.toString(longitude));
+        return new ElevationPoint(elevationFromLatLng(location), location);
     }
 
     /**
@@ -366,14 +386,15 @@ public class DemData {
     }
 
     /**
-     * Finds min and max elevation along a line between two points
+     * Finds elevation at every pixel in DEM between points
      * @param p1 Point 1
      * @param p2 Point 2
-     * @return [min elevation, max elevation] along line
+     * @return list of elevations connecting the points
      */
-    public float[] getMinMaxLine(LatLng p1, LatLng p2) {
-
-        List<Integer> values = new ArrayList<Integer>();
+    public List<ElevationPoint> getLineElevations(LatLng p1, LatLng p2) {
+        ElevationPoint min;
+        ElevationPoint max;
+        List<ElevationPoint> values = new ArrayList<ElevationPoint>();
         int x1 = 1, x2 = 1, y1 = 1, y2 = 1;
         if (getDemBounds().contains(p1) && getDemBounds().contains(p2)) {
             //use linear interpolation to figure out which pixel to get data from
@@ -406,7 +427,7 @@ public class DemData {
         int err = dx - dy;
 
         while (true) {
-            values.add(elevationBitmap.getPixel(x1, y1));
+            values.add(elevationPointFromPixel(x1, y1));
 
             if (x1 == x2 && y1 == y2) {
                 break;
@@ -424,22 +445,91 @@ public class DemData {
                 y1 = y1 + sy;
             }
         }
-        Collections.sort(values);
-        Log.i("thing", "text");
 
-        double min = getMinElevation() + ((double)values.get(0)*(maxElevation-getMinElevation())/255.0);
-        double max = getMinElevation() + ((double)values.get(values.size()-1)*(maxElevation-getMinElevation())/255.0);
+        Iterator<ElevationPoint> iter = values.iterator();
+        ElevationPoint p;
+        while (iter.hasNext()) {
+            p = iter.next();
+        }
+        return values;
+    }
 
-        if (elevationFromLatLng(p1) < elevationFromLatLng(p2)) {
-            min = elevationFromLatLng(p1);
-            max = elevationFromLatLng(p2);
+    /**
+     * Finds the lowest elevation on the line connecting the two points
+     * @param p1
+     * @param p2
+     * @return
+     */
+    public ElevationPoint getMinLine(LatLng p1, LatLng p2) {
+        List<ElevationPoint> list = getLineElevations(p1, p2);
+        Collections.sort(list);
+        return list.get(0);
+    }
+
+    /**
+     * Finds the lowest elevation on the polyline connecting the points
+     * @param points
+     * @return
+     */
+    public ElevationPoint getMinLine(List<LatLng> points) {
+        LatLng point1, point2;
+        Iterator<LatLng> iter = points.iterator();
+        ArrayList<ElevationPoint> elevationPoints = new ArrayList<ElevationPoint>();
+        if(iter.hasNext()) {
+            point1 = iter.next();
         }
-        else {
-            max = elevationFromLatLng(p2);
-            min = elevationFromLatLng(p1);
+        else return null;
+        if(iter.hasNext()) {
+            point2 = iter.next();
         }
-        float[] returnValue = {(float)min, (float)max};
-        return returnValue;
+        else return null;
+        elevationPoints.add(getMinLine(point1, point2));
+        while (iter.hasNext()) {
+            point1 = point2;
+            point2 = iter.next();
+            elevationPoints.add(getMinLine(point1, point2));
+        }
+        Collections.sort(elevationPoints);
+        return elevationPoints.get(0);
+    }
+
+    /**
+     * Finds the highest elevation on the line connecting the two points
+     * @param p1
+     * @param p2
+     * @return
+     */
+    public ElevationPoint getMaxLine(LatLng p1, LatLng p2) {
+        List<ElevationPoint> list = getLineElevations(p1, p2);
+        Collections.sort(list);
+        return list.get(list.size()-1);
+    }
+
+    /**
+     * Finds the highest elevation on the polyline connecting the points
+     * @param points
+     * @return
+     */
+    public ElevationPoint getMaxLine(List<LatLng> points) {
+        LatLng point1, point2;
+        Iterator<LatLng> iter = points.iterator();
+        ArrayList<ElevationPoint> elevationPoints = new ArrayList<ElevationPoint>();
+        if(iter.hasNext()) {
+            point1 = iter.next();
+        }
+        else return null;
+        if(iter.hasNext()) {
+            point2 = iter.next();
+        }
+        else return null;
+        elevationPoints.add(getMinLine(point1, point2));
+        while (iter.hasNext()) {
+            point1 = point2;
+            point2 = iter.next();
+            elevationPoints.add(getMinLine(point1, point2));
+        }
+        Collections.sort(elevationPoints);
+        return elevationPoints.get(elevationPoints.size()-1);
     }
 
     /**

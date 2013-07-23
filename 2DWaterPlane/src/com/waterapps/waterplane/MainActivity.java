@@ -49,12 +49,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import static android.graphics.Color.HSVToColor;
+import static android.graphics.Color.red;
 
 /**
  * The app's main activity.
  */
 public class MainActivity extends Activity implements OnMapClickListener {
     private static final int ADD_MODE = 1;
+    private static final int LINE_MODE = 57832;
     GroundOverlay prevoverlay;
     static DemData demData;
     static List<CustomMarker> markers;
@@ -104,6 +106,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
     static ArrayList<Polyline> demOutlines;
     public static boolean mapReady;
     static Resources resources;
+    ArrayList<LatLng> linePoints;
+    PolylineOptions currentLineOptions;
+    Polyline currentLine;
+    ArrayList<MapLine> lines;
 
     public static Context getContext() {
         return context;
@@ -111,6 +117,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
+        lines = new ArrayList<MapLine>();
+        currentLineOptions = new PolylineOptions().color(Color.WHITE).width(5.0f);
+        currentLine = null;
+        linePoints = new ArrayList<LatLng>();
         resources = getResources();
         mapReady = false;
         demOutlines = new ArrayList<Polyline>();
@@ -151,6 +161,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         actionBar.setDisplayShowCustomEnabled(true);
 		MyMapFragment mapFragment = (MyMapFragment) getFragmentManager().findFragmentById(R.id.map);
 		map = mapFragment.getMap();
+        MapLine.setMap(map);
 		map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 		map.setMyLocationEnabled(true);
 		map.setOnMapClickListener(this);
@@ -528,6 +539,18 @@ public class MainActivity extends Activity implements OnMapClickListener {
             startActivity(intent);
         }
 
+        else if(item.getItemId() == R.id.menu_line) {
+            if(mode == LINE_MODE) {
+                mode = 0;
+                lines.add(new MapLine(currentLine));
+                currentLineOptions = new PolylineOptions().color(Color.WHITE).width(5.0f);
+            }
+            else {
+                mode = LINE_MODE;
+                linePoints.clear();
+            }
+        }
+
 	    else {
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -541,6 +564,15 @@ public class MainActivity extends Activity implements OnMapClickListener {
      */
 	@Override
 	public void onMapClick (LatLng point) {
+        //handle adding a line
+        if(mode == LINE_MODE) {
+            currentLineOptions.add(point);
+            if (currentLine != null) {
+                currentLine.remove();
+            }
+            currentLine = map.addPolyline(currentLineOptions);
+        }
+
         //handle markers
 		CustomMarker.setSelected(null);
         showNormalAB();
@@ -779,8 +811,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
     public static void onFileRead(DemData raster) {
 
+        demData.setNcols(raster.getNcols());
+        demData.setNrows(raster.getNrows());
         demData.setBounds(raster.getBounds());
-        System.out.println(raster.getBounds());
         raster.calculateTenths();
         demData.setMinElevation((float)raster.getMinElevation());
         demData.setMaxElevation((float)raster.getMaxElevation());
@@ -1183,6 +1216,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
     public static Resources getResource() {
         return resources;
+    }
+
+    public static DemData getDemData() {
+        return demData;
     }
 
 }

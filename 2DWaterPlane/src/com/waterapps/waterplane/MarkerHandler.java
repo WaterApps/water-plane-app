@@ -103,6 +103,12 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
      */
     @Override
     public boolean onMarkerClick(Marker marker) {
+
+        //if this is a marker showing the min/max of a line, use default behavior
+        //which is to toggle visibility of info window
+        if(marker.getTitle().contains("Min") | marker.getTitle().contains("Max")) {
+            return false;
+        }
         //if this isn't the user location marker, set it as selected.
         if(marker.getTitle().equals("true") | marker.getTitle().equals("false")) {
             CustomMarker.setSelected(marker);
