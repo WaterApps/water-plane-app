@@ -8,13 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+/**
+ * Wrapper around MapFragment to intercept touch events
+ */
 public class MyMapFragment extends MapFragment {
 	public View mOriginalContentView;
 	public TouchableWrapper mTouchView;
-	
-	
-	
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 	mOriginalContentView = super.onCreateView(inflater, parent, savedInstanceState);

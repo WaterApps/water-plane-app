@@ -5,6 +5,9 @@ import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.net.URI;
 
+/**
+ * Describes metadata of a DEM file (location, filename, timestamp)
+ */
 public class DemFile {
     int id;
     float sw_lat;

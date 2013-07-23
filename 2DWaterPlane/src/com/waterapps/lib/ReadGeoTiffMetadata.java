@@ -10,7 +10,7 @@ import java.net.URI;
 import java.text.DateFormat;
 
 /**
- * Created by steve on 6/7/13.
+ * Reads metadata from a GeoTIFF file into a DemFile object
  */
 public class ReadGeoTiffMetadata {
     public static DemFile readMetadata(File file) {
