@@ -9,25 +9,43 @@
     android:focusableInTouchMode="true">
     
 	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	    xmlns:tools="http://schemas.android.com/tools"
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:orientation="vertical"
-	    tools:context=".MainActivity"
-        android:animateLayoutChanges="true">
-		
-            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:map="http://schemas.android.com/apk/res-auto"
-                  android:id="@+id/map"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_weight="5"
-                  class="com.waterapps.lib.MyMapFragment"
-                  map:cameraTargetLat="40.9779943136"
-                  map:cameraTargetLng="-86.1949964826"
-                  map:cameraZoom="15"
-                  />
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            tools:context=".MainActivity"
+            android:animateLayoutChanges="true">
 
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                            android:id="@+id/map"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="5">
+                <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                      xmlns:map="http://schemas.android.com/apk/res-auto"
+                      android:id="@+id/map"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="5"
+                      class="com.waterapps.lib.MyMapFragment"
+                      />
+                <Button
+                    android:id="@+id/buttonDeleteLine"
+                    android:text="Delete"
+                    android:layout_alignBottom="@id/map"
+                    android:layout_alignRight="@id/map"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
+                <Button
+                        android:id="@+id/buttonDrawLine"
+                        android:text="Finished Drawing Line"
+                        android:layout_alignBottom="@id/map"
+                        android:layout_alignRight="@id/map"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"/>
+            </RelativeLayout>
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                           android:id="@+id/elevationControls"
                           android:layout_width="fill_parent"

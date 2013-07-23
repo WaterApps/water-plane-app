@@ -78,6 +78,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
     public static boolean coloring;
     public static boolean hasGPS;
     public static Button buttonDelete;
+    static Button buttonDrawLine;
+    static Button buttonDeleteLine;
     public static float sliderMin;
     public static float sliderMax;
     public static float defaultSliderMin;
@@ -106,10 +108,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
     static ArrayList<Polyline> demOutlines;
     public static boolean mapReady;
     static Resources resources;
-    ArrayList<LatLng> linePoints;
     PolylineOptions currentLineOptions;
     Polyline currentLine;
     ArrayList<MapLine> lines;
+    ArrayList<Marker> lineJoints;
 
     public static Context getContext() {
         return context;
@@ -118,9 +120,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         lines = new ArrayList<MapLine>();
+        lineJoints = new ArrayList<Marker>();
         currentLineOptions = new PolylineOptions().color(Color.WHITE).width(5.0f);
         currentLine = null;
-        linePoints = new ArrayList<LatLng>();
         resources = getResources();
         mapReady = false;
         demOutlines = new ArrayList<Polyline>();
@@ -303,6 +305,43 @@ public class MainActivity extends Activity implements OnMapClickListener {
             }
         });
         buttonDelete.setVisibility(View.GONE);
+
+        //this button draws a line when points have been placed on map
+        buttonDrawLine = (Button) findViewById(R.id.buttonDrawLine);
+        buttonDrawLine.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if(currentLineOptions.getPoints().size() < 2) {
+                    Toast.makeText(context, "You must have at least 2 points selected.", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    mode = 0;
+                    lines.add(new MapLine(currentLine, lineJoints));
+                    lineJoints = new ArrayList<Marker>();
+                    currentLineOptions = new PolylineOptions().color(Color.WHITE).width(5.0f);
+                    currentLine = null;
+                    buttonDrawLine.setVisibility(View.GONE);
+                    showElevationControls();
+                }
+            }
+        });
+
+        buttonDeleteLine = (Button) findViewById(R.id.buttonDeleteLine);
+        buttonDeleteLine.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                buttonDeleteLine.setVisibility(View.GONE);
+                showElevationControls();
+               Iterator<MapLine> iter = lines.iterator();
+               while(iter.hasNext()) {
+                   MapLine l = iter.next();
+                   if(l.getMarker().equals(MapLine.getSelected())) {
+                       //remove from list
+                       lines.remove(l);
+                       //remove from map
+                       l.remove();
+                   }
+               }
+            }
+        });
         
 		updateColors(demData);
 
@@ -542,12 +581,13 @@ public class MainActivity extends Activity implements OnMapClickListener {
         else if(item.getItemId() == R.id.menu_line) {
             if(mode == LINE_MODE) {
                 mode = 0;
-                lines.add(new MapLine(currentLine));
                 currentLineOptions = new PolylineOptions().color(Color.WHITE).width(5.0f);
             }
             else {
                 mode = LINE_MODE;
-                linePoints.clear();
+                currentLineOptions = new PolylineOptions().color(Color.WHITE).width(5.0f);
+                buttonDrawLine.setVisibility(View.VISIBLE);
+                hideElevationControls();
             }
         }
 
@@ -566,11 +606,21 @@ public class MainActivity extends Activity implements OnMapClickListener {
 	public void onMapClick (LatLng point) {
         //handle adding a line
         if(mode == LINE_MODE) {
-            currentLineOptions.add(point);
-            if (currentLine != null) {
-                currentLine.remove();
+            if(demData.getBounds().contains(point)) {
+                if(currentLine != null) {
+                    currentLine.remove();
+                }
+                currentLineOptions.add(point);
+                currentLine = map.addPolyline(currentLineOptions);
+                lineJoints.add(map.addMarker(new MarkerOptions()
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.dot))
+                        .anchor(0.5f, 0.5f)
+                        .position(point)));
             }
-            currentLine = map.addPolyline(currentLineOptions);
+            else {
+                Toast toast = Toast.makeText(this, "Please place all points within DEM boundaries.", Toast.LENGTH_SHORT);
+                toast.show();
+            }
         }
 
         //handle markers
@@ -591,6 +641,11 @@ public class MainActivity extends Activity implements OnMapClickListener {
 				
 			default:
                 showNormalAB();
+                buttonDeleteLine.setVisibility(View.GONE);
+                if(mode != LINE_MODE) {
+                    showElevationControls();
+                }
+                MapLine.setSelected(null);
 				break;
 		}
 

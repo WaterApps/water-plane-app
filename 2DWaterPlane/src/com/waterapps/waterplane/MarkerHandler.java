@@ -1,11 +1,14 @@
 package com.waterapps.waterplane;
 
+import android.view.View;
+
 import java.text.DecimalFormat;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.model.Marker;
 import com.waterapps.lib.CustomMarker;
+import com.waterapps.lib.MapLine;
 
 /**
  * An implementation of the Google Maps marker callbacks.
@@ -103,11 +106,22 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
      */
     @Override
     public boolean onMarkerClick(Marker marker) {
+        if(marker == null) {
+            return true;
+        }
 
         //if this is a marker showing the min/max of a line, use default behavior
         //which is to toggle visibility of info window
+
         if(marker.getTitle().contains("Min") | marker.getTitle().contains("Max")) {
             return false;
+        }
+
+        //if this is a marker that identifies a line, set up appropriate UI
+        if(marker.getTitle().equals("Line")) {
+            MainActivity.buttonDeleteLine.setVisibility(View.VISIBLE);
+            MainActivity.hideElevationControls();
+            MapLine.setSelected(marker);
         }
         //if this isn't the user location marker, set it as selected.
         if(marker.getTitle().equals("true") | marker.getTitle().equals("false")) {

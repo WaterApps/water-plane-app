@@ -522,7 +522,7 @@ public class DemData {
             point2 = iter.next();
         }
         else return null;
-        elevationPoints.add(getMinLine(point1, point2));
+        elevationPoints.add(getMaxLine(point1, point2));
         while (iter.hasNext()) {
             point1 = point2;
             point2 = iter.next();
