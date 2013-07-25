@@ -747,27 +747,14 @@ public class MainActivity extends Activity implements OnMapClickListener {
             if (!coloring) {
                 //test each pixel, if below water level set blue, else set transparent
                 for (int i = 0; i < (width * height); i++) {
-                    if ((pixels[i] & 0x000000FF) < waterLevel) {
-                        //water is visible, set pixel to blue
-                        //pixels[i] = transparency ? 0x880000FF : 0xFF0000FF;
-                        pixels[i] = 0xFF0000FF;
-                    } else {
-                        //no water, set pixel transparent
-                        pixels[i] = 0x00000000;
-                    }
+                    pixels[i] = ((pixels[i] & 0x000000FF) < waterLevel) ? 0xFF0000FF : 0x00000000;
                 }
             }
             else {
                 //elevation shading is being used
                 for (int i = 0; i < (width * height); i++) {
-                    if ((pixels[i] & 0x000000FF) < waterLevel) {
-                        //water is visible, set pixel to appropriate color
-                        c=pixels[i] & 0xFF;
-                        pixels[i] =  hsvColors[c];
-                    } else {
-                        //no water, set pixel transparent
-                        pixels[i] = 0x00000000;
-                    }
+                    c = pixels[i] & 0x000000FF;
+                    pixels[i] = (c < waterLevel) ? hsvColors[c] : 0x00000000;
                 }
             }
             bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
