@@ -446,12 +446,33 @@ public class DemData {
             }
         }
 
-        Iterator<ElevationPoint> iter = values.iterator();
-        ElevationPoint p;
-        while (iter.hasNext()) {
-            p = iter.next();
-        }
         return values;
+    }
+
+    /**
+     * Finds elevation at every pixel in DEM along polyline
+     * @param points Points in polyline
+     * @return list of elevations connecting the points
+     */
+    public List<ElevationPoint> getLineElevations(List<LatLng> points) {
+        Iterator<LatLng> iter = points.iterator();
+        LatLng point1, point2;
+        ArrayList<ElevationPoint> elevationPoints = new ArrayList<ElevationPoint>();
+        if(iter.hasNext()) {
+            point1 = iter.next();
+        }
+        else return null;
+        if(iter.hasNext()) {
+            point2 = iter.next();
+        }
+        else return null;
+        elevationPoints.addAll(getLineElevations(point1, point2));
+        while (iter.hasNext()) {
+            point1 = point2;
+            point2 = iter.next();
+            elevationPoints.addAll(getLineElevations(point1, point2));
+        }
+        return elevationPoints;
     }
 
     /**

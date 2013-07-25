@@ -44,7 +44,7 @@
 
     <item android:id="@+id/menu_line"
           android:icon="@drawable/line"
-          android:title="Add Marker"
+          android:title="Add Line"
           android:showAsAction="always|withText" />
 
     <item android:id="@+id/menu_settings"

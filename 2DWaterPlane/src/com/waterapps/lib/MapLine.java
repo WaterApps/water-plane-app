@@ -1,6 +1,14 @@
 package com.waterapps.lib;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.SystemClock;
 import android.util.Log;
+import android.view.View;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -27,6 +35,12 @@ public class MapLine {
     ArrayList<Marker> joints;
     static GoogleMap map;
     private static Marker selected;
+    double minElevation;
+    double maxElevation;
+    float dpWidth;
+    float dpHeight;
+    List<ElevationPoint> points;
+    long prevTime;
 
     public MapLine(Polyline line, ArrayList<Marker> joints) {
         DecimalFormat df = new DecimalFormat("#.#");
@@ -51,7 +65,11 @@ public class MapLine {
         primaryMarker = map.addMarker(new MarkerOptions()
                 .position(centerOfLine(polyline))
                 .title("Line")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.star)));
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.linemarker)));
+        points = MainActivity.getDemData().getLineElevations(polyline.getPoints());
+        minElevation = MainActivity.getDemData().getMinLine(polyline.getPoints()).getElevation();
+        maxElevation = MainActivity.getDemData().getMaxLine(polyline.getPoints()).getElevation();
+        prevTime = SystemClock.elapsedRealtime();
     }
 
     public static void setMap(GoogleMap newMap) {
@@ -105,6 +123,68 @@ public class MapLine {
             iterator.next().remove();
         }
         joints = null;
+    }
+
+    /**
+     * Draws a side profile of the line
+     */
+    public void drawProfile() {
+        prevTime = SystemClock.elapsedRealtime();
+        int width = MainActivity.getMapWidth();
+        int height =  MainActivity.getMapHeight();
+        //sets dimensions to square of whichever side is smallest
+        width = height = width < height ? width : height;
+        Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        b.eraseColor(Color.TRANSPARENT);
+        Canvas c = new Canvas(b);
+        dpWidth = pixelToDP(width);
+        dpHeight = pixelToDP(height);
+        Paint p = new Paint();
+        p.setAntiAlias(true);
+        p.setStrokeWidth(5.0f);
+
+        float dpPerPoint = dpWidth/points.size();
+        float x = 0.0f;
+
+        //show current water level
+        p.setColor(Color.BLUE);
+        if(MainActivity.waterLevelMeters > minElevation) {
+            c.drawRect(0.0f, elevationToDP(MainActivity.waterLevelMeters), dpWidth, dpHeight, p);
+        }
+
+        //show current user elevation
+        p.setColor(Color.RED);
+        c.drawLine(0.0f, elevationToDP(MainActivity.getUserElevation()), dpWidth, elevationToDP(MainActivity.getUserElevation()), p);
+
+        //draw the elevation points
+        p.setColor(Color.BLACK);
+        Iterator<ElevationPoint> iter = points.iterator();
+        float y = elevationToDP(iter.next().getElevation());
+        float prevY = 0.0f;
+        while (iter.hasNext()) {
+            prevY = y;
+            y = elevationToDP(iter.next().getElevation());
+            c.drawLine(x, prevY, x+dpPerPoint, y, p);
+            x+=dpPerPoint;
+        }
+
+
+        //show fps
+        long time = SystemClock.elapsedRealtime();
+        long deltaT = time - prevTime;
+        prevTime = time;
+        int fps = (int)(1000/deltaT);
+        c.drawText(Integer.toString(fps), 0.0f, 20.0f, p);
+
+        MainActivity.iv.setImageBitmap(b);
+    }
+
+    private float pixelToDP(int px) {
+        return 2.0f*(float)px/MainActivity.getResource().getDisplayMetrics().density;
+    }
+
+    private float elevationToDP(double elevation) {
+        return dpHeight-(float)(dpHeight*(elevation-minElevation)/(maxElevation-minElevation));
     }
 
 }

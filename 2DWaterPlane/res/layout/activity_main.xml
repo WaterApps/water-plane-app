@@ -29,6 +29,11 @@
                       android:layout_weight="5"
                       class="com.waterapps.lib.MyMapFragment"
                       />
+                <ImageView
+                    android:id="@+id/graphView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"/>
                 <Button
                     android:id="@+id/buttonDeleteLine"
                     android:text="Delete"
@@ -37,6 +42,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"/>
+                <Button
+                        android:id="@+id/buttonShowProfile"
+                        android:text="Show Profile of Line"
+                        android:layout_alignBottom="@id/map"
+                        android:layout_alignLeft="@id/map"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"/>
                 <Button
                         android:id="@+id/buttonDrawLine"
                         android:text="Finished Drawing Line"

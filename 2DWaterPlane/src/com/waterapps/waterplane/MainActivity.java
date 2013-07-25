@@ -12,7 +12,9 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -22,7 +24,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.*;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -49,7 +53,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static android.graphics.Color.HSVToColor;
-import static android.graphics.Color.red;
 
 /**
  * The app's main activity.
@@ -112,6 +115,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
     Polyline currentLine;
     ArrayList<MapLine> lines;
     ArrayList<Marker> lineJoints;
+    static Button buttonShowProfile;
+    public static ImageView iv;
+    public static boolean profile;
 
     public static Context getContext() {
         return context;
@@ -119,6 +125,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
+        profile = false;
         lines = new ArrayList<MapLine>();
         lineJoints = new ArrayList<Marker>();
         currentLineOptions = new PolylineOptions().color(Color.WHITE).width(5.0f);
@@ -153,6 +160,14 @@ public class MainActivity extends Activity implements OnMapClickListener {
         elevationControls = (LinearLayout) findViewById(R.id.elevationControls);
         markerBottomText = (LinearLayout) findViewById(R.id.markerControls);
         actionBar = getActionBar();
+        iv = (ImageView) findViewById(R.id.graphView);
+        iv.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                iv.setVisibility(View.GONE);
+                mapFrag.getView().setVisibility(View.VISIBLE);
+                profile = false;
+            }
+        });
 
         //set display mode
         transparency = prefs.getBoolean("transparency_bool", true);
@@ -218,10 +233,17 @@ public class MainActivity extends Activity implements OnMapClickListener {
 		    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         }
 
-		//set button listeners
+		//get the Buttons
+        hideButton = (Button)findViewById(R.id.buttonHideMarker);
+        showButton = (Button)findViewById(R.id.buttonShowMarker);
+        buttonDelete = (Button) findViewById(R.id.buttonDeleteMarker);
+        buttonDeleteLine = (Button) findViewById(R.id.buttonDeleteLine);
+        buttonShowProfile = (Button) findViewById(R.id.buttonShowProfile);
+        buttonDrawLine = (Button) findViewById(R.id.buttonDrawLine);
+        final Button buttonPlus = (Button) findViewById(R.id.buttonPlus);
+        final Button buttonMinus = (Button) findViewById(R.id.buttonMinus);
 
         //increments elevation
-		final Button buttonPlus = (Button) findViewById(R.id.buttonPlus);
         buttonPlus.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Increase elevation
@@ -232,7 +254,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         });
 
         //decrements elevation
-        final Button buttonMinus = (Button) findViewById(R.id.buttonMinus);
         buttonMinus.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
             	// Decrease elevation
@@ -246,7 +267,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         appName = (TextView)findViewById(R.id.appName);
 
         //hides currently selected marker text
-        hideButton = (Button)findViewById(R.id.buttonHideMarker);
         hideButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Iterator<CustomMarker> i = markers.iterator();
@@ -267,7 +287,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         hideButton.setVisibility(View.GONE);
 
         //shows currently selected marker text
-        showButton = (Button)findViewById(R.id.buttonShowMarker);
         showButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Iterator<CustomMarker> i = markers.iterator();
@@ -288,7 +307,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         showButton.setVisibility(View.GONE);
 
         //deletes currently selected marker
-        buttonDelete = (Button) findViewById(R.id.buttonDeleteMarker);
         buttonDelete.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
             	Iterator<CustomMarker> i = markers.iterator();
@@ -307,7 +325,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         buttonDelete.setVisibility(View.GONE);
 
         //this button draws a line when points have been placed on map
-        buttonDrawLine = (Button) findViewById(R.id.buttonDrawLine);
         buttonDrawLine.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(currentLineOptions.getPoints().size() < 2) {
@@ -325,10 +342,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
             }
         });
 
-        buttonDeleteLine = (Button) findViewById(R.id.buttonDeleteLine);
+
+
         buttonDeleteLine.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 buttonDeleteLine.setVisibility(View.GONE);
+                buttonShowProfile.setVisibility(View.GONE);
                 showElevationControls();
                Iterator<MapLine> iter = lines.iterator();
                while(iter.hasNext()) {
@@ -340,6 +359,25 @@ public class MainActivity extends Activity implements OnMapClickListener {
                        l.remove();
                    }
                }
+            }
+        });
+
+        buttonShowProfile.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                buttonShowProfile.setVisibility(View.GONE);
+                mapFrag.getView().setVisibility(View.GONE);
+                showElevationControls();
+                iv.setVisibility(View.VISIBLE);
+                profile = true;
+                Iterator<MapLine> iter = lines.iterator();
+                MapLine l;
+                while (iter.hasNext()) {
+                    l = iter.next();
+                    if(l.getMarker().equals(MapLine.getSelected())) {
+                        l.drawProfile();
+                    }
+                }
+
             }
         });
         
@@ -406,7 +444,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
         }
     }
 
-	@Override
+
+
+    @Override
 	public void onPause() {
 		super.onPause();
 		locationManager.removeUpdates(locationListener);
@@ -588,6 +628,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 currentLineOptions = new PolylineOptions().color(Color.WHITE).width(5.0f);
                 buttonDrawLine.setVisibility(View.VISIBLE);
                 hideElevationControls();
+                Toast toast = Toast.makeText(getContext(), "Tap to add points to the line.", Toast.LENGTH_SHORT);
+                toast.show();
             }
         }
 
@@ -786,9 +828,21 @@ public class MainActivity extends Activity implements OnMapClickListener {
                       //update marker text
                       CustomMarker.setWaterElevation(waterLevelMeters);
 
+                    if(profile) {
+                        Iterator<MapLine> iter = lines.iterator();
+                        MapLine l;
+                        while (iter.hasNext()) {
+                            l = iter.next();
+                            if(l.getMarker().equals(MapLine.getSelected())) {
+                                l.drawProfile();
+                            }
+                        }
+                    }
+                    else {
                       //visual updates
                       updateMarkers();
                       updateColors(field);
+                    }
                 }
 
             }
@@ -1277,4 +1331,15 @@ public class MainActivity extends Activity implements OnMapClickListener {
         return demData;
     }
 
+    public static int getMapWidth() {
+        return mapFrag.getView().getWidth();
+    }
+
+    public static int getMapHeight() {
+        return mapFrag.getView().getHeight();
+    }
+
+    public static float getUserElevation() {
+        return (float)demData.elevationFromLatLng(userLocation);
+    }
 }

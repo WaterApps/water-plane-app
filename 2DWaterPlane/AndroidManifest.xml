@@ -74,6 +74,9 @@
         <meta-data
     		android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyC6ycnvq1hAKbdN4_CEQNViJnO_3xoLnmQ"/>
+        <meta-data
+                android:name="com.google.android.maps.v2.API_KEY"
+                android:value="AIzaSyAY8BOg0EEGKWKw4GacgquGVe6_KY9wjds"/>
     </application>
 
 </manifest>

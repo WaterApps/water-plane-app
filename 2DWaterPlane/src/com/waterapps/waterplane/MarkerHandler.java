@@ -106,7 +106,7 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
      */
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if(marker == null) {
+        if(marker == null || marker.getTitle() == null) {
             return true;
         }
 
@@ -122,6 +122,7 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
             MainActivity.buttonDeleteLine.setVisibility(View.VISIBLE);
             MainActivity.hideElevationControls();
             MapLine.setSelected(marker);
+            MainActivity.buttonShowProfile.setVisibility(View.VISIBLE);
         }
         //if this isn't the user location marker, set it as selected.
         if(marker.getTitle().equals("true") | marker.getTitle().equals("false")) {
