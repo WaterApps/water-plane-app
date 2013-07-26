@@ -41,16 +41,29 @@ public class MapLine {
     float dpHeight;
     List<ElevationPoint> points;
     long prevTime;
+    Bitmap lines;
 
     public MapLine(Polyline line, ArrayList<Marker> joints) {
         DecimalFormat df = new DecimalFormat("#.#");
         polyline = line;
         this.joints = joints;
-        ElevationPoint minPoint = MainActivity.getDemData().getMinLine(polyline.getPoints());
-        ElevationPoint maxPoint = MainActivity.getDemData().getMaxLine(polyline.getPoints());
+        points = MainActivity.getDemData().getLineElevations(polyline.getPoints());
 
-        Log.d("min elevation", Double.toString(minPoint.getElevation()));
-        Log.d("min location", minPoint.getLocation().toString());
+        //set min and max to +/- infinity
+        ElevationPoint minPoint = new ElevationPoint(Double.POSITIVE_INFINITY, new LatLng(0.0, 0.0));
+        ElevationPoint maxPoint = new ElevationPoint(Double.NEGATIVE_INFINITY, new LatLng(0.0, 0.0));
+        Iterator<ElevationPoint> iterator = points.iterator();
+        ElevationPoint point;
+
+        //find min and max elevation points
+        while (iterator.hasNext()) {
+            point = iterator.next();
+            minPoint = point.getElevation() < minPoint.getElevation() ? point : minPoint;
+            maxPoint = point.getElevation() > minPoint.getElevation() ? point : maxPoint;
+        }
+
+        minElevation = minPoint.getElevation();
+        maxElevation = maxPoint.getElevation();
 
         minMarker = map.addMarker(new MarkerOptions()
                 .position(minPoint.getLocation())
@@ -66,10 +79,8 @@ public class MapLine {
                 .position(centerOfLine(polyline))
                 .title("Line")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.linemarker)));
-        points = MainActivity.getDemData().getLineElevations(polyline.getPoints());
-        minElevation = MainActivity.getDemData().getMinLine(polyline.getPoints()).getElevation();
-        maxElevation = MainActivity.getDemData().getMaxLine(polyline.getPoints()).getElevation();
         prevTime = SystemClock.elapsedRealtime();
+        lines = drawLines();
     }
 
     public static void setMap(GoogleMap newMap) {
@@ -126,6 +137,41 @@ public class MapLine {
     }
 
     /**
+     * Draws the side profile to a bitmap
+     */
+    public Bitmap drawLines() {
+        int width = MainActivity.getMapWidth();
+        int height =  MainActivity.getMapHeight();
+        //sets dimensions to square of whichever side is smallest
+        width = height = width < height ? width : height;
+        Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        b.eraseColor(Color.TRANSPARENT);
+        Canvas c = new Canvas(b);
+        dpWidth = pixelToDP(width);
+        dpHeight = pixelToDP(height);
+        Paint p = new Paint();
+        p.setAntiAlias(true);
+        p.setStrokeWidth(5.0f);
+
+        float dpPerPoint = dpWidth/points.size();
+        float x = 0.0f;
+
+        //draw the elevation points
+        p.setColor(Color.BLACK);
+        Iterator<ElevationPoint> iter = points.iterator();
+        float y = elevationToDP(iter.next().getElevation());
+        float prevY = 0.0f;
+        while (iter.hasNext()) {
+            prevY = y;
+            y = elevationToDP(iter.next().getElevation());
+            c.drawLine(x, prevY, x+dpPerPoint, y, p);
+            x+=dpPerPoint;
+        }
+
+        return b;
+    }
+
+    /**
      * Draws a side profile of the line
      */
     public void drawProfile() {
@@ -157,17 +203,7 @@ public class MapLine {
         c.drawLine(0.0f, elevationToDP(MainActivity.getUserElevation()), dpWidth, elevationToDP(MainActivity.getUserElevation()), p);
 
         //draw the elevation points
-        p.setColor(Color.BLACK);
-        Iterator<ElevationPoint> iter = points.iterator();
-        float y = elevationToDP(iter.next().getElevation());
-        float prevY = 0.0f;
-        while (iter.hasNext()) {
-            prevY = y;
-            y = elevationToDP(iter.next().getElevation());
-            c.drawLine(x, prevY, x+dpPerPoint, y, p);
-            x+=dpPerPoint;
-        }
-
+        c.drawBitmap(lines, 0.0f, 0.0f, p);
 
         //show fps
         long time = SystemClock.elapsedRealtime();
