@@ -210,7 +210,7 @@ public class MapLine {
         long deltaT = time - prevTime;
         prevTime = time;
         int fps = (int)(1000/deltaT);
-        c.drawText(Integer.toString(fps), 0.0f, 20.0f, p);
+        //c.drawText(Integer.toString(fps), 0.0f, 20.0f, p);
 
         MainActivity.iv.setImageBitmap(b);
     }
