@@ -43,6 +43,11 @@ public class MapLine {
     long prevTime;
     Bitmap lines;
 
+    /**
+     *
+     * @param line google maps polyline object
+     * @param joints list of joints for the polyline
+     */
     public MapLine(Polyline line, ArrayList<Marker> joints) {
         DecimalFormat df = new DecimalFormat("#.#");
         polyline = line;
@@ -65,6 +70,7 @@ public class MapLine {
         minElevation = minPoint.getElevation();
         maxElevation = maxPoint.getElevation();
 
+        //add markers to the map
         minMarker = map.addMarker(new MarkerOptions()
                 .position(minPoint.getLocation())
                 .title("Min elevation along line: " + df.format(minPoint.getElevation()) + "m")
@@ -79,7 +85,6 @@ public class MapLine {
                 .position(centerOfLine(polyline))
                 .title("Line")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.linemarker)));
-        prevTime = SystemClock.elapsedRealtime();
         lines = drawLines();
     }
 
@@ -175,11 +180,11 @@ public class MapLine {
      * Draws a side profile of the line
      */
     public void drawProfile() {
-        prevTime = SystemClock.elapsedRealtime();
         int width = MainActivity.getMapWidth();
         int height =  MainActivity.getMapHeight();
         //sets dimensions to square of whichever side is smallest
         width = height = width < height ? width : height;
+        //create empty canvas and set up paint
         Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         b.eraseColor(Color.TRANSPARENT);
         Canvas c = new Canvas(b);
@@ -205,20 +210,24 @@ public class MapLine {
         //draw the elevation points
         c.drawBitmap(lines, 0.0f, 0.0f, p);
 
-        //show fps
-        long time = SystemClock.elapsedRealtime();
-        long deltaT = time - prevTime;
-        prevTime = time;
-        int fps = (int)(1000/deltaT);
-        //c.drawText(Integer.toString(fps), 0.0f, 20.0f, p);
-
+        //display on screen
         MainActivity.iv.setImageBitmap(b);
     }
 
+    /**
+     * converts raw pixel count to density-independent DP
+     * @param px pixels
+     * @return pixels converted to dp
+     */
     private float pixelToDP(int px) {
         return 2.0f*(float)px/MainActivity.getResource().getDisplayMetrics().density;
     }
 
+    /**
+     * gives a location of a given elevation in DP in the bitmap
+     * @param elevation elevation in meters
+     * @return Y coordinate of pixel mapped to elevation
+     */
     private float elevationToDP(double elevation) {
         return dpHeight-(float)(dpHeight*(elevation-minElevation)/(maxElevation-minElevation));
     }

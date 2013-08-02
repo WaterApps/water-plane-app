@@ -19,6 +19,7 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
      * Updates text display in ManinActivity
      */
     public static void setText() {
+        //create string to use
         double elevationDouble = MainActivity.demData.elevationFromLatLng(MainActivity.userLocation);
         double elevationDelta =  elevationDouble - MainActivity.waterLevelMeters;
         String ElevationText;
@@ -36,10 +37,10 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
                 ElevationText = "You: " + elevationDeltaString + "m below water (" + elevationString + "m)";
             }
         }
-        MainActivity.ElevationTextView.setText(ElevationText);
 
+        //update things in MainActivity
+        MainActivity.ElevationTextView.setText(ElevationText);
         CustomMarker.setUserElevation(elevationDouble);
-        //MainActivity.updateMarkers();
     }
 
     /**
@@ -48,36 +49,37 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
      */
 	@Override
 	public void onMarkerDrag(Marker marker) {
-		// TODO Auto-generated method stub
+        //this is for the user location maarker
         if(!marker.getTitle().equals("true") && !marker.getTitle().equals("false")) {
             MainActivity.userLocation = marker.getPosition();
             MainActivity.updateMarkers();
-
         }
-
+        //for when 'location following' mode is set
         if (MainActivity.following) {
             MainActivity.demData.setWaterLevel(MainActivity.demData.elevationFromLatLng(MainActivity.userLocation));
         }
+
+        //updates text
 		double elevationDouble = MainActivity.demData.elevationFromLatLng(MainActivity.userLocation);
-		  double elevationDelta =  elevationDouble - MainActivity.waterLevelMeters;
-		  String ElevationText;
-		  
-		  if (elevationDouble == 0.0) {
-			  ElevationText = "You are not in the demData.";
-		  }
-		  else {
-		  	  String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
-		  	  String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
-		  	  if (elevationDelta >= 0.0) {
-		  		  ElevationText = "You: " + elevationDeltaString + "m above water (" + elevationString + "m)";
-		  	  }
-		  	  else {
-		  		ElevationText = "You: " + elevationDeltaString + "m below water (" + elevationString + "m)";
-		  	  }
-		  }
-		  MainActivity.ElevationTextView.setText(ElevationText);
-		  
-		  CustomMarker.setUserElevation(elevationDouble);
+        double elevationDelta =  elevationDouble - MainActivity.waterLevelMeters;
+        String ElevationText;
+
+        if (elevationDouble == 0.0) {
+          ElevationText = "You are not in the demData.";
+        }
+        else {
+          String elevationString = new DecimalFormat("#.#").format(Math.abs(elevationDouble));
+          String elevationDeltaString = new DecimalFormat("#.#").format(Math.abs(elevationDelta));
+          if (elevationDelta >= 0.0) {
+              ElevationText = "You: " + elevationDeltaString + "m above water (" + elevationString + "m)";
+          }
+          else {
+            ElevationText = "You: " + elevationDeltaString + "m below water (" + elevationString + "m)";
+          }
+        }
+        MainActivity.ElevationTextView.setText(ElevationText);
+
+        CustomMarker.setUserElevation(elevationDouble);
 	}
 
     /**

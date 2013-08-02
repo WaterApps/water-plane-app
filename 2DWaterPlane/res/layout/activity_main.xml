@@ -41,6 +41,7 @@
                     android:layout_alignRight="@id/map"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@color/lighter_gray"
                     android:visibility="gone"/>
                 <Button
                         android:id="@+id/buttonShowProfile"
@@ -49,6 +50,7 @@
                         android:layout_alignLeft="@id/map"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:background="@color/lighter_gray"
                         android:visibility="gone"/>
                 <Button
                         android:id="@+id/buttonDrawLine"
@@ -57,6 +59,7 @@
                         android:layout_alignRight="@id/map"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:background="@color/lighter_gray"
                         android:visibility="gone"/>
             </RelativeLayout>
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

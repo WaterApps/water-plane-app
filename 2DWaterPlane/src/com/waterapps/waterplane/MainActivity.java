@@ -368,6 +368,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 mapFrag.getView().setVisibility(View.GONE);
                 showElevationControls();
                 iv.setVisibility(View.VISIBLE);
+                Toast toast = Toast.makeText(getContext(), "Tap to dismiss.", Toast.LENGTH_LONG);
+                toast.show();
                 profile = true;
                 Iterator<MapLine> iter = lines.iterator();
                 MapLine l;
@@ -727,7 +729,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
         return groundOverlay;
     }
 
-    //updates colors when elevation is changed
+    /**
+     * updates colors when elevation is changed
+     * @param field field to be updated
+     */
     public static void updateColors(DemData field) {
         if (!currentlyDrawing) {
             currentlyDrawing = true;
@@ -772,8 +777,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
         }
     }
 
-    //sets up the seekbar object and text above it
-    private void configSeekbar(final DemData field, final GroundOverlay overlay) {
+    /**
+     * sets up the seekbar object and text above it
+     * @param demData dem object
+     * @param overlay map overlay
+     */
+    private void configSeekbar(final DemData demData, final GroundOverlay overlay) {
         SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setMax(255);
         seekBar.setProgress(128);
@@ -792,7 +801,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
                     waterElevationTextView.setText(waterElevationText);
 
                     //update other text block
-                      double elevationDouble = field.elevationFromLatLng(userLocation);
+                      double elevationDouble = demData.elevationFromLatLng(userLocation);
                       double elevationDelta =  elevationDouble - waterLevelMeters;
                       String ElevationText;
                       TextView ElevationTextView = (TextView) findViewById(R.id.text2);
@@ -828,7 +837,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
                     else {
                       //visual updates
                       updateMarkers();
-                      updateColors(field);
+                      updateColors(demData);
                     }
                 }
 
@@ -838,13 +847,16 @@ public class MainActivity extends Activity implements OnMapClickListener {
             public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                updateColors(field);
+                updateColors(demData);
                 updateMarkers();
             }
         });
         seekBar.setProgress(seekBar.getMax()/2);
     }
 
+    /**
+     * update the text on all markers currently shown
+     */
     public static void updateMarkers() {
         Iterator<CustomMarker> i = markers.iterator();
         CustomMarker marker;
@@ -860,6 +872,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
     LocationListener locationListener = new LocationHandler();
 
+    /**
+     * Handles data returned from other activities
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
         //handle data from file manager
 
@@ -966,28 +984,20 @@ public class MainActivity extends Activity implements OnMapClickListener {
      * Displays the action bar for when a marker is selected and its text is visible
      */
     public static void showMarkerAB() {
-        //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
-        //actionBar.setCustomView(R.layout.custom_ab);
         buttonDelete.setVisibility(View.VISIBLE);
         appName.setVisibility(View.GONE);
         hideButton.setVisibility(View.VISIBLE);
         showButton.setVisibility(View.GONE);
-        //markerAB = true;
-        //invalidateOptionsMenu();
     }
 
     /**
      * Displays the action bar for when a marker is selected but its text is hidden
      */
     public static void showHiddenMarkerAB() {
-        //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
-        //actionBar.setCustomView(R.layout.custom_ab);
         buttonDelete.setVisibility(View.VISIBLE);
         appName.setVisibility(View.GONE);
         hideButton.setVisibility(View.GONE);
         showButton.setVisibility(View.VISIBLE);
-        //markerAB = true;
-        //invalidateOptionsMenu();
     }
 
     /**
@@ -999,8 +1009,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         appName.setVisibility(View.VISIBLE);
         hideButton.setVisibility(View.GONE);
         showButton.setVisibility(View.GONE);
-        //markerAB = false;
-        //invalidateOptionsMenu();
     }
 
 
@@ -1097,25 +1105,28 @@ public class MainActivity extends Activity implements OnMapClickListener {
         Polyline outline;
         demOutlines = new ArrayList<Polyline>();
 
+        //don't look through it if it isn't a directory
         if (f.isDirectory()) {
+            //loop through each file in dir
             File file[] = f.listFiles();
-            Log.i("File", file.toString());
-
             for (int i=0; i < file.length; i++)
             {
-                Log.d("Files", "FileName:" + file[i].getName());
+                //get metadata
                 demFile = ReadGeoTiffMetadata.readMetadata(file[i]);
                 if(i==0) {
                     demBounds = new LatLngBounds(new LatLng(demFile.getSw_lat(), demFile.getSw_long()),
                             new LatLng(demFile.getNe_lat(), demFile.getNe_long()));
                 }
+                //add to list of dem objects
                 demFiles.add(demFile);
+                //draw outline on map
                 demOutlines.add(map.addPolyline(new PolylineOptions().add(new LatLng(demFile.getSw_lat(), demFile.getSw_long()))
                         .add(new LatLng(demFile.getSw_lat(), demFile.getNe_long()))
                         .add(new LatLng(demFile.getNe_lat(), demFile.getNe_long()))
                         .add(new LatLng(demFile.getNe_lat(), demFile.getSw_long()))
                         .add(new LatLng(demFile.getSw_lat(), demFile.getSw_long()))
                         .color(Color.RED)));
+                //expand bounds to include each dem
                 demBounds = demBounds.including(new LatLng(demFile.getSw_lat(), demFile.getSw_long()));
                 demBounds = demBounds.including(new LatLng(demFile.getNe_lat(), demFile.getNe_long()));
             }
@@ -1235,6 +1246,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
             }
         }
 
+    /**
+     * copies a file
+     * @param in input file stream
+     * @param out output file stream
+     * @throws IOException
+     */
     private void copyFile(InputStream in, OutputStream out) throws IOException {
         byte[] buffer = new byte[1024];
         int read;
@@ -1310,6 +1327,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         }
     }
 
+    //getters and setters
     public static Resources getResource() {
         return resources;
     }
