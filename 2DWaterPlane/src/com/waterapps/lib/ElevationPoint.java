@@ -14,7 +14,6 @@ public class ElevationPoint implements Comparable<ElevationPoint> {
         this.setElevation(elevation);
     }
 
-
     public LatLng getLocation() {
         return location;
     }

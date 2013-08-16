@@ -30,17 +30,19 @@ public class ReadGeoTiff implements ReadDemData {
         String noDataString = TiffDecoder.nativeTiffGetNoData();
         //float nodata = Float.parseFloat(noDataString);
         float nodata = -9999.0f;
+        float lastGoodElevation = 0.0f;
 
         //loop throuogh each pixel, calculating min and max along the way and not setting nodata points
         for(int i=0; i<raster.getNrows(); i++) {
             for(int j=0; j<raster.getNcols(); j++) {
                 raster.elevationData[i][raster.getNcols()-1-j] = pixels[j+(raster.getNcols()*i)];
                 if (raster.getElevationData()[i][raster.getNcols()-1-j] != nodata ) {
+                    lastGoodElevation = raster.elevationData[i][raster.getNcols()-1-j];
                     if (raster.getElevationData()[i][raster.getNcols()-1-j] < raster.getMinElevation()) raster.setMinElevation(raster.getElevationData()[i][raster.getNcols()-1-j]);
                     if (raster.getElevationData()[i][raster.getNcols()-1-j] > raster.getMaxElevation()) raster.setMaxElevation(raster.getElevationData()[i][raster.getNcols()-1-j]);
                 }
                 else {
-                    raster.elevationData[i][raster.getNcols()-1-j] = (float)raster.getMinElevation();
+                    raster.elevationData[i][raster.getNcols()-1-j] = lastGoodElevation;
                 }
 
             }

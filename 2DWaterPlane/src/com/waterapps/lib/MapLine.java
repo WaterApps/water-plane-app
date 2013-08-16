@@ -67,8 +67,8 @@ public class MapLine {
             maxPoint = point.getElevation() > minPoint.getElevation() ? point : maxPoint;
         }
 
-        minElevation = minPoint.getElevation();
-        maxElevation = maxPoint.getElevation();
+        minElevation = MainActivity.sliderMin;
+        maxElevation = MainActivity.sliderMax;
 
         //add markers to the map
         minMarker = map.addMarker(new MarkerOptions()
@@ -147,8 +147,8 @@ public class MapLine {
     public Bitmap drawLines() {
         int width = MainActivity.getMapWidth();
         int height =  MainActivity.getMapHeight();
-        //sets dimensions to square of whichever side is smallest
-        width = height = width < height ? width : height;
+        //sets dimensions to square of whichever side is largest
+        width = height = width < height ? height : width;
         Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         b.eraseColor(Color.TRANSPARENT);
         Canvas c = new Canvas(b);
@@ -182,8 +182,8 @@ public class MapLine {
     public void drawProfile() {
         int width = MainActivity.getMapWidth();
         int height =  MainActivity.getMapHeight();
-        //sets dimensions to square of whichever side is smallest
-        width = height = width < height ? width : height;
+        //sets dimensions to square of whichever side is largest
+        width = height = width < height ? height : width;
         //create empty canvas and set up paint
         Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         b.eraseColor(Color.TRANSPARENT);

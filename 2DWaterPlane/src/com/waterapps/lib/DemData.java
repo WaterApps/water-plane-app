@@ -126,11 +126,6 @@ public class DemData {
 
                 double range = 255/(getMaxElevation()-getMinElevation());
                 intpixels[k+(m*getNrows())] = (int)(range*(getElevationData()[k][m]-getMinElevation()));
-
-                //Log.i("pixel value", Integer.toString(intpixels[m+(k*getNcols())]));
-                //intpixels[k] = (int)( ((pixels[k]-min)/(max-min))*(double)255.0);
-                //convert to greyscale ARGB value
-                //intpixels[m+(k*getNcols())] = 0xFF000000 + intpixels[m+(k*getNcols())] + intpixels[m+(k*getNcols())]<<8 + intpixels[m+(k*getNcols())]<<16;
             }
         }
 
