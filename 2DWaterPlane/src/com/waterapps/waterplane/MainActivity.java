@@ -1,6 +1,7 @@
 package com.waterapps.waterplane;
 
 import android.app.ActionBar;
+import com.waterapps.lib.gzip;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -53,6 +54,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static android.graphics.Color.HSVToColor;
+import static android.os.Environment.getExternalStorageDirectory;
 
 /**
  * The app's main activity.
@@ -137,7 +139,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         CustomMarker.setDensity(getResources().getDisplayMetrics().density);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        demDirectory = prefs.getString("dem_dir", Environment.getExternalStorageDirectory().toString() + "/dem");
+        demDirectory = prefs.getString("dem_dir", getExternalStorageDirectory().toString() + "/dem");
         context = this;
         alpha = 0.5f;
         hsvColors = new int[256];
@@ -366,7 +368,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
             }
         });
-        
+
+
+
 		updateColors(demData);
 
         //if GPS isn't enabled, ask user to enable it
@@ -428,6 +432,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
         if(!firstStart) {
             loadInitialDEM();
         }
+
+        File tarball = new File(getExternalStorageDirectory() + "/dems/dems.tar.gz");
+        File outputdir = new File(getExternalStorageDirectory() + "/dems");
+        gzip.extractGzip(tarball, outputdir);
     }
 
 
