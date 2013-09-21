@@ -1,16 +1,23 @@
 package com.waterapps.waterplane;
 
+import android.app.DownloadManager;
+import android.app.DownloadManager.Query;
+import android.app.DownloadManager.Request;
+import android.content.BroadcastReceiver;
 import android.app.ActionBar;
 import com.waterapps.lib.gzip;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -41,13 +48,22 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.*;
 import com.waterapps.lib.*;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -120,6 +136,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
     static Button buttonShowProfile;
     public static ImageView iv;
     public static boolean profile;
+    private static long enqueue;
+    private static DownloadManager dm;
 
     public static Context getContext() {
         return context;
@@ -127,6 +145,40 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
+
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                    long downloadId = intent.getLongExtra(
+                            DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                    DownloadManager.Query query = new DownloadManager.Query();
+                    query.setFilterById(enqueue);
+                    Cursor c = dm.query(query);
+                    if (c.moveToFirst()) {
+                        int columnIndex = c
+                                .getColumnIndex(DownloadManager.COLUMN_STATUS);
+                        if (DownloadManager.STATUS_SUCCESSFUL == c
+                                .getInt(columnIndex)) {
+
+                            String fileString = c
+                                    .getString(c
+                                            .getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
+
+                            File in = new File(fileString);
+                            File outputdir = new File(getExternalStorageDirectory() + "/dem");
+                            gzip.extractGzip(in, outputdir);
+                            in.delete();
+
+                        }
+                    }
+                }
+            }
+        };
+        registerReceiver(receiver, new IntentFilter(
+                DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
         profile = false;
         lines = new ArrayList<MapLine>();
         lineJoints = new ArrayList<Marker>();
@@ -433,9 +485,21 @@ public class MainActivity extends Activity implements OnMapClickListener {
             loadInitialDEM();
         }
 
-        File tarball = new File(getExternalStorageDirectory() + "/dems/dems.tar.gz");
-        File outputdir = new File(getExternalStorageDirectory() + "/dems");
-        gzip.extractGzip(tarball, outputdir);
+        /*
+        dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        Request request = new Request(
+                Uri.parse(demURL));
+        enqueue = dm.enqueue(request);
+
+        InputStream stream = null;
+        */
+
+        String demURL = "http://opentopo.sdsc.edu/gridsphere/gridsphere?gs_action=lidarOutput&cid=geonlidarframeportlet&jobId=1379666446532232699892";
+        try {
+            new DownloadDemTask().execute(new URL(demURL));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -1348,5 +1412,14 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
     public static float getUserElevation() {
         return (float)demData.elevationFromLatLng(userLocation);
+    }
+
+    public static void getDEM(String demURL) {
+        dm = (DownloadManager) MainActivity.getContext().getSystemService(MainActivity.getContext().DOWNLOAD_SERVICE);
+        DownloadManager.Request request = new DownloadManager.Request(
+                Uri.parse(demURL));
+        enqueue = dm.enqueue(request);
+        Toast toast = Toast.makeText(MainActivity.getContext(), "DEM download started", Toast.LENGTH_SHORT);
+        toast.show();
     }
 }
