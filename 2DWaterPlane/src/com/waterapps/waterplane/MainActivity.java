@@ -502,8 +502,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         }
     }
 
-
-
     @Override
 	public void onPause() {
 		super.onPause();
