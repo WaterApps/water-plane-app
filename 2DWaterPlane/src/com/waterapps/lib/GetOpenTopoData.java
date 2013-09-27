@@ -29,11 +29,11 @@ public class GetOpenTopoData {
         return in;
     }
 
-    private String readStream(InputStream in) {
+    private static String readStream(InputStream in) {
         return in.toString();
     }
 
-    public InputStream sendForm(URL url, httpRequest request) throws IOException {
+    public static InputStream sendForm(URL url, httpRequest request) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         InputStream in = null;
         try {
@@ -54,7 +54,7 @@ public class GetOpenTopoData {
         return in;
     }
 
-    public InputStream sendTestData() {
+    public static InputStream sendTestData() {
         httpRequest form = new httpRequest("username", "guest");
         form.addField("minX", "-86.088"); //location
         form.addField("minY", "-86.088");
@@ -85,7 +85,7 @@ public class GetOpenTopoData {
         form.addField("espg", "32616"); //projection format espg code
         URL url = null;
         try {
-            url = new URL("http://opentopo.sdsc.edu/gridsphere/gridsphere?gs_action=lidarDataset&cid=geonlidarframeportlet&opentopoID=OTLAS.062012.4326.1&minX=-86.088&minY=40.739&maxX=-86.064&maxY=40.754");
+            url = new URL("http://opentopo.sdsc.edu:80/gridsphere/gridsphere;jsessionid=9890FAF3B1FD3BAB89CF6D5460DADA8A?gs_action=lidarSubmit&cid=geonlidarframeportlet");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

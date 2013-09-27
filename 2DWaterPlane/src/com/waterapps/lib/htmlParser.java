@@ -70,6 +70,25 @@ public class htmlParser {
         return null;
     }
 
+    public static String findJobId(InputStream in) {
+        String line;
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        boolean found;
+        try {
+            while((line = br.readLine()) != null) {
+                Pattern p = Pattern.compile("jobId=[0-9]*");
+                Matcher m = p.matcher(line);
+                found = m.find();
+                if(found) {
+                    return m.group().substring(6);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private static String getStringFromInputStream(InputStream is) {
 
         BufferedReader br = null;

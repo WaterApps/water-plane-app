@@ -494,12 +494,15 @@ public class MainActivity extends Activity implements OnMapClickListener {
         InputStream stream = null;
         */
 
+        /*
         String demURL = "http://opentopo.sdsc.edu/gridsphere/gridsphere?gs_action=lidarOutput&cid=geonlidarframeportlet&jobId=1379666446532232699892";
         try {
             new DownloadDemTask().execute(new URL(demURL));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+        */
+        new GetOpenTopoDataTask().execute();
     }
 
     @Override
