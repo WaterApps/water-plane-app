@@ -1,14 +1,12 @@
 package com.waterapps.waterplane;
 
 import android.app.DownloadManager;
-import android.app.DownloadManager.Query;
 import android.app.DownloadManager.Request;
 import android.content.BroadcastReceiver;
 import android.app.ActionBar;
 import com.waterapps.lib.gzip;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,17 +18,19 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.*;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -48,18 +48,11 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.*;
 import com.waterapps.lib.*;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -138,6 +131,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
     public static boolean profile;
     private static long enqueue;
     private static DownloadManager dm;
+    //BroadcastReceiver receiver;
+    WebView webView;
+    private static final String magicString = "25az225MAGICee4587da";
+
+
+    static BroadcastReceiver receiver;
 
     public static Context getContext() {
         return context;
@@ -146,7 +145,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
 
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
@@ -170,14 +169,17 @@ public class MainActivity extends Activity implements OnMapClickListener {
                             File outputdir = new File(getExternalStorageDirectory() + "/dem");
                             gzip.extractGzip(in, outputdir);
                             in.delete();
-
+                            scanDEMs();
                         }
                     }
                 }
             }
         };
+
         registerReceiver(receiver, new IntentFilter(
                 DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+        dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 
         profile = false;
         lines = new ArrayList<MapLine>();
@@ -484,31 +486,13 @@ public class MainActivity extends Activity implements OnMapClickListener {
         if(!firstStart) {
             loadInitialDEM();
         }
-
-        /*
-        dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-        Request request = new Request(
-                Uri.parse(demURL));
-        enqueue = dm.enqueue(request);
-
-        InputStream stream = null;
-        */
-
-        /*
-        String demURL = "http://opentopo.sdsc.edu/gridsphere/gridsphere?gs_action=lidarOutput&cid=geonlidarframeportlet&jobId=1379666446532232699892";
-        try {
-            new DownloadDemTask().execute(new URL(demURL));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        */
-        new GetOpenTopoDataTask().execute();
     }
 
     @Override
 	public void onPause() {
 		super.onPause();
 		locationManager.removeUpdates(locationListener);
+        unregisterReceiver(receiver);
 	}
 
 	@Override
@@ -689,6 +673,11 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 Toast toast = Toast.makeText(getContext(), "Tap to add points to the line.", Toast.LENGTH_SHORT);
                 toast.show();
             }
+        }
+
+        //Download DEM of currently visible area
+        else if(item.getItemId() == R.id.menu_download) {
+            DownloadDEM(map.getProjection().getVisibleRegion().latLngBounds);
         }
 
 	    else {
@@ -1422,5 +1411,80 @@ public class MainActivity extends Activity implements OnMapClickListener {
         enqueue = dm.enqueue(request);
         Toast toast = Toast.makeText(MainActivity.getContext(), "DEM download started", Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    void DownloadDEM(LatLngBounds extent) {
+        runWeb(extent);
+    }
+
+    private void runWeb(LatLngBounds extent){
+
+        final double minX = extent.southwest.longitude;
+        final double minY = extent.southwest.latitude;
+        final double maxX = extent.northeast.longitude;
+        final double maxY = extent.northeast.latitude;
+
+        webView = new WebView(this);
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.setWebChromeClient(new PageHandler());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                Log.d("onPageFinished", "url:" + url);
+                if(url.contentEquals("file:///android_asset/OpenTopo.html") == true){
+                    Log.d("onPageFinished", "Submitting form");
+                    //Initial homemade post page, change post vars here, then post form;
+                    final String strFunction = "javascript:"
+                            + "document.getElementById('email').value = 'newEmailAddress@email.com';"
+                            + "document.getElementById('minX').value = '" + Double.toString(minX) + "';"
+                            + "document.getElementById('minY').value = '" + Double.toString(minY) + "';"
+                            + "document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
+                            + "document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
+                            + "document.getElementById('format').value = 'GTiff';"
+                            + "document.getElementById('theForm').submit();";
+                    webView.loadUrl(strFunction);
+                    Log.d("url", strFunction);
+
+                } else {
+                    Log.d("onPageFinished", "Searching for DEM");
+                    Log.d("onPageFinished", "URL:" + url);
+                    //Open topo pages
+                    String strFunction = "javascript:"
+                            + "var els = document.getElementsByTagName('a');"
+                            + "for (var i = 0, l = els.length; i < l; i++) {"
+                            + "    var el = els[i];"
+                            + "    if (el.innerHTML.indexOf('dems.tar.gz') != -1) {"
+                            + "         if (el.href.indexOf('appBulkFormat') != -1) {"
+                            + "             javascript:console.log('"+magicString+"'+ el.href);"
+                            + "         }"
+                            + "    }"
+                            + "}";
+                    webView.loadUrl(strFunction);
+
+                }
+            }
+        });
+        webView.loadUrl("file:///android_asset/OpenTopo.html");
+    }
+
+    public static void downloadFile(String url) {
+        Log.d("downloadFile", url);
+        Request request = new Request(
+                Uri.parse(url));
+        enqueue = dm.enqueue(request);
+    }
+
+    private class PageHandler extends WebChromeClient {
+        public boolean onConsoleMessage(ConsoleMessage cmsg){
+            if(cmsg.message().startsWith(magicString)){
+                String categoryMsg = cmsg.message().substring(magicString.length());
+                Log.d("Link:", categoryMsg);
+                downloadFile(categoryMsg);
+                webView.stopLoading();
+                webView.destroy();
+                return true;
+            }
+            return false;
+        }
     }
 }

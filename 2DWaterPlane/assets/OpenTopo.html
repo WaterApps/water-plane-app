@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+
+<form id="theForm" name="selectForm" action="http://opentopo.sdsc.edu:80/gridsphere/gridsphere?gs_action=lidarSubmit&amp;cid=geonlidarframeportlet" method="post">
+
+<input type="hidden" name="username" value="guest">
+<input type="checkbox" onclick="do_select_coordinates();" id="select_coordinates" checked="checked">
+<input type="hidden" id="auto_xmin" value="-85.065">
+<input type="hidden" id="auto_ymin" value="41.362">
+<input type="hidden" id="auto_xmax" value="-85.052">
+<input type="hidden" id="auto_ymax" value="41.369">
+
+<input style="width:90px;" type="text" name="minX" id="minX" value="-85.059"/>
+<input style="width:90px;" type="text" name="minY" id="minY" value="41.365"/>
+<input style="width:90px;" type="text" name="maxX" id="maxX" value="-85.057"/>
+<input style="width:90px;" type="text" name="maxY" id="maxY" value="41.367"/>
+
+<input name="classification" type="radio" value="2" onchange="recalculatePointCount();">
+<input name="classification" type="radio" value="0,1,10,11,12,13,14,3,4,5,6,7,8,9" onchange="recalculatePointCount();">
+<input name="classification" type="radio" value="all" checked="checked" onchange="recalculatePointCount();">
+
+
+
+<select name="reprojectOutput" id="reprojectOutput" onchange="changeProjection();"> 
+ <option value="IN_E">NAD83 Indiana East (ftUS) [EPSG: 2965]</option>
+ <option value="IN_W">NAD83 Indiana West (ftUS) [EPSG: 2966]</option>
+ <option value="16N" selected="selected">NAD83 UTM Zone 16N (Meter) [EPSG: 32616]</option>
+ </select> 
+ 
+<script type="text/javascript">
+ var gridValues = new Array();
+ gridValues[0] = new Array(6, 0.5, 6, 'ft', '2965');
+ gridValues[1] = new Array(6, 0.5, 6, 'ft', '2966');
+ gridValues[2] = new Array(1, 0.1, 1, 'meter', '32616');
+ </script> 
+        <input type="checkbox" name="lasOutput" id="lasOutput" value="1" checked="checked">
+        <input type="checkbox" name="lazOutput" id="lazOutput" value="1">
+        <input type="checkbox" name="rawData" id="rawData" value="1">
+        <input type="checkbox" name="minView" id="minView" value="1" onclick="checkDerivate();">
+        <input type="checkbox" name="maxView" id="maxView" value="1" onclick="checkDerivate();">
+        <input type="checkbox" name="meanView" id="meanView" value="1" onclick="checkDerivate();">
+        <input type="checkbox" name="idwView" id="idwView" value="1" checked="checked" onclick="checkDerivate();">
+        <input type="checkbox" name="denView" id="denView" value="1" onclick="checkDerivate();">
+        <input type="text" id="resolution" name="resolution" value="1" maxlength="10" style="width:70px;">
+        <input type="text" id="radius" name="radius" value="1" maxlength="10" style="width:70px;">
+
+        <select name="format" id="format">
+          <option selected="selected" value="GTiff">GeoTiff</option>
+           <option value="arc">Arc ASCII Grid</option>
+           <option value="HFA">IMG</option>
+          <option value="all">All formats</option>
+        </select>
+        <select name="nullFill" id="nullFill"><option value="0">None</option><option value="3">3</option><option value="5">5</option><option value="7">7</option></select>
+
+ 
+        <input type="checkbox" name="tin" id="tin" value="1" onclick="checkDerivate();">
+        <input type="text" id="tinResolution" name="tinResolution" value="1" maxlength="10" style="width:70px;">
+        <input type="text" id="maxTriangleSize" name="maxTriangleSize" value="50" maxlength="10" style="width:70px;">
+
+        <select name="tinFormat" id="tinFormat">
+          <option value="arc">Arc ASCII Grid</option>
+          <option value="GTiff" selected="selected">GeoTiff</option>
+          <option value="HFA">IMG</option>
+          <option value="all">All formats</option>
+        </select>
+
+          <input type="checkbox" id="derivativeSelect" name="derivativeSelect" value="1" checked="">
+
+          <select name="derivativeFormat" id="derivativeFormat">
+            <option value="GTiff" selected="">GeoTiff</option>
+            <option value="HFA">IMG</option>
+          </select>
+        </div>
+        <div id="noDerivativeBox" style="display: none;">This option is only available when at least one grid is selected in step 3a and 3b (DEM Generation: Zmin, Zmax, Zmean, Zidw or TIN) above.</div>
+      </td>
+    </tr>
+  </tbody></table>
+
+
+  <table width="100%" id="visualizationBox" class="nospace">
+    <tbody><tr>
+      <td style="vertical-align:top; padding-left:50px;"><input type="checkbox" name="visualization" id="visualization" value="1" checked="checked" onclick="toggleDivByCheckInput('viz_options', 'visualization', true);"></td>
+      <td style="vertical-align:top;" nowrap="nowrap" width="30%">Generate hillshade images and<br> Google Earth files from DEMs</td>
+      <td style="vertical-align:top;" width="70%">
+        <table id="viz_options">
+          <tbody><tr>
+            <td width="50%">
+              Altitude of the light, <span style="font-size:smaller;">&nbsp;(in degrees)</span>: &nbsp; &nbsp; <input type="text" id="vizAltitude" name="vizAltitude" value="45" style="width:50px;">
+              <br>
+              Azimuth of the light, <span style="font-size:smaller;">(in degrees)</span>: &nbsp; &nbsp; <input type="text" id="vizAzimuth" name="vizAzimuth" value="315" style="width:50px;">
+            </td>
+            <td style="vertical-align:top;"><input type="checkbox" id="vizColor" name="vizColor" value="1"></td>
+            <td width="50%" style="vertical-align:top;" nowrap="nowrap"> Generate additional color-relief<br> and colored hillshades</td>
+          </tr>
+        </tbody></table>
+      </td>
+    </tr>
+  </tbody></table>
+
+  <div style="padding-left: 50px; display: none;" id="noVisualizationBox">This option is only available when at least one grid is selected in step 3a and 3b (DEM Generation: Zmin, Zmax, Zmean, Zidw or TIN) above.</div>
+  <br>
+  <b>Job Description</b>
+
+  <table width="100%">
+    <tbody><tr>
+      <td colspan="2" style="padding-left:50px;">
+      </td>
+    </tr>
+    <tr>
+      <td style="padding-left:50px;">Job title: <span style="font-size:smaller;">(up to 100 characters)</span></td>
+      <td width="100%"><input style="width:600px;" type="text" name="title" value="" size="62" maxlength="100"></td>
+    </tr>
+    <tr>
+      <td style="padding-left:50px; vertical-align:top;" nowrap="nowrap">Job description: <br><span style="font-size:smaller;">(up to 500 characters)</span></td>
+      <td>
+        <textarea style="width:600px; height:60px;" id="jobDescription" name="jobDescription" onkeyup="update();"></textarea>
+        <input type="hidden" id="prevJobDescription" name="prevJobDescription" value="" maxlength="500">
+      </td>
+    </tr>
+  </tbody></table>
+
+  <b>Email Address</b>: 
+
+  <table width="100%">
+    <tbody><tr>
+      <td style="padding-left:50px;" nowrap="nowrap">
+        Enter your e-mail address for notification upon completion of processing&nbsp;<span style="color: #FF6600;">*</span>
+      </td>
+      <td width="100%">
+        <input type="text" id="email" name="email" value="guest@none.com" style="width:200px;"><span id="inf_reqEmail" class=""></span>
+      </td>
+    </tr>
+  </tbody></table>
+
+  <table width="100%">
+    <tbody><tr>
+      <td style="text-align:center;">
+        <input type="hidden" name="referer" value="LIDARDATASET">
+        <input type="hidden" name="numRows" id="numRows" value="953000">
+        <input type="hidden" name="opentopoID" value="OTLAS.062012.4326.1">
+        <input type="hidden" name="queryLimit" id="queryLimit" value="50000000">
+        <input type="submit" value="Submit">
+        <input type="hidden" name="epsg" id="epsg" value="32616">
+        <input type="button" value="Clear All" onclick="clearForm();">
+        <div id="submitFail" style="padding-top:10px;" class=""></div>
+      </td>
+    </tr>
+  </tbody></table>
+  </form>
+
+
+</body>
+</html>

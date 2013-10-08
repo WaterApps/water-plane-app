@@ -47,6 +47,10 @@
           android:title="Add Line"
           android:showAsAction="always|withText" />
 
+    <item android:id="@+id/menu_download"
+        android:title="Download DEM"
+        android:showAsAction="never" />
+
     <item android:id="@+id/menu_settings"
           android:title="@string/menu_settings"
           android:showAsAction="never" />
