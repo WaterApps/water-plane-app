@@ -2,6 +2,8 @@ package com.waterapps.waterplane;
 
 import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.app.ActionBar;
 import com.waterapps.lib.gzip;
@@ -25,6 +27,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.*;
 import android.webkit.ConsoleMessage;
@@ -170,6 +173,20 @@ public class MainActivity extends Activity implements OnMapClickListener {
                             gzip.extractGzip(in, outputdir);
                             in.delete();
                             scanDEMs();
+
+                            //clear notification
+                            NotificationManager mNotifyManager =
+                                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                            NotificationCompat.Builder mBuilder =
+                                    new NotificationCompat.Builder(MainActivity.getContext())
+                                            .setSmallIcon(R.drawable.notification)
+                                            .setContentTitle("DEM download")
+                                            .setContentText("Download complete")
+                                            .setProgress(0, 0, false);
+
+                            int id = 1;
+                            mNotifyManager.notify(id, mBuilder.build());
                         }
                     }
                 }
@@ -677,7 +694,23 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
         //Download DEM of currently visible area
         else if(item.getItemId() == R.id.menu_download) {
+            //download DEM of currently visible area
             DownloadDEM(map.getProjection().getVisibleRegion().latLngBounds);
+
+            //create notification
+            NotificationManager mNotifyManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.drawable.notification)
+                            .setContentTitle("DEM download")
+                            .setContentText("Download in progress")
+                            .setProgress(0, 0, true);
+
+            int id = 1;
+            mNotifyManager.notify(id, mBuilder.build());
+
         }
 
 	    else {
