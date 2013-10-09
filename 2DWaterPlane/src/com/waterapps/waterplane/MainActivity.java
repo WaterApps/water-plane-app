@@ -137,6 +137,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
     //BroadcastReceiver receiver;
     WebView webView;
     private static final String magicString = "25az225MAGICee4587da";
+    int demDownloadCount = 1;
+    int demFinishedCount = 1;
 
 
     static BroadcastReceiver receiver;
@@ -147,7 +149,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
-
          receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -185,7 +186,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
                                             .setContentText("Download complete")
                                             .setProgress(0, 0, false);
 
-                            int id = 1;
+                            int id = demFinishedCount++;
                             mNotifyManager.notify(id, mBuilder.build());
                         }
                     }
@@ -708,7 +709,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
                             .setContentText("Download in progress")
                             .setProgress(0, 0, true);
 
-            int id = 1;
+            int id = demDownloadCount++;
             mNotifyManager.notify(id, mBuilder.build());
 
         }
@@ -1447,60 +1448,62 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     void DownloadDEM(LatLngBounds extent) {
-        runWeb(extent);
+        new runWeb().runWeb(extent);
     }
 
-    private void runWeb(LatLngBounds extent){
+    private class runWeb {
+        private void runWeb(LatLngBounds extent){
 
-        final double minX = extent.southwest.longitude;
-        final double minY = extent.southwest.latitude;
-        final double maxX = extent.northeast.longitude;
-        final double maxY = extent.northeast.latitude;
+            final double minX = extent.southwest.longitude;
+            final double minY = extent.southwest.latitude;
+            final double maxX = extent.northeast.longitude;
+            final double maxY = extent.northeast.latitude;
 
-        webView = new WebView(this);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.setWebChromeClient(new PageHandler());
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                Log.d("onPageFinished", "url:" + url);
-                if(url.contentEquals("file:///android_asset/OpenTopo.html") == true){
-                    Log.d("onPageFinished", "Submitting form");
-                    //Initial homemade post page, change post vars here, then post form;
-                    final String strFunction = "javascript:"
-                            + "document.getElementById('email').value = 'newEmailAddress@email.com';"
-                            + "document.getElementById('minX').value = '" + Double.toString(minX) + "';"
-                            + "document.getElementById('minY').value = '" + Double.toString(minY) + "';"
-                            + "document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
-                            + "document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
-                            + "document.getElementById('format').value = 'GTiff';"
-                            + "document.getElementById('theForm').submit();";
-                    webView.loadUrl(strFunction);
-                    Log.d("url", strFunction);
+            webView = new WebView(MainActivity.getContext());
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.setWebChromeClient(new PageHandler());
+            webView.setWebViewClient(new WebViewClient() {
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    Log.d("onPageFinished", "url:" + url);
+                    if(url.contentEquals("file:///android_asset/OpenTopo.html") == true){
+                        Log.d("onPageFinished", "Submitting form");
+                        //Initial homemade post page, change post vars here, then post form;
+                        final String strFunction = "javascript:"
+                                + "document.getElementById('email').value = 'newEmailAddress@email.com';"
+                                + "document.getElementById('minX').value = '" + Double.toString(minX) + "';"
+                                + "document.getElementById('minY').value = '" + Double.toString(minY) + "';"
+                                + "document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
+                                + "document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
+                                + "document.getElementById('format').value = 'GTiff';"
+                                + "document.getElementById('theForm').submit();";
+                        webView.loadUrl(strFunction);
+                        Log.d("url", strFunction);
 
-                } else {
-                    Log.d("onPageFinished", "Searching for DEM");
-                    Log.d("onPageFinished", "URL:" + url);
-                    //Open topo pages
-                    String strFunction = "javascript:"
-                            + "var els = document.getElementsByTagName('a');"
-                            + "for (var i = 0, l = els.length; i < l; i++) {"
-                            + "    var el = els[i];"
-                            + "    if (el.innerHTML.indexOf('dems.tar.gz') != -1) {"
-                            + "         if (el.href.indexOf('appBulkFormat') != -1) {"
-                            + "             javascript:console.log('"+magicString+"'+ el.href);"
-                            + "         }"
-                            + "    }"
-                            + "}";
-                    webView.loadUrl(strFunction);
+                    } else {
+                        Log.d("onPageFinished", "Searching for DEM");
+                        Log.d("onPageFinished", "URL:" + url);
+                        //Open topo pages
+                        String strFunction = "javascript:"
+                                + "var els = document.getElementsByTagName('a');"
+                                + "for (var i = 0, l = els.length; i < l; i++) {"
+                                + "    var el = els[i];"
+                                + "    if (el.innerHTML.indexOf('dems.tar.gz') != -1) {"
+                                + "         if (el.href.indexOf('appBulkFormat') != -1) {"
+                                + "             javascript:console.log('"+magicString+"'+ el.href);"
+                                + "         }"
+                                + "    }"
+                                + "}";
+                        webView.loadUrl(strFunction);
 
+                    }
                 }
-            }
-        });
-        webView.loadUrl("file:///android_asset/OpenTopo.html");
+            });
+            webView.loadUrl("file:///android_asset/OpenTopo.html");
+        }
     }
 
-    public static void downloadFile(String url) {
+    private static void downloadFile(String url) {
         Log.d("downloadFile", url);
         Request request = new Request(
                 Uri.parse(url));
