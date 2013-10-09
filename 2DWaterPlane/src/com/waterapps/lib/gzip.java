@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.Random;
 import java.util.zip.GZIPInputStream;
 
@@ -40,7 +41,7 @@ public class gzip {
                 byte data[] = new byte[2048];
 
                 Random rand = new Random();
-                FileOutputStream fos = new FileOutputStream(outDir.getPath() + "/" + Integer.toString(rand.nextInt()) + entry.getName());
+                FileOutputStream fos = new FileOutputStream(outDir.getPath() + "/" + new Date().toString() + ".tif");
                 Log.d("inputfilename", entry.getName());
                 Log.d("outputfilename", outDir.getPath() + "/" + entry.getName());
                 BufferedOutputStream dest = new BufferedOutputStream(fos);
