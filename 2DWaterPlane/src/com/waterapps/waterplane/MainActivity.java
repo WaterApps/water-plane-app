@@ -64,6 +64,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import static android.graphics.Color.HSVToColor;
 import static android.os.Environment.getExternalStorageDirectory;
@@ -136,7 +137,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     private static DownloadManager dm;
     //BroadcastReceiver receiver;
     WebView webView;
-    private static final String magicString = "25az225MAGICee4587da";
+    //private static final String magicString = "25az225MAGICee4587da";
     int demDownloadCount = 1;
     int demFinishedCount = 1;
 
@@ -511,7 +512,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
 		super.onPause();
 		locationManager.removeUpdates(locationListener);
         unregisterReceiver(receiver);
-	}
+    }
 
 	@Override
 	public void onResume() {
@@ -519,6 +520,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         updateColors(demData);
         if (hasGPS)
 		    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
 	}
 
 	@Override
@@ -1448,11 +1450,18 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     void DownloadDEM(LatLngBounds extent) {
-        new runWeb().runWeb(extent);
+        runWeb rw = new runWeb();
+        rw.run(extent);
     }
 
     private class runWeb {
-        private void runWeb(LatLngBounds extent){
+        //private static final String magicString = "25az225MAGICee4587da";
+        String magicString;
+
+        public runWeb() {
+            magicString = randomString();
+        };
+        private void run(LatLngBounds extent){
 
             final double minX = extent.southwest.longitude;
             final double minY = extent.southwest.latitude;
@@ -1501,6 +1510,20 @@ public class MainActivity extends Activity implements OnMapClickListener {
             });
             webView.loadUrl("file:///android_asset/OpenTopo.html");
         }
+
+        private class PageHandler extends WebChromeClient {
+            public boolean onConsoleMessage(ConsoleMessage cmsg){
+                if(cmsg.message().startsWith(magicString)){
+                    String categoryMsg = cmsg.message().substring(magicString.length());
+                    Log.d("Link:", categoryMsg);
+                    downloadFile(categoryMsg);
+                    webView.stopLoading();
+                    webView.destroy();
+                    return true;
+                }
+                return false;
+            }
+        }
     }
 
     private static void downloadFile(String url) {
@@ -1510,17 +1533,13 @@ public class MainActivity extends Activity implements OnMapClickListener {
         enqueue = dm.enqueue(request);
     }
 
-    private class PageHandler extends WebChromeClient {
-        public boolean onConsoleMessage(ConsoleMessage cmsg){
-            if(cmsg.message().startsWith(magicString)){
-                String categoryMsg = cmsg.message().substring(magicString.length());
-                Log.d("Link:", categoryMsg);
-                downloadFile(categoryMsg);
-                webView.stopLoading();
-                webView.destroy();
-                return true;
-            }
-            return false;
+    String randomString() {
+        char [] chars = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+        String result = "";
+        Random random = new Random();
+        for(int i=0; i<20; i++) {
+            result += chars[random.nextInt(chars.length-1)];
         }
+        return result;
     }
 }
