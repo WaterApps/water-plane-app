@@ -185,7 +185,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
                             NotificationCompat.Builder mBuilder =
                                     new NotificationCompat.Builder(MainActivity.getContext())
-                                            .setSmallIcon(R.drawable.notification)
+                                            .setSmallIcon(R.drawable.done)
                                             .setContentTitle("DEM download")
                                             .setContentText("Download complete")
                                             .setProgress(0, 0, false);
