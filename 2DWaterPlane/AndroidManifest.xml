@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.waterapps.waterplane"
-    android:versionCode="9"
+    android:versionCode="10"
     android:versionName="1.1.2" >
 
     <uses-sdk
@@ -73,7 +73,7 @@
         </activity>
         <meta-data
     		android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyAY8BOg0EEGKWKw4GacgquGVe6_KY9wjds"/>
+            android:value="AIzaSyBY3jLiH0G3Ec3h_oACjigaHm29z6pOuhw"/>
     </application>
 
 </manifest>

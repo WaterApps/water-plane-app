@@ -63,7 +63,9 @@ import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
 
 import static android.graphics.Color.HSVToColor;
@@ -140,7 +142,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
     //private static final String magicString = "25az225MAGICee4587da";
     int demDownloadCount = 1;
     int demFinishedCount = 1;
-
+    int currentDemDownloads = 0;
+    Queue<runWeb> downloads = new LinkedList<runWeb>();
 
     static BroadcastReceiver receiver;
 
@@ -511,7 +514,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
 	public void onPause() {
 		super.onPause();
 		locationManager.removeUpdates(locationListener);
-        unregisterReceiver(receiver);
+        //unregisterReceiver(receiver);
     }
 
 	@Override
@@ -1450,19 +1453,26 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     void DownloadDEM(LatLngBounds extent) {
-        runWeb rw = new runWeb();
-        rw.run(extent);
+        downloads.add(new runWeb(extent));
+        if (currentDemDownloads == 0) {
+            if (downloads.peek() != null) {
+                downloads.poll().run();
+            }
+        }
     }
 
     private class runWeb {
         //private static final String magicString = "25az225MAGICee4587da";
         String magicString;
+        LatLngBounds extent;
 
-        public runWeb() {
+        public runWeb(LatLngBounds extent) {
+            this.extent = extent;
             magicString = randomString();
+            Log.d("magic constructor:",magicString);
         };
-        private void run(LatLngBounds extent){
-
+        private void run(){
+            currentDemDownloads++;
             final double minX = extent.southwest.longitude;
             final double minY = extent.southwest.latitude;
             final double maxX = extent.northeast.longitude;
@@ -1503,6 +1513,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
                                 + "         }"
                                 + "    }"
                                 + "}";
+                        Log.d("url:",strFunction);
                         webView.loadUrl(strFunction);
 
                     }
@@ -1515,10 +1526,15 @@ public class MainActivity extends Activity implements OnMapClickListener {
             public boolean onConsoleMessage(ConsoleMessage cmsg){
                 if(cmsg.message().startsWith(magicString)){
                     String categoryMsg = cmsg.message().substring(magicString.length());
+                    Log.d("magic:", magicString);
                     Log.d("Link:", categoryMsg);
                     downloadFile(categoryMsg);
+                    currentDemDownloads--;
                     webView.stopLoading();
                     webView.destroy();
+                    if (downloads.peek() != null) {
+                        downloads.poll().run();
+                    }
                     return true;
                 }
                 return false;
