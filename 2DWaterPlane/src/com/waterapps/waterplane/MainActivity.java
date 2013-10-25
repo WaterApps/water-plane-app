@@ -77,6 +77,7 @@ import static android.os.Environment.getExternalStorageDirectory;
 public class MainActivity extends Activity implements OnMapClickListener {
     private static final int ADD_MODE = 1;
     private static final int LINE_MODE = 57832;
+    private static final int MAX_PIXELS = 5000000;
     GroundOverlay prevoverlay;
     static DemData demData;
     static List<CustomMarker> markers;
@@ -92,6 +93,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     static boolean drag_mode = false;
     static LinearLayout elevationControls;
     static LinearLayout markerBottomText;
+    static LinearLayout dlControls;
     static ActionBar actionBar;
     static boolean currentlyDrawing;
     public static boolean transparency;
@@ -125,6 +127,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     static TextView appName;
     static Button showButton;
     static Button hideButton;
+    static Button DlButton;
     static ArrayList<Polyline> demOutlines;
     public static boolean mapReady;
     static Resources resources;
@@ -144,7 +147,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
     int demFinishedCount = 1;
     int currentDemDownloads = 0;
     Queue<runWeb> downloads = new LinkedList<runWeb>();
-
+    float dlWidth;
+    float s;
+    LatLng dlCenter;
+    Polygon gdlArea;
     static BroadcastReceiver receiver;
 
     public static Context getContext() {
@@ -237,6 +243,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         editMax = (TextView) findViewById(R.id.editMax);
         elevationControls = (LinearLayout) findViewById(R.id.elevationControls);
         markerBottomText = (LinearLayout) findViewById(R.id.markerControls);
+        dlControls = (LinearLayout)findViewById(R.id.dlControls);
         actionBar = getActionBar();
         iv = (ImageView) findViewById(R.id.graphView);
         iv.setOnClickListener(new View.OnClickListener() {
@@ -318,6 +325,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         buttonDelete = (Button) findViewById(R.id.buttonDeleteMarker);
         buttonDeleteLine = (Button) findViewById(R.id.buttonDeleteLine);
         buttonShowProfile = (Button) findViewById(R.id.buttonShowProfile);
+        DlButton = (Button) findViewById(R.id.dlButton);
         //buttonDrawLine = (Button) findViewById(R.id.buttonDrawLine);
         final Button buttonPlus = (Button) findViewById(R.id.buttonPlus);
         final Button buttonMinus = (Button) findViewById(R.id.buttonMinus);
@@ -339,6 +347,16 @@ public class MainActivity extends Activity implements OnMapClickListener {
             	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
             	seekBar.setProgress(seekBar.getProgress()-2);
             	updateColors(demData);
+            }
+        });
+
+        DlButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                hideDlControls();
+                showElevationControls();
+                onDownloadAreaSelected();
+                gdlArea.remove();
             }
         });
 
@@ -445,6 +463,33 @@ public class MainActivity extends Activity implements OnMapClickListener {
             }
         });
 
+        SeekBar seekBar = (SeekBar) findViewById(R.id.sizeBar);
+        seekBar.setMax(100);
+        seekBar.setProgress(100);
+        seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                dlWidth = s*(float)progress/100.0f;
+                LatLngBounds a = makeSquare(dlCenter, dlWidth);
+                ArrayList<LatLng> l = new ArrayList<LatLng>();
+                l.add(a.northeast);
+                l.add(new LatLng(a.northeast.latitude, a.southwest.longitude));
+                l.add(a.southwest);
+                l.add(new LatLng(a.southwest.latitude, a.northeast.longitude));
+                gdlArea.setPoints(l);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
 
 		updateColors(demData);
@@ -700,22 +745,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
         //Download DEM of currently visible area
         else if(item.getItemId() == R.id.menu_download) {
+
+            showDlControls();
+            hideElevationControls();
             //download DEM of currently visible area
-            DownloadDEM(map.getProjection().getVisibleRegion().latLngBounds);
+            LatLngBounds demArea = selectArea(map.getProjection().getVisibleRegion().latLngBounds);
 
-            //create notification
-            NotificationManager mNotifyManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-            NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.drawable.notification)
-                            .setContentTitle("DEM download")
-                            .setContentText("Download in progress")
-                            .setProgress(0, 0, true);
-
-            int id = demDownloadCount++;
-            mNotifyManager.notify(id, mBuilder.build());
 
         }
 
@@ -1075,6 +1110,14 @@ public class MainActivity extends Activity implements OnMapClickListener {
         markerBottomText.setVisibility(View.VISIBLE);
     }
 
+    public static void hideDlControls() {
+        dlControls.setVisibility(View.GONE);
+    }
+
+    public static void showDlControls() {
+        dlControls.setVisibility(View.VISIBLE);
+    }
+
     /**
      * Displays the action bar for when a marker is selected and its text is visible
      */
@@ -1129,6 +1172,16 @@ public class MainActivity extends Activity implements OnMapClickListener {
         double longDistance = (p1.longitude-p2.longitude)*metersPerDegree*Math.cos((p1.latitude+p2.latitude)/2);
         double latDistance = (p1.latitude-p2.latitude)*metersPerDegree;
         return (float)Math.sqrt((latDistance*latDistance) + (longDistance*longDistance));
+    }
+
+    public LatLngBounds makeSquare(LatLng center, float s) {
+        double metersPerDegree = 111222.0;
+        float r = s/2;
+        double north = center.latitude + (s/metersPerDegree);
+        double south = center.latitude - (s/metersPerDegree);
+        double west = center.longitude + (r/(metersPerDegree*Math.cos(center.latitude)));
+        double east = center.longitude - (r/(metersPerDegree*Math.cos(center.latitude)));
+        return new LatLngBounds(new LatLng(south, west), new LatLng(north, east));
     }
 
     /**
@@ -1557,5 +1610,73 @@ public class MainActivity extends Activity implements OnMapClickListener {
             result += chars[random.nextInt(chars.length-1)];
         }
         return result;
+    }
+
+    private float getArea(LatLngBounds extent) {
+        return getWidth(extent)*getHeight(extent);
+    }
+
+    private float getWidth(LatLngBounds extent) {
+        LatLng sw = extent.southwest;
+        LatLng ne = extent.northeast;
+        LatLng se = new LatLng(extent.southwest.latitude, extent.northeast.longitude);
+        LatLng nw = new LatLng(extent.northeast.latitude, extent.southwest.longitude);
+
+        return distanceBetween(sw, se);
+    }
+
+    private float getHeight(LatLngBounds extent) {
+        LatLng sw = extent.southwest;
+        LatLng ne = extent.northeast;
+        LatLng se = new LatLng(extent.southwest.latitude, extent.northeast.longitude);
+        LatLng nw = new LatLng(extent.northeast.latitude, extent.southwest.longitude);
+
+        return distanceBetween(sw, nw);
+    }
+
+    private LatLngBounds selectArea(LatLngBounds screen) {
+        LatLng center = center(screen);
+        dlCenter = center;
+
+        //make a square with its side length min(width, height) of screen area
+        s = getWidth(screen) > getHeight(screen) ? getHeight(screen) : getWidth(screen);
+        if (s*s > MAX_PIXELS) {
+            s = (float)Math.sqrt(MAX_PIXELS);
+        }
+        LatLngBounds dlArea = makeSquare(center, s);
+
+        PolygonOptions rectOptions = new PolygonOptions()
+                .add(dlArea.northeast)
+                .add(new LatLng(dlArea.northeast.latitude, dlArea.southwest.longitude))
+                .add(dlArea.southwest)
+                .add(new LatLng(dlArea.southwest.latitude, dlArea.northeast.longitude))
+                .strokeColor(Color.BLUE);
+        gdlArea = map.addPolygon(rectOptions);
+        return dlArea;
+    }
+
+    private LatLng center(LatLngBounds screen) {
+        return new LatLng( (screen.southwest.latitude+screen.northeast.latitude )/2.0f,
+                (screen.southwest.longitude+screen.northeast.longitude)/2.0f);
+
+    }
+
+    private void onDownloadAreaSelected() {
+        LatLngBounds demArea = makeSquare(dlCenter, s);
+        DownloadDEM(demArea);
+
+        //create notification
+        NotificationManager mNotifyManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.notification)
+                        .setContentTitle("DEM download")
+                        .setContentText("Download in progress")
+                        .setProgress(0, 0, true);
+
+        int id = demDownloadCount++;
+        mNotifyManager.notify(id, mBuilder.build());
     }
 }
