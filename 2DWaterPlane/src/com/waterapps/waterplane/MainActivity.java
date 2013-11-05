@@ -1,8 +1,8 @@
 package com.waterapps.waterplane;
 
+import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.app.ActionBar;
@@ -24,8 +24,8 @@ import android.graphics.Color;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -37,7 +37,6 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -56,12 +55,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,7 +75,7 @@ import static android.os.Environment.getExternalStorageDirectory;
 public class MainActivity extends Activity implements OnMapClickListener {
     private static final int ADD_MODE = 1;
     private static final int LINE_MODE = 57832;
-    private static final int MAX_PIXELS = 5000000;
+    private static final int MAX_PIXELS_PER_MB = 1200;
     GroundOverlay prevoverlay;
     static DemData demData;
     static List<CustomMarker> markers;
@@ -152,6 +150,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     LatLng dlCenter;
     Polygon gdlArea;
     static BroadcastReceiver receiver;
+    static Queue<DemInProgress> progress = new LinkedList<DemInProgress>();
 
     public static Context getContext() {
         return context;
@@ -164,6 +163,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                    progress.poll().remove();
                     long downloadId = intent.getLongExtra(
                             DownloadManager.EXTRA_DOWNLOAD_ID, 0);
                     DownloadManager.Query query = new DownloadManager.Query();
@@ -352,7 +352,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
         DlButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
                 hideDlControls();
                 showElevationControls();
                 onDownloadAreaSelected();
@@ -548,6 +547,13 @@ public class MainActivity extends Activity implements OnMapClickListener {
             edit.putBoolean("first_start", false);
             edit.commit();
         }
+
+
+        ActivityManager manager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+        int mem = manager.getLargeMemoryClass();
+        Log.d("large memory", Integer.toString(mem));
+        int smallmem = manager.getLargeMemoryClass();
+        Log.d("small memory", Integer.toString(smallmem));
 
         //load initial DEM if help menu isn't being shown
         if(!firstStart) {
@@ -745,13 +751,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
         //Download DEM of currently visible area
         else if(item.getItemId() == R.id.menu_download) {
-
             showDlControls();
             hideElevationControls();
             //download DEM of currently visible area
+            Log.d("screen", map.getProjection().getVisibleRegion().latLngBounds.toString());
             LatLngBounds demArea = selectArea(map.getProjection().getVisibleRegion().latLngBounds);
-
-
+            dlWidth = s;
         }
 
 	    else {
@@ -1179,8 +1184,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
         float r = s/2;
         double north = center.latitude + (s/metersPerDegree);
         double south = center.latitude - (s/metersPerDegree);
-        double west = center.longitude + (r/(metersPerDegree*Math.cos(center.latitude)));
-        double east = center.longitude - (r/(metersPerDegree*Math.cos(center.latitude)));
+        double west = center.longitude - (r/(metersPerDegree*Math.cos(center.latitude)));
+        double east = center.longitude + (r/(metersPerDegree*Math.cos(center.latitude)));
         return new LatLngBounds(new LatLng(south, west), new LatLng(north, east));
     }
 
@@ -1496,13 +1501,53 @@ public class MainActivity extends Activity implements OnMapClickListener {
         return (float)demData.elevationFromLatLng(userLocation);
     }
 
-    public static void getDEM(String demURL) {
+    public void getDEM(String demURL) {
         dm = (DownloadManager) MainActivity.getContext().getSystemService(MainActivity.getContext().DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(
                 Uri.parse(demURL));
         enqueue = dm.enqueue(request);
         Toast toast = Toast.makeText(MainActivity.getContext(), "DEM download started", Toast.LENGTH_SHORT);
         toast.show();
+
+        progress.peek().cancelUpdate();
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                boolean downloading = true;
+
+                while (downloading) {
+
+                    DownloadManager.Query q = new DownloadManager.Query();
+                    q.setFilterById(enqueue);
+
+                    Cursor cursor = dm.query(q);
+                    cursor.moveToFirst();
+                    int bytes_downloaded = cursor.getInt(cursor
+                            .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                    int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+
+                    if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
+                        downloading = false;
+                    }
+
+                    final double dl_progress = ((double) bytes_downloaded / (double) bytes_total);
+
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+
+                            progress.peek().updateProgress(dl_progress);
+
+                        }
+                    });
+                    cursor.close();
+                }
+
+            }
+        }).start();
     }
 
     void DownloadDEM(LatLngBounds extent) {
@@ -1515,16 +1560,18 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     private class runWeb {
-        //private static final String magicString = "25az225MAGICee4587da";
-        String magicString;
+        private static final String magicString = "25az225MAGICee4587da";
+        //String magicString;
         LatLngBounds extent;
 
         public runWeb(LatLngBounds extent) {
             this.extent = extent;
-            magicString = randomString();
+            //magicString = randomString();
             Log.d("magic constructor:",magicString);
         };
         private void run(){
+            //create progress box on map
+            progress.add(new DemInProgress(extent, map));
             currentDemDownloads++;
             final double minX = extent.southwest.longitude;
             final double minY = extent.southwest.latitude;
@@ -1640,10 +1687,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
         //make a square with its side length min(width, height) of screen area
         s = getWidth(screen) > getHeight(screen) ? getHeight(screen) : getWidth(screen);
-        if (s*s > MAX_PIXELS) {
-            s = (float)Math.sqrt(MAX_PIXELS);
+        ActivityManager manager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (s*s > MAX_PIXELS_PER_MB*manager.getLargeMemoryClass()) {
+            s = (float)Math.sqrt(MAX_PIXELS_PER_MB*manager.getLargeMemoryClass());
         }
         LatLngBounds dlArea = makeSquare(center, s);
+
 
         PolygonOptions rectOptions = new PolygonOptions()
                 .add(dlArea.northeast)
@@ -1652,6 +1701,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 .add(new LatLng(dlArea.southwest.latitude, dlArea.northeast.longitude))
                 .strokeColor(Color.BLUE);
         gdlArea = map.addPolygon(rectOptions);
+
+
         return dlArea;
     }
 
@@ -1662,7 +1713,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     private void onDownloadAreaSelected() {
-        LatLngBounds demArea = makeSquare(dlCenter, s);
+        LatLngBounds demArea = makeSquare(dlCenter, dlWidth);
         DownloadDEM(demArea);
 
         //create notification
