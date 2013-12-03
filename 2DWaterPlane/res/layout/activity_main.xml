@@ -59,6 +59,11 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:text="Download"/>
+                <Button
+                    android:id="@+id/dlCancelButton"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Cancel"/>
                 <SeekBar
                     android:id="@+id/sizeBar"
                     android:layout_height="wrap_content"
@@ -124,14 +129,52 @@
                     android:orientation="horizontal"
                     android:divider="@color/background_dark">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="Min:"
+                        android:id="@+id/minText"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="241.94"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:id="@+id/editMin"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="m"
+                        android:textAppearance="?android:attr/textAppearanceSmall"/>
 
                             <SeekBar
                                 android:id="@+id/seekBar"
-                                android:layout_width="match_parent"
+                                android:layout_width="wrap_content"
                                 android:layout_height="40dp"
-                                android:layout_weight="1"
-                                android:layout_alignParentBottom="true"
-                                android:layout_alignParentLeft="true" />
+                                android:layout_weight="1"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="Max:"
+                        android:id="@+id/maxText"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:text="250.925"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:id="@+id/editMax"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:text="m"
+                        android:textAppearance="?android:attr/textAppearanceSmall"/>
 
             </LinearLayout>
 
@@ -143,7 +186,7 @@
                               android:orientation="horizontal"
                               android:divider="@color/background_dark">
 
-
+<!--
                     <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="fill_parent"
@@ -176,6 +219,7 @@
                                 android:ems="10"
                                 android:textAppearance="?android:attr/textAppearanceSmall"
                                 android:id="@+id/editMax"/>
+                                -->
                 </LinearLayout>
         </LinearLayout>
 

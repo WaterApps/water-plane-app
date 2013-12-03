@@ -20,14 +20,17 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.util.Log;
 import android.view.*;
 import android.webkit.ConsoleMessage;
@@ -98,7 +101,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
     public static boolean coloring;
     public static boolean hasGPS;
     public static Button buttonDelete;
-    //static Button buttonDrawLine;
     static Button buttonDeleteLine;
     public static float sliderMin;
     public static float sliderMax;
@@ -113,7 +115,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     private static Context context;
     static boolean following;
     static ArrayList<DemFile> demFiles;
-    DemFile currentlyLoaded;
+    static DemFile currentlyLoaded;
     private boolean firstStart;
     public static LatLngBounds demBounds;
     static SeekBar seekBar;
@@ -126,7 +128,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
     static Button showButton;
     static Button hideButton;
     static Button DlButton;
-    static ArrayList<Polyline> demOutlines;
+    static Button DlCancelButton;
+    static ArrayList<Polygon> demOutlines;
+    static ArrayList<Marker> demMarkers = new ArrayList<Marker>();
     public static boolean mapReady;
     static Resources resources;
     PolylineOptions currentLineOptions;
@@ -138,26 +142,25 @@ public class MainActivity extends Activity implements OnMapClickListener {
     public static boolean profile;
     private static long enqueue;
     private static DownloadManager dm;
-    //BroadcastReceiver receiver;
     WebView webView;
-    //private static final String magicString = "25az225MAGICee4587da";
     int demDownloadCount = 1;
     int demFinishedCount = 1;
-    int currentDemDownloads = 0;
-    Queue<runWeb> downloads = new LinkedList<runWeb>();
+    static int currentDemDownloads = 0;
+    static Queue<runWeb> downloads = new LinkedList<runWeb>();
     float dlWidth;
     float s;
     LatLng dlCenter;
     Polygon gdlArea;
     static BroadcastReceiver receiver;
     static Queue<DemInProgress> progress = new LinkedList<DemInProgress>();
-
+    static float density;
     public static Context getContext() {
         return context;
     }
-
+    static MainActivity that;
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
+        that = this;
          receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -172,12 +175,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
                     if (c.moveToFirst()) {
                         int columnIndex = c
                                 .getColumnIndex(DownloadManager.COLUMN_STATUS);
+
                         if (DownloadManager.STATUS_SUCCESSFUL == c
                                 .getInt(columnIndex)) {
 
                             String fileString = c
-                                    .getString(c
-                                            .getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
+                                    .getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
 
                             File in = new File(fileString);
                             File outputdir = new File(getExternalStorageDirectory() + "/dem");
@@ -216,9 +219,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
         currentLine = null;
         resources = getResources();
         mapReady = false;
-        demOutlines = new ArrayList<Polyline>();
+        demOutlines = new ArrayList<Polygon>();
         markerAB = false;
         CustomMarker.setDensity(getResources().getDisplayMetrics().density);
+        density = getResources().getDisplayMetrics().density;
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         demDirectory = prefs.getString("dem_dir", getExternalStorageDirectory().toString() + "/dem");
@@ -326,7 +330,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         buttonDeleteLine = (Button) findViewById(R.id.buttonDeleteLine);
         buttonShowProfile = (Button) findViewById(R.id.buttonShowProfile);
         DlButton = (Button) findViewById(R.id.dlButton);
-        //buttonDrawLine = (Button) findViewById(R.id.buttonDrawLine);
+        DlCancelButton = (Button) findViewById(R.id.dlCancelButton);
         final Button buttonPlus = (Button) findViewById(R.id.buttonPlus);
         final Button buttonMinus = (Button) findViewById(R.id.buttonMinus);
 
@@ -355,6 +359,14 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 hideDlControls();
                 showElevationControls();
                 onDownloadAreaSelected();
+                gdlArea.remove();
+            }
+        });
+
+        DlCancelButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                hideDlControls();
+                showElevationControls();
                 gdlArea.remove();
             }
         });
@@ -565,7 +577,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
 	public void onPause() {
 		super.onPause();
 		locationManager.removeUpdates(locationListener);
-        //unregisterReceiver(receiver);
     }
 
 	@Override
@@ -765,6 +776,57 @@ public class MainActivity extends Activity implements OnMapClickListener {
         return true;
 	}
 
+    static boolean inside(Polygon poly, LatLng l) {
+        Iterator<LatLng> iter = poly.getPoints().iterator();
+        LatLngBounds bounds = new LatLngBounds(iter.next(), iter.next());
+        while(iter.hasNext()) {
+            bounds = bounds.including(iter.next());
+        }
+        return bounds.contains(l);
+    }
+
+    static void removeDemOutline(LatLng point) {
+        Iterator<Polygon> outlines = demOutlines.iterator();
+        while(outlines.hasNext()) {
+            Polygon outline = outlines.next();
+            if (inside(outline, point)) {
+                outline.remove();
+            }
+        }
+    }
+
+    static void removeMarker(LatLngBounds b) {
+        Iterator<Marker> iter = demMarkers.iterator();
+        while(iter.hasNext()) {
+            Marker marker = iter.next();
+            if (b.contains(marker.getPosition()))
+                marker.remove();
+        }
+    }
+
+    public static void loadDEM(LatLng point) {
+        //load DEM if clicked on
+        DemFile demFile;
+        removeDemOutlines();
+        scanDEMs();
+        removeDemOutline(point);
+
+        for(int i = 0; i< demFiles.size(); i++) {
+            demFile = demFiles.get(i);
+            if ( (currentlyLoaded == null) || !demFile.getFilename().equals(currentlyLoaded.getFilename())) {
+                if(demFile.getBounds().contains(point)) {
+                    currentlyLoaded = demFile;
+                    DemData raster = new DemData();
+                    new ReadDemDataTask(that, raster, demFile.getFilename()).execute(demFile.getFileUri());
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString("last_dem", demFile.getFileUri().getPath());
+                    editor.commit();
+                }
+            }
+        }
+        updateMarkers();
+    }
+
     /**
      * Handles user clicks on the map.
      * Adds markers when needed and loads DEMs if they are clicked on.
@@ -828,22 +890,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
 				break;
 		}
 
-        //load DEM if clicked on
-        DemFile demFile;
-        for(int i = 0; i< demFiles.size(); i++) {
-            demFile = demFiles.get(i);
-            if ( (currentlyLoaded == null) || !demFile.getFilename().equals(currentlyLoaded.getFilename())) {
-                if(demFile.getBounds().contains(point)) {
-                    currentlyLoaded = demFile;
-                    DemData raster = new DemData();
-                    new ReadDemDataTask(this, raster, demFile.getFilename()).execute(demFile.getFileUri());
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString("last_dem", demFile.getFileUri().getPath());
-                    editor.commit();
-                }
-            }
-        }
-        updateMarkers();
+        loadDEM(point);
     }
 
     /**
@@ -932,7 +979,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
                     waterLevelMeters = sliderMin + ((double)waterLevel*(sliderMax-sliderMin)/255.0);
                     TextView waterElevationTextView = (TextView) findViewById(R.id.text);
                     String elevation = new DecimalFormat("#.#").format(waterLevelMeters);
-                    String waterElevationText = "Elevation: " + elevation + "m";
+                    String diff = new DecimalFormat("#.#").format(waterLevelMeters-sliderMin);
+                    String waterElevationText = "Elevation: " + elevation + "m (" + diff + "m above min)";
                     waterElevationTextView.setText(waterElevationText);
 
                     //update other text block
@@ -1096,6 +1144,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
         updateSlider();
 
         map.animateCamera(CameraUpdateFactory.newLatLngBounds(raster.getBounds(), 50));
+        removeDemOutline(new GeoRectangle(raster.getBounds()).center());
+        removeMarker(raster.getBounds());
 
     }
 
@@ -1147,7 +1197,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
      * Displays the action bar for when no marker is selected
      */
     public static void showNormalAB() {
-        //actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
         buttonDelete.setVisibility(View.GONE);
         appName.setVisibility(View.VISIBLE);
         hideButton.setVisibility(View.GONE);
@@ -1256,7 +1305,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         Log.i("Files", "Path: " + path);
         File f = new File(path);
         Polyline outline;
-        demOutlines = new ArrayList<Polyline>();
+        demOutlines = new ArrayList<Polygon>();
 
         //don't look through it if it isn't a directory
         if (f.isDirectory()) {
@@ -1273,15 +1322,20 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 //add to list of dem objects
                 demFiles.add(demFile);
                 //draw outline on map
-                demOutlines.add(map.addPolyline(new PolylineOptions().add(new LatLng(demFile.getSw_lat(), demFile.getSw_long()))
+                demOutlines.add(map.addPolygon(new PolygonOptions().add(new LatLng(demFile.getSw_lat(), demFile.getSw_long()))
                         .add(new LatLng(demFile.getSw_lat(), demFile.getNe_long()))
                         .add(new LatLng(demFile.getNe_lat(), demFile.getNe_long()))
                         .add(new LatLng(demFile.getNe_lat(), demFile.getSw_long()))
                         .add(new LatLng(demFile.getSw_lat(), demFile.getSw_long()))
-                        .color(Color.RED)));
+                        .strokeColor(Color.RED)
+                        .fillColor(Color.argb(64, 255, 0, 0))));
                 //expand bounds to include each dem
                 demBounds = demBounds.including(new LatLng(demFile.getSw_lat(), demFile.getSw_long()));
                 demBounds = demBounds.including(new LatLng(demFile.getNe_lat(), demFile.getNe_long()));
+                demMarkers.add(map.addMarker(new MarkerOptions()
+                        .icon(BitmapDescriptorFactory.fromBitmap(textToBitmap("Tap")))
+                        .position(new GeoRectangle(demFile.getBounds()).center())
+                        .title("Tap")));
             }
         }
     }
@@ -1474,7 +1528,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
      *Removes polylines showing DEM outlines, for use when DEM folder is changed
      */
     public static void removeDemOutlines() {
-        Iterator<Polyline> outlines = demOutlines.iterator();
+        Iterator<Polygon> outlines = demOutlines.iterator();
         while(outlines.hasNext()) {
             outlines.next().remove();
         }
@@ -1499,55 +1553,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
     public static float getUserElevation() {
         return (float)demData.elevationFromLatLng(userLocation);
-    }
-
-    public void getDEM(String demURL) {
-        dm = (DownloadManager) MainActivity.getContext().getSystemService(MainActivity.getContext().DOWNLOAD_SERVICE);
-        DownloadManager.Request request = new DownloadManager.Request(
-                Uri.parse(demURL));
-        enqueue = dm.enqueue(request);
-        Toast toast = Toast.makeText(MainActivity.getContext(), "DEM download started", Toast.LENGTH_SHORT);
-        toast.show();
-
-        progress.peek().cancelUpdate();
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                boolean downloading = true;
-
-                while (downloading) {
-
-                    DownloadManager.Query q = new DownloadManager.Query();
-                    q.setFilterById(enqueue);
-
-                    Cursor cursor = dm.query(q);
-                    cursor.moveToFirst();
-                    int bytes_downloaded = cursor.getInt(cursor
-                            .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-                    int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-
-                    if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
-                        downloading = false;
-                    }
-
-                    final double dl_progress = ((double) bytes_downloaded / (double) bytes_total);
-
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-
-                            progress.peek().updateProgress(dl_progress);
-
-                        }
-                    });
-                    cursor.close();
-                }
-
-            }
-        }).start();
     }
 
     void DownloadDEM(LatLngBounds extent) {
@@ -1642,11 +1647,56 @@ public class MainActivity extends Activity implements OnMapClickListener {
         }
     }
 
-    private static void downloadFile(String url) {
+    private void downloadFile(String url) {
         Log.d("downloadFile", url);
         Request request = new Request(
                 Uri.parse(url));
         enqueue = dm.enqueue(request);
+
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                boolean downloading = true;
+
+                while (downloading) {
+
+                    DownloadManager.Query q = new DownloadManager.Query();
+                    q.setFilterById(enqueue);
+
+                    Cursor cursor = dm.query(q);
+                    cursor.moveToFirst();
+                    int bytes_downloaded = cursor.getInt(cursor
+                            .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                    int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+
+                    if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
+                        downloading = false;
+                    }
+
+                    final double dl_progress = ((double) bytes_downloaded / (double) bytes_total);
+                    System.out.println("Downloading: " + dl_progress);
+
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            if (progress.peek() != null)
+                                progress.peek().updateProgress((2.0+dl_progress)/3.0);
+
+                        }
+                    });
+                    cursor.close();
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        }).start();
     }
 
     String randomString() {
@@ -1702,7 +1752,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 .strokeColor(Color.BLUE);
         gdlArea = map.addPolygon(rectOptions);
 
-
         return dlArea;
     }
 
@@ -1729,5 +1778,56 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
         int id = demDownloadCount++;
         mNotifyManager.notify(id, mBuilder.build());
+    }
+
+    static Bitmap textToBitmap(String text) {
+        int width = dpToPx(180);
+        int height = dpToPx(20);
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawBitmap(bitmap, 0, 0, null);
+
+        TextPaint textPaint = new TextPaint();
+        textPaint.setAntiAlias(true);
+        textPaint.setTextSize(16.0f * density);
+        textPaint.setColor(Color.WHITE);
+        StaticLayout sl= new StaticLayout(text, textPaint, bitmap.getWidth()-8, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
+        canvas.translate((int)(3.0f * density), (int)(4.0f * density));
+        sl.draw(canvas);
+        return bitmap;
+    }
+
+    static int dpToPx(int dp) {
+        return (int) (dp * density + 0.5f);
+    }
+
+    private static int getProgressPercentage() {
+
+        int DOWNLOADED_BYTES_SO_FAR_INT = 0, TOTAL_BYTES_INT = 0, PERCENTAGE = 0;
+
+        try {
+            Cursor c = dm.query(new DownloadManager.Query()
+                    .setFilterById(enqueue));
+
+            if (c.moveToFirst()) {
+                DOWNLOADED_BYTES_SO_FAR_INT = (int) c
+                        .getLong(c
+                                .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                TOTAL_BYTES_INT = (int) c
+                        .getLong(c
+                                .getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+            }
+
+            System.out.println("PERCEN ------" + DOWNLOADED_BYTES_SO_FAR_INT
+                    + " ------ " + TOTAL_BYTES_INT + "****" + PERCENTAGE);
+            PERCENTAGE = (DOWNLOADED_BYTES_SO_FAR_INT * 100 / TOTAL_BYTES_INT);
+            System.out.println("PERCENTAGE % " + PERCENTAGE);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return PERCENTAGE;
     }
 }

@@ -112,6 +112,10 @@ public class MarkerHandler implements OnMarkerDragListener, GoogleMap.OnMarkerCl
             return true;
         }
 
+        if(marker.getTitle().equals("Tap")) {
+            MainActivity.loadDEM(marker.getPosition());
+        }
+
         //if this is a marker showing the min/max of a line, use default behavior
         //which is to toggle visibility of info window
 
