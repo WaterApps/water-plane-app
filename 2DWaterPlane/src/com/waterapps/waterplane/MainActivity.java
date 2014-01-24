@@ -1599,6 +1599,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
                                 + "document.getElementById('minY').value = '" + Double.toString(minY) + "';"
                                 + "document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
                                 + "document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
+                                + "document.getElementById('resolution').value = '" + Double.toString(3.0) + "';"
                                 + "document.getElementById('format').value = 'GTiff';"
                                 + "document.getElementById('theForm').submit();";
                         webView.loadUrl(strFunction);
@@ -1738,11 +1739,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
         //make a square with its side length min(width, height) of screen area
         s = getWidth(screen) > getHeight(screen) ? getHeight(screen) : getWidth(screen);
         ActivityManager manager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
-        if (s*s > MAX_PIXELS_PER_MB*manager.getLargeMemoryClass()) {
-            s = (float)Math.sqrt(MAX_PIXELS_PER_MB*manager.getLargeMemoryClass());
+        if ( (s*s)/3 > MAX_PIXELS_PER_MB*manager.getLargeMemoryClass()) {
+            s = 3*(float)Math.sqrt(MAX_PIXELS_PER_MB*manager.getLargeMemoryClass());
         }
         LatLngBounds dlArea = makeSquare(center, s);
-
 
         PolygonOptions rectOptions = new PolygonOptions()
                 .add(dlArea.northeast)
