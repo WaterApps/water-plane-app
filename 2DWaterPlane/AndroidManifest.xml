@@ -17,6 +17,7 @@
         android:protectionLevel="signature"/>
         <uses-permission android:name="com.waterapps.waterplane.permission.MAPS_RECEIVE"/>
         <uses-permission android:name="android.permission.INTERNET"/>
+        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 		<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 		<uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
 		<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -30,6 +31,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
         <activity
             android:name="com.waterapps.waterplane.MainActivity"
             android:label="@string/app_name"
