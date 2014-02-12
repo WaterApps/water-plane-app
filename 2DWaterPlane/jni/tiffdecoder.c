@@ -34,6 +34,7 @@
 #define TIFFTAG_GEOKEYDIRECTORY      34735
 #define TIFFTAG_GEODOUBLEPARAMS      34736
 #define TIFFTAG_GEOASCIIPARAMS       34737
+#define TIFFTAG_PROJECTEDCSTYPEGEOKEY 3072
 #define TIFFTAG_GDAL_NODATA	     42113
 #define FALSE 0
 #define TRUE 1
@@ -51,6 +52,7 @@ unsigned int totalFrame = 0;
 void *latlng;
 void *scale;
 void *params;
+void *projection;
 unsigned short iCount;
 void *noData;
 
@@ -71,7 +73,9 @@ static void TagExtender(TIFF *tiff)
 		{ TIFFTAG_GEOASCIIPARAMS,	-1,-1, TIFF_ASCII,	FIELD_CUSTOM,
 		  TRUE,	TRUE,	"GeoASCIIParams" },
 		{ TIFFTAG_GDAL_NODATA,	-1,-1, TIFF_ASCII,	FIELD_CUSTOM,
-		  TRUE,	TRUE,	"NoData" }
+		  TRUE,	TRUE,	"NoData" },
+		{ TIFFTAG_PROJECTEDCSTYPEGEOKEY, -1,-1, TIFF_SHORT, FIELD_CUSTOM,
+		  TRUE, TRUE, "ProjectedCSTypeGeoKey" }
 	    };
 
 	TIFFMergeFieldInfo( tiff, xtiffFieldInfo,
@@ -150,7 +154,9 @@ Java_com_tiffdecoder_TiffDecoder_nativeTiffOpen( JNIEnv* env, jobject thiz, jstr
 	TIFFGetField(image, TIFFTAG_GEOASCIIPARAMS, &iCount, &params);
 	noData = _TIFFmalloc(1000);
 	TIFFGetField(image, TIFFTAG_GDAL_NODATA, &iCount, &noData);
-
+	projection = _TIFFmalloc(1000);
+	TIFFGetField(image, TIFFTAG_PROJECTEDCSTYPEGEOKEY, &iCount, &noData);
+	
 
 	__android_log_print(ANDROID_LOG_INFO, "nativeTiffOpen", "after read long/lat");
 	bufferSize = width * height;
