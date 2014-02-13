@@ -1,4 +1,4 @@
-package com.waterapps.waterplane;
+package com.waterapps.lib;
 
 import android.graphics.Color;
 
@@ -16,7 +16,7 @@ public class GeoRectangle {
     public enum unit {METERS, FEET};
     private unit units = unit.METERS;
 
-    GeoRectangle(LatLngBounds extent) {
+    public GeoRectangle(LatLngBounds extent) {
         north = extent.northeast.latitude;
         south = extent.southwest.latitude;
         east = extent.northeast.longitude;
