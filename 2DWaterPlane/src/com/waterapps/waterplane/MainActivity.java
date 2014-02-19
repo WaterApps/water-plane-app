@@ -1,14 +1,13 @@
 package com.waterapps.waterplane;
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
-import android.app.ActionBar;
-import com.waterapps.lib.gzip;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,7 +31,10 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
-import android.view.*;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -50,14 +52,36 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.*;
-import com.waterapps.lib.*;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlay;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.jhlabs.map.Point2D;
+import com.waterapps.lib.CustomMarker;
+import com.waterapps.lib.DemData;
+import com.waterapps.lib.DemFile;
+import com.waterapps.lib.DemInProgress;
+import com.waterapps.lib.GeoRectangle;
+import com.waterapps.lib.MapLine;
+import com.waterapps.lib.MyMapFragment;
+import com.waterapps.lib.ReadDemDataTask;
+import com.waterapps.lib.ReadGeoTiffMetadata;
+import com.waterapps.lib.gzip;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
@@ -67,9 +91,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
+import java.util.Vector;
 
 import static android.graphics.Color.HSVToColor;
 import static android.os.Environment.getExternalStorageDirectory;
+import static org.gdal.osr.osr.CreateCoordinateTransformation;
+
+import org.gdal.gdal.Band;
+import org.gdal.gdal.Dataset;
+import org.gdal.gdal.GCP;
+import org.gdal.gdal.gdal;
+import org.gdal.gdalconst.gdalconstConstants;
+import org.gdal.ogr.ogr;
+import org.gdal.osr.CoordinateTransformation;
+import org.gdal.osr.SpatialReference;
 
 /**
  * The app's main activity.
@@ -817,6 +852,86 @@ public class MainActivity extends Activity implements OnMapClickListener {
                     currentlyLoaded = demFile;
                     DemData raster = new DemData();
                     new ReadDemDataTask(that, raster, demFile.getFilename()).execute(demFile.getFileUri());
+
+                    //GDAL test
+
+                    gdal.AllRegister();
+                    ogr.RegisterAll();
+                    Dataset dataset = gdal.Open(demFile.getFilename(), gdalconstConstants.GA_ReadOnly);
+                    Toast toast;
+                    if(dataset == null) {
+                        toast = Toast.makeText(context, gdal.GetLastErrorMsg(), Toast.LENGTH_LONG);
+                    }
+                    else {
+                        //String wkt = dataset.GetProjection();
+                        String wkt = dataset.GetProjectionRef();
+                        /*
+                        String webMercator = new String("PROJCS['WGS_1984_Web_Mercator_Auxiliary_Sphere',\n" +
+                                "    GEOGCS['GCS_WGS_1984',\n" +
+                                "        DATUM['D_WGS_1984',\n" +
+                                "            SPHEROID['WGS_1984',6378137.0,298.257223563]\n" +
+                                "        ],\n" +
+                                "        PRIMEM['Greenwich',0.0],\n" +
+                                "        UNIT['Degree',0.0174532925199433]\n" +
+                                "    ],\n" +
+                                "    PROJECTION['Mercator_Auxiliary_Sphere'],\n" +
+                                "    PARAMETER['False_Easting',0.0],\n" +
+                                "    PARAMETER['False_Northing',0.0],\n" +
+                                "    PARAMETER['Central_Meridian',0.0],\n" +
+                                "    PARAMETER['latitude_of_origin',0.0],\n" +
+                                "    PARAMETER['Standard_Parallel_1',0.0],\n" +
+                                "    PARAMETER['Auxiliary_Sphere_Type',0.0],\n" +
+                                "    UNIT['Meter',1.0],\n" +
+                                "    EXTENSION[\"PROJ4\",\n" +
+                                "        \"+proj=merc +a=6378137 +b=6356752.314245179 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs\"\n" +
+                                "    ],\n" +
+                                "    AUTHORITY[\"EPSG\",\"3857\"]\n" +
+                                "]");
+                        String wm = new String("GEOGCS[\"WGS 84\",\n" +
+                                "    DATUM[\"WGS_1984\",\n" +
+                                "        SPHEROID[\"WGS 84\",6378137,298.257223563,\n" +
+                                "            AUTHORITY[\"EPSG\",\"7030\"]],\n" +
+                                "        AUTHORITY[\"EPSG\",\"6326\"]],\n" +
+                                "    PRIMEM[\"Greenwich\",0,\n" +
+                                "        AUTHORITY[\"EPSG\",\"8901\"]],\n" +
+                                "    UNIT[\"degree\",0.01745329251994328,\n" +
+                                "        AUTHORITY[\"EPSG\",\"9122\"]],\n" +
+                                "    AUTHORITY[\"EPSG\",\"4326\"]]");
+                        */
+                        //toast = Toast.makeText(context, wkt, Toast.LENGTH_LONG);
+                        SpatialReference wgs84 = new SpatialReference();
+                        wgs84.SetWellKnownGeogCS("WGS84");
+                        SpatialReference demref = new SpatialReference(wkt);
+                        //CoordinateTransformation transform = new CoordinateTransformation(new SpatialReference(wkt), wgs84);
+                        CoordinateTransformation transform = null;
+                        transform = CreateCoordinateTransformation(demref, wgs84);
+                        if (transform == null) {
+                            toast = Toast.makeText(context, "Coordinate transform not working!", Toast.LENGTH_LONG);
+                        }
+                        else {
+                            //double[] geoTransform = new double[10];
+                            double[] geoTransform = dataset.GetGeoTransform();
+                            double width = dataset.getRasterXSize();
+                            double height = dataset.getRasterYSize();
+                            double minx = geoTransform[0];
+                            double maxx = geoTransform[0] + width*geoTransform[1] + height*geoTransform[2];
+                            double miny = geoTransform[3] + width*geoTransform[4] + height*geoTransform[5];
+                            double maxy = geoTransform[3];
+
+                            double[] transformed_ll = new double[3];
+                            //transform.TransformPoint(transformed_ll, 0, minx, miny);
+                            double[] transformed_ur = new double[3];
+                            //transform.TransformPoint(transformed_ur, 0, maxy, maxy);
+                            transformed_ll = transform.TransformPoint(minx, miny);
+                            transformed_ur = transform.TransformPoint(maxx, maxy);
+                            String display = "("+Double.toString(transformed_ll[0])+","+Double.toString(transformed_ll[1])+"), ("
+                                    +Double.toString(transformed_ur[0]) + "," + Double.toString(transformed_ur[1])+")"+transform.toString();
+                            toast = Toast.makeText(context, display, Toast.LENGTH_LONG);
+                            System.out.println(wkt);
+                        }
+                    }
+
+                    toast.show();
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString("last_dem", demFile.getFileUri().getPath());
                     editor.commit();
