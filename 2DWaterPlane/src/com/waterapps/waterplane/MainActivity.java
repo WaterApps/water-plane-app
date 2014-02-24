@@ -808,7 +808,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         DemFile demFile;
         removeDemOutlines();
         scanDEMs();
-        removeDemOutline(point);
 
         for(int i = 0; i< demFiles.size(); i++) {
             demFile = demFiles.get(i);
@@ -823,6 +822,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 }
             }
         }
+        removeDemOutline(currentlyLoaded.getBounds().getCenter());
+        removeMarker(currentlyLoaded.getBounds());
         updateMarkers();
     }
 
