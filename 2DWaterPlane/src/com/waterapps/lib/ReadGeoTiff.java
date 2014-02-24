@@ -9,6 +9,11 @@ import java.net.URI;
 
 import com.ibm.util.CoordinateConversion;
 
+import org.gdal.gdal.Dataset;
+import org.gdal.gdal.gdal;
+import org.gdal.ogr.ogr;
+import org.gdal.osr.SpatialReference;
+
 /**
  * Reads data from a GeoTIFF into a DemData object
  */
@@ -55,8 +60,21 @@ public class ReadGeoTiff implements ReadDemData {
 
         //convert from UTM->LatLng as GMaps expects
         CoordinateConversion conversion = new CoordinateConversion();
-        String UTM = TiffDecoder.nativeTiffGetParams();
-        String UTMZone = UTM.substring(18, 20).concat(" ").concat(UTM.substring(20, 21)).concat(" ");
+        //String UTM = TiffDecoder.nativeTiffGetParams();
+        //String UTMZone = UTM.substring(18, 20).concat(" ").concat(UTM.substring(20, 21)).concat(" ");
+
+        //figure out UTM zone
+        //gdal returns positive zone for north hemisphere, negative for south
+        String UTMZone;
+        gdal.AllRegister();
+        ogr.RegisterAll();
+        Dataset ds = gdal.Open(fileUri.getPath());
+        int zone = new SpatialReference(ds.GetProjectionRef()).GetUTMZone();
+        if (zone > 0) {
+            UTMZone = Integer.toString(zone) + " N ";
+        } else {
+            UTMZone = Integer.toString(-zone) + " S ";
+        }
         latLng = conversion.utm2LatLon(UTMZone + Integer.toString((int)longitude) + " " + Integer.toString((int)latitude));
         double scaleX = TiffDecoder.nativeTiffGetScaleX();
         double scaleY = TiffDecoder.nativeTiffGetScaleY();
