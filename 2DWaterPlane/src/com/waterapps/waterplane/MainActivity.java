@@ -70,6 +70,7 @@ import java.util.Random;
 
 import static android.graphics.Color.HSVToColor;
 import static android.os.Environment.getExternalStorageDirectory;
+import static org.gdal.osr.CoordinateTransformation.CreateCoordinateTransformation;
 
 /**
  * The app's main activity.
