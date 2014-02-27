@@ -1203,7 +1203,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         showButton.setVisibility(View.GONE);
     }
 
-
     /**
      * Updates the textboxes which show slider min/max values
      * @param min Slider min value
