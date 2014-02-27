@@ -54,8 +54,8 @@ public class ReadGeoTiffMetadata {
         double scaleY = TiffDecoder.nativeTiffGetScaleY();
 
         //calculate position of northeast corner, as only southwest and scale are provided
-        double width = scaleX*TiffDecoder.nativeTiffGetWidth()/(111111.0);
-        double height = scaleY*TiffDecoder.nativeTiffGetHeight()/(111111.0*Math.cos(Math.toRadians(latLng[0])));
+        double width = scaleX*TiffDecoder.nativeTiffGetHeight()/(111111.0);
+        double height = scaleY*TiffDecoder.nativeTiffGetWidth()/(111111.0*Math.cos(Math.toRadians(latLng[0])));
         return new DemFile((float)(latLng[0]-width), ((float)latLng[1]), (float)latLng[0], (float)(latLng[1]+height), fileName, timeStamp, fileUri);
     }
 }
