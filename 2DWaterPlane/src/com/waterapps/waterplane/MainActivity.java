@@ -480,7 +480,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 dlWidth = s*(float)progress/100.0f;
-                LatLngBounds a = makeSquare(dlCenter, dlWidth);
+                LatLngBounds a = GeoUtils.makeSquare(dlCenter, dlWidth);
                 ArrayList<LatLng> l = new ArrayList<LatLng>();
                 l.add(a.northeast);
                 l.add(new LatLng(a.northeast.latitude, a.southwest.longitude));
@@ -1204,7 +1204,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         showButton.setVisibility(View.GONE);
     }
 
-
     /**
      * Updates the textboxes which show slider min/max values
      * @param min Slider min value
@@ -1214,29 +1213,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         DecimalFormat df = new DecimalFormat("#.#");
         editMin.setText(df.format(min));
         editMax.setText(df.format(max));
-    }
-
-    /**
-     * Calculates distance between two LatLng objects
-     * @param p1 Point 1
-     * @param p2 Point 2
-     * @return Distance between Point 1 and Point 2
-     */
-    public float distanceBetween(LatLng p1, LatLng p2) {
-        double metersPerDegree = 111222.0;
-        double longDistance = (p1.longitude-p2.longitude)*metersPerDegree*Math.cos((p1.latitude+p2.latitude)/2);
-        double latDistance = (p1.latitude-p2.latitude)*metersPerDegree;
-        return (float)Math.sqrt((latDistance*latDistance) + (longDistance*longDistance));
-    }
-
-    public LatLngBounds makeSquare(LatLng center, float s) {
-        double metersPerDegree = 111222.0;
-        float r = s/2;
-        double north = center.latitude + (s/metersPerDegree);
-        double south = center.latitude - (s/metersPerDegree);
-        double west = center.longitude - (r/(metersPerDegree*Math.cos(center.latitude)));
-        double east = center.longitude + (r/(metersPerDegree*Math.cos(center.latitude)));
-        return new LatLngBounds(new LatLng(south, west), new LatLng(north, east));
     }
 
     /**
@@ -1711,39 +1687,17 @@ public class MainActivity extends Activity implements OnMapClickListener {
         return result;
     }
 
-    private float getArea(LatLngBounds extent) {
-        return getWidth(extent)*getHeight(extent);
-    }
-
-    private float getWidth(LatLngBounds extent) {
-        LatLng sw = extent.southwest;
-        LatLng ne = extent.northeast;
-        LatLng se = new LatLng(extent.southwest.latitude, extent.northeast.longitude);
-        LatLng nw = new LatLng(extent.northeast.latitude, extent.southwest.longitude);
-
-        return distanceBetween(sw, se);
-    }
-
-    private float getHeight(LatLngBounds extent) {
-        LatLng sw = extent.southwest;
-        LatLng ne = extent.northeast;
-        LatLng se = new LatLng(extent.southwest.latitude, extent.northeast.longitude);
-        LatLng nw = new LatLng(extent.northeast.latitude, extent.southwest.longitude);
-
-        return distanceBetween(sw, nw);
-    }
-
     private LatLngBounds selectArea(LatLngBounds screen) {
-        LatLng center = center(screen);
+        LatLng center = GeoUtils.center(screen);
         dlCenter = center;
 
         //make a square with its side length min(width, height) of screen area
-        s = getWidth(screen) > getHeight(screen) ? getHeight(screen) : getWidth(screen);
+        s = GeoUtils.getWidth(screen) > GeoUtils.getHeight(screen) ? GeoUtils.getHeight(screen) : GeoUtils.getWidth(screen);
         ActivityManager manager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
         if ( (s*s)/3 > MAX_PIXELS_PER_MB*manager.getLargeMemoryClass()) {
             s = 3*(float)Math.sqrt(MAX_PIXELS_PER_MB*manager.getLargeMemoryClass());
         }
-        LatLngBounds dlArea = makeSquare(center, s);
+        LatLngBounds dlArea = GeoUtils.makeSquare(center, s);
 
         PolygonOptions rectOptions = new PolygonOptions()
                 .add(dlArea.northeast)
@@ -1756,14 +1710,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
         return dlArea;
     }
 
-    private LatLng center(LatLngBounds screen) {
-        return new LatLng( (screen.southwest.latitude+screen.northeast.latitude )/2.0f,
-                (screen.southwest.longitude+screen.northeast.longitude)/2.0f);
-
-    }
-
     private void onDownloadAreaSelected() {
-        LatLngBounds demArea = makeSquare(dlCenter, dlWidth);
+        LatLngBounds demArea = GeoUtils.makeSquare(dlCenter, dlWidth);
         DownloadDEM(demArea);
 
         //create notification
