@@ -1065,6 +1065,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         //handle data from file manager
 
         if (requestCode == FIRST_START) {
+
             loadInitialDEM();
             return;
         }
