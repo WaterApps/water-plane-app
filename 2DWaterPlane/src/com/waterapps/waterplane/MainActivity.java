@@ -278,7 +278,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
         //set ups markers
 		userMarker = map.addMarker(new MarkerOptions()
         .position(map.getCameraPosition().target)
-        .title("You are here"));
+        .title("You are here")
+        .icon(BitmapDescriptorFactory.fromResource(R.drawable.person)));
 		MarkerHandler markerListener = new MarkerHandler();
 		map.setOnMarkerDragListener(markerListener);
         map.setOnMarkerClickListener(markerListener);
