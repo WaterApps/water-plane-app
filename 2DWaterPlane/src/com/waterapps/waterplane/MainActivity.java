@@ -1556,19 +1556,42 @@ public class MainActivity extends Activity implements OnMapClickListener {
             //create progress box on map
             progress.add(new DemInProgress(extent, map));
             currentDemDownloads++;
-            final double minX = extent.southwest.longitude;
-            final double minY = extent.southwest.latitude;
-            final double maxX = extent.northeast.longitude;
-            final double maxY = extent.northeast.latitude;
+            final double minX = (extent.southwest.longitude < extent.northeast.longitude) ? extent.southwest.longitude :  extent.northeast.longitude;
+            final double minY = (extent.southwest.latitude < extent.northeast.latitude) ? extent.southwest.latitude :  extent.northeast.latitude;
+            final double maxX = (extent.southwest.longitude > extent.northeast.longitude) ? extent.southwest.longitude :  extent.northeast.longitude;
+            final double maxY = (extent.southwest.latitude > extent.northeast.latitude) ? extent.southwest.latitude :  extent.northeast.latitude;
+            String initalURL = "http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=datasets&minX=" +
+                    Double.toString(minX) + "&minY=" +
+                    Double.toString(minY) + "&maxX=" +
+                    Double.toString(maxX) + "&maxY=" +
+                    Double.toString(maxY);
 
             webView = new WebView(MainActivity.getContext());
             webView.getSettings().setJavaScriptEnabled(true);
             webView.setWebChromeClient(new PageHandler());
+            webView.addJavascriptInterface(this, "Callback");
             webView.setWebViewClient(new WebViewClient() {
+                public void noDataFound() {
+                    Toast.makeText(that, "No data found", Toast.LENGTH_SHORT).show();
+                }
                 @Override
                 public void onPageFinished(WebView view, String url) {
+
                     Log.d("onPageFinished", "url:" + url);
-                    if(url.contentEquals("file:///android_asset/OpenTopo.html") == true){
+                    if(url.contains("datasets")) {
+                        Log.d("onPageFinished", "Finding dataset");
+                        String strFunction = "javascript:" +
+                                "var buttons;" +
+                                "buttons = document.querySelectorAll(\"input[value='Get Data']\");" +
+                                "if (buttons.length > 0) {" +
+                                "   buttons[0].onclick();" +
+                                "}" +
+                                "else {" +
+                                "   Callback.noDataFound();" +
+                                "}";
+                        webView.loadUrl(strFunction);
+                    }
+                    else if(url.contains("lidarDataset")){
                         Log.d("onPageFinished", "Submitting form");
                         //Initial homemade post page, change post vars here, then post form;
                         final String strFunction = "javascript:"
@@ -1577,13 +1600,16 @@ public class MainActivity extends Activity implements OnMapClickListener {
                                 + "document.getElementById('minY').value = '" + Double.toString(minY) + "';"
                                 + "document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
                                 + "document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
+                                + "document.getElementById('lasOutput').checked = 'unchecked';"
+                                + "document.getElementById('derivativeSelect').checked = 'unchecked';"
+                                + "document.getElementById('visualization').checked = 'unchecked';"
                                 + "document.getElementById('resolution').value = '" + Double.toString(3.0) + "';"
                                 + "document.getElementById('format').value = 'GTiff';"
-                                + "document.getElementById('theForm').submit();";
+                                + "document.getElementsByName('selectForm')[0].submit();";
                         webView.loadUrl(strFunction);
                         Log.d("url", strFunction);
-
-                    } else {
+                    }
+                    else {
                         Log.d("onPageFinished", "Searching for DEM");
                         Log.d("onPageFinished", "URL:" + url);
                         //Open topo pages
@@ -1603,7 +1629,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
                     }
                 }
             });
-            webView.loadUrl("file:///android_asset/OpenTopo.html");
+
+            webView.loadUrl(initalURL);
         }
 
         private class PageHandler extends WebChromeClient {
