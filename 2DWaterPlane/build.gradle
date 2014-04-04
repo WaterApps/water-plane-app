@@ -21,6 +21,24 @@ android {
     compileSdkVersion 19
     buildToolsVersion "19.0.1"
 
+	signingConfigs {
+        release {
+            storeFile file("openatk.keystore")
+            storePassword "************"
+            keyAlias "************"
+            keyPassword "**************"
+        }
+    }
+	
+	buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), \
+            'proguard-rules.txt'
+			signingConfig signingConfigs.release
+        }
+	}
+		
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
