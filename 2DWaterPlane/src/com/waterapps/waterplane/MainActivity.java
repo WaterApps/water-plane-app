@@ -147,6 +147,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     static int currentDemDownloads = 0;
     static Queue<runWeb> downloads = new LinkedList<runWeb>();
     float dlWidth;
+    float aspect = 1;
     float s;
     LatLng dlCenter;
     Polygon gdlArea;
@@ -481,7 +482,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 dlWidth = s*(float)progress/100.0f;
-                LatLngBounds a = GeoUtils.makeSquare(dlCenter, dlWidth);
+                LatLngBounds a = GeoUtils.makeRectangle(dlCenter, dlWidth, aspect);
                 ArrayList<LatLng> l = new ArrayList<LatLng>();
                 l.add(a.northeast);
                 l.add(new LatLng(a.northeast.latitude, a.southwest.longitude));
@@ -489,6 +490,33 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 l.add(new LatLng(a.southwest.latitude, a.northeast.longitude));
                 gdlArea.setPoints(l);
 
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        SeekBar aspectBar = (SeekBar) findViewById(R.id.aspectBar);
+        aspectBar.setMax(100);
+        aspectBar.setProgress(49);
+        aspectBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                aspect = (progress+1)/50.0f;
+                LatLngBounds a = GeoUtils.makeRectangle(dlCenter, dlWidth, aspect);
+                ArrayList<LatLng> l = new ArrayList<LatLng>();
+                l.add(a.northeast);
+                l.add(new LatLng(a.northeast.latitude, a.southwest.longitude));
+                l.add(a.southwest);
+                l.add(new LatLng(a.southwest.latitude, a.northeast.longitude));
+                gdlArea.setPoints(l);
             }
 
             @Override
@@ -1534,7 +1562,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     void DownloadDEM(LatLngBounds extent) {
-        downloads.add(new runWeb(extent));
+        downloads.add(new runWeb(extent, getContext(), this));
         if (currentDemDownloads == 0) {
             if (downloads.peek() != null) {
                 downloads.poll().run();
@@ -1542,15 +1570,25 @@ public class MainActivity extends Activity implements OnMapClickListener {
         }
     }
 
+    public void cancelDownload() {
+        Log.d("cancelDownload", "no data found");
+        NotificationManager mNotifyManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotifyManager.cancel(--demDownloadCount);
+        progress.poll().remove();
+    }
+
     private class runWeb {
         private static final String magicString = "25az225MAGICee4587da";
-        //String magicString;
+        private static final String errorString = "AsV2gZ2pxd9PcC8pJLkm";
         LatLngBounds extent;
+        Context context;
+        MainActivity activity;
 
-        public runWeb(LatLngBounds extent) {
+        public runWeb(LatLngBounds extent, Context con, MainActivity act) {
             this.extent = extent;
-            //magicString = randomString();
-            Log.d("magic constructor:",magicString);
+            this.context = con;
+            this.activity = act;
         };
         private void run(){
             //create progress box on map
@@ -1569,7 +1607,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
             webView = new WebView(MainActivity.getContext());
             webView.getSettings().setJavaScriptEnabled(true);
             webView.setWebChromeClient(new PageHandler());
-            webView.addJavascriptInterface(this, "Callback");
             webView.setWebViewClient(new WebViewClient() {
                 public void noDataFound() {
                     Toast.makeText(that, "No data found", Toast.LENGTH_SHORT).show();
@@ -1587,7 +1624,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
                                 "   buttons[0].onclick();" +
                                 "}" +
                                 "else {" +
-                                "   Callback.noDataFound();" +
+                                "   javascript:console.log('"+errorString+"');" +
                                 "}";
                         webView.loadUrl(strFunction);
                     }
@@ -1625,7 +1662,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
                                 + "}";
                         Log.d("url:",strFunction);
                         webView.loadUrl(strFunction);
-
                     }
                 }
             });
@@ -1647,6 +1683,12 @@ public class MainActivity extends Activity implements OnMapClickListener {
                         downloads.poll().run();
                     }
                     return true;
+                }
+                else if (cmsg.message().startsWith(errorString)) {
+                    Log.d("onConsoleMessage", "no dem data available");
+                    Toast toast = Toast.makeText(context, "No DEM data available for this region", Toast.LENGTH_LONG);
+                    toast.show();
+                    activity.cancelDownload();
                 }
                 return false;
             }
@@ -1725,7 +1767,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         if ( (s*s)/3 > MAX_PIXELS_PER_MB*manager.getLargeMemoryClass()) {
             s = 3*(float)Math.sqrt(MAX_PIXELS_PER_MB*manager.getLargeMemoryClass());
         }
-        LatLngBounds dlArea = GeoUtils.makeSquare(center, s);
+        LatLngBounds dlArea = GeoUtils.makeRectangle(center, s, aspect);
 
         PolygonOptions rectOptions = new PolygonOptions()
                 .add(dlArea.northeast)
@@ -1739,7 +1781,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     private void onDownloadAreaSelected() {
-        LatLngBounds demArea = GeoUtils.makeSquare(dlCenter, dlWidth);
+        LatLngBounds demArea = GeoUtils.makeRectangle(dlCenter, dlWidth, aspect);
         DownloadDEM(demArea);
 
         //create notification

@@ -9,11 +9,25 @@ import com.google.android.gms.maps.model.LatLngBounds;
 public class GeoUtils {
     public static LatLngBounds makeSquare(LatLng center, float s) {
         double metersPerDegree = 111222.0;
+        double metersPerDegreeLat = 111132.92 - 559.82 * Math.cos(2*(center.latitude*Math.PI/180.0)) + 1.175*Math.cos(4*(center.latitude*Math.PI/180.0));
+        double metersPerDegreeLong = 111412.84 * Math.cos(center.latitude*Math.PI/180.0) - 93.5 * Math.cos(3*center.latitude*Math.PI/180.0);
         float r = s/2;
-        double north = center.latitude + (s/metersPerDegree);
-        double south = center.latitude - (s/metersPerDegree);
-        double west = center.longitude - (r/(metersPerDegree*Math.cos(center.latitude)));
-        double east = center.longitude + (r/(metersPerDegree*Math.cos(center.latitude)));
+        double north = center.latitude + (r/metersPerDegreeLat);
+        double south = center.latitude - (r/metersPerDegreeLat);
+        double west = center.longitude - (r/(metersPerDegreeLong));
+        double east = center.longitude + (r/(metersPerDegreeLong));
+        return new LatLngBounds(new LatLng(south, west), new LatLng(north, east));
+    }
+
+    public static LatLngBounds makeRectangle(LatLng center, float s, float aspect) {
+        double metersPerDegree = 111222.0;
+        double metersPerDegreeLat = 111132.92 - 559.82 * Math.cos(2*(center.latitude*Math.PI/180.0)) + 1.175*Math.cos(4*(center.latitude*Math.PI/180.0));
+        double metersPerDegreeLong = 111412.84 * Math.cos(center.latitude*Math.PI/180.0) - 93.5 * Math.cos(3*center.latitude*Math.PI/180.0);
+        float r = s/2;
+        double north = center.latitude + (r/metersPerDegreeLat);
+        double south = center.latitude - (r/metersPerDegreeLat);
+        double west = center.longitude - aspect*(r/(metersPerDegreeLong));
+        double east = center.longitude + aspect*(r/(metersPerDegreeLong));
         return new LatLngBounds(new LatLng(south, west), new LatLng(north, east));
     }
 

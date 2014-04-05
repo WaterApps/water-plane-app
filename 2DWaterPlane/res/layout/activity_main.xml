@@ -64,10 +64,20 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:text="Cancel"/>
-                <SeekBar
-                    android:id="@+id/sizeBar"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent" />
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <SeekBar
+                        android:id="@+id/sizeBar"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent" />
+                    <SeekBar
+                        android:id="@+id/aspectBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    </LinearLayout>
+
                 </LinearLayout>
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                           android:id="@+id/elevationControls"
