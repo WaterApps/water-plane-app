@@ -1,23 +1,18 @@
 package com.waterapps.waterplane;
 
 import android.app.ActivityManager;
-import android.app.DownloadManager;
-import android.app.DownloadManager.Request;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.app.ActionBar;
-import com.waterapps.lib.gzip;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -33,10 +28,6 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.*;
-import android.webkit.ConsoleMessage;
-import android.webkit.WebChromeClient;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -66,7 +57,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Random;
+
+import com.waterapps.lib.DownloadDem;
 
 import static android.graphics.Color.HSVToColor;
 import static android.os.Environment.getExternalStorageDirectory;
@@ -140,12 +132,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
     public static ImageView iv;
     public static boolean profile;
     private static long enqueue;
-    private static DownloadManager dm;
-    WebView webView;
+
     int demDownloadCount = 1;
     int demFinishedCount = 1;
     static int currentDemDownloads = 0;
-    static Queue<runWeb> downloads = new LinkedList<runWeb>();
     float dlWidth;
     float aspect = 1;
     float s;
@@ -161,56 +151,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         that = this;
-         receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                    progress.poll().remove();
-                    long downloadId = intent.getLongExtra(
-                            DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-                    DownloadManager.Query query = new DownloadManager.Query();
-                    query.setFilterById(enqueue);
-                    Cursor c = dm.query(query);
-                    if (c.moveToFirst()) {
-                        int columnIndex = c
-                                .getColumnIndex(DownloadManager.COLUMN_STATUS);
-
-                        if (DownloadManager.STATUS_SUCCESSFUL == c
-                                .getInt(columnIndex)) {
-
-                            String fileString = c
-                                    .getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
-
-                            File in = new File(fileString);
-                            File outputdir = new File(getExternalStorageDirectory() + "/dem");
-                            gzip.extractGzip(in, outputdir);
-                            in.delete();
-                            scanDEMs();
-
-                            //clear notification
-                            NotificationManager mNotifyManager =
-                                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-                            NotificationCompat.Builder mBuilder =
-                                    new NotificationCompat.Builder(MainActivity.getContext())
-                                            .setSmallIcon(R.drawable.done)
-                                            .setContentTitle("DEM download")
-                                            .setContentText("Download complete")
-                                            .setProgress(0, 0, false);
-
-                            int id = demFinishedCount++;
-                            mNotifyManager.notify(id, mBuilder.build());
-                        }
-                    }
-                }
-            }
-        };
-
-        registerReceiver(receiver, new IntentFilter(
-                DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-
-        dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
 
         profile = false;
         lines = new ArrayList<MapLine>();
@@ -1562,12 +1502,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     void DownloadDEM(LatLngBounds extent) {
-        downloads.add(new runWeb(extent, getContext(), this));
-        if (currentDemDownloads == 0) {
-            if (downloads.peek() != null) {
-                downloads.poll().run();
-            }
-        }
+        new DownloadDem(extent, demDirectory, getContext());
     }
 
     public void cancelDownload() {
@@ -1576,185 +1511,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotifyManager.cancel(--demDownloadCount);
         progress.poll().remove();
-    }
-
-    private class runWeb {
-        private static final String magicString = "25az225MAGICee4587da";
-        private static final String errorString = "AsV2gZ2pxd9PcC8pJLkm";
-        LatLngBounds extent;
-        Context context;
-        MainActivity activity;
-
-        public runWeb(LatLngBounds extent, Context con, MainActivity act) {
-            this.extent = extent;
-            this.context = con;
-            this.activity = act;
-        };
-        private void run(){
-            //create progress box on map
-            progress.add(new DemInProgress(extent, map));
-            currentDemDownloads++;
-            final double minX = (extent.southwest.longitude < extent.northeast.longitude) ? extent.southwest.longitude :  extent.northeast.longitude;
-            final double minY = (extent.southwest.latitude < extent.northeast.latitude) ? extent.southwest.latitude :  extent.northeast.latitude;
-            final double maxX = (extent.southwest.longitude > extent.northeast.longitude) ? extent.southwest.longitude :  extent.northeast.longitude;
-            final double maxY = (extent.southwest.latitude > extent.northeast.latitude) ? extent.southwest.latitude :  extent.northeast.latitude;
-            String initalURL = "http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=datasets&minX=" +
-                    Double.toString(minX) + "&minY=" +
-                    Double.toString(minY) + "&maxX=" +
-                    Double.toString(maxX) + "&maxY=" +
-                    Double.toString(maxY);
-
-            webView = new WebView(MainActivity.getContext());
-            webView.getSettings().setJavaScriptEnabled(true);
-            webView.setWebChromeClient(new PageHandler());
-            webView.setWebViewClient(new WebViewClient() {
-                public void noDataFound() {
-                    Toast.makeText(that, "No data found", Toast.LENGTH_SHORT).show();
-                }
-                @Override
-                public void onPageFinished(WebView view, String url) {
-
-                    Log.d("onPageFinished", "url:" + url);
-                    if(url.contains("datasets")) {
-                        Log.d("onPageFinished", "Finding dataset");
-                        String strFunction = "javascript:" +
-                                "var buttons;" +
-                                "buttons = document.querySelectorAll(\"input[value='Get Data']\");" +
-                                "if (buttons.length > 0) {" +
-                                "   buttons[0].onclick();" +
-                                "}" +
-                                "else {" +
-                                "   javascript:console.log('"+errorString+"');" +
-                                "}";
-                        webView.loadUrl(strFunction);
-                    }
-                    else if(url.contains("lidarDataset")){
-                        Log.d("onPageFinished", "Submitting form");
-                        //Initial homemade post page, change post vars here, then post form;
-                        final String strFunction = "javascript:"
-                                + "document.getElementById('email').value = 'newEmailAddress@email.com';"
-                                + "document.getElementById('minX').value = '" + Double.toString(minX) + "';"
-                                + "document.getElementById('minY').value = '" + Double.toString(minY) + "';"
-                                + "document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
-                                + "document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
-                                + "document.getElementById('lasOutput').checked = 'unchecked';"
-                                + "document.getElementById('derivativeSelect').checked = 'unchecked';"
-                                + "document.getElementById('visualization').checked = 'unchecked';"
-                                + "document.getElementById('resolution').value = '" + Double.toString(3.0) + "';"
-                                + "document.getElementById('format').value = 'GTiff';"
-                                + "document.getElementsByName('selectForm')[0].submit();";
-                        webView.loadUrl(strFunction);
-                        Log.d("url", strFunction);
-                    }
-                    else {
-                        Log.d("onPageFinished", "Searching for DEM");
-                        Log.d("onPageFinished", "URL:" + url);
-                        //Open topo pages
-                        String strFunction = "javascript:"
-                                + "var els = document.getElementsByTagName('a');"
-                                + "for (var i = 0, l = els.length; i < l; i++) {"
-                                + "    var el = els[i];"
-                                + "    if (el.innerHTML.indexOf('dems.tar.gz') != -1) {"
-                                + "         if (el.href.indexOf('appBulkFormat') != -1) {"
-                                + "             javascript:console.log('"+magicString+"'+ el.href);"
-                                + "         }"
-                                + "    }"
-                                + "}";
-                        Log.d("url:",strFunction);
-                        webView.loadUrl(strFunction);
-                    }
-                }
-            });
-
-            webView.loadUrl(initalURL);
-        }
-
-        private class PageHandler extends WebChromeClient {
-            public boolean onConsoleMessage(ConsoleMessage cmsg){
-                if(cmsg.message().startsWith(magicString)){
-                    String categoryMsg = cmsg.message().substring(magicString.length());
-                    Log.d("magic:", magicString);
-                    Log.d("Link:", categoryMsg);
-                    downloadFile(categoryMsg);
-                    currentDemDownloads--;
-                    webView.stopLoading();
-                    webView.destroy();
-                    if (downloads.peek() != null) {
-                        downloads.poll().run();
-                    }
-                    return true;
-                }
-                else if (cmsg.message().startsWith(errorString)) {
-                    Log.d("onConsoleMessage", "no dem data available");
-                    Toast toast = Toast.makeText(context, "No DEM data available for this region", Toast.LENGTH_LONG);
-                    toast.show();
-                    activity.cancelDownload();
-                }
-                return false;
-            }
-        }
-    }
-
-    private void downloadFile(String url) {
-        Log.d("downloadFile", url);
-        Request request = new Request(
-                Uri.parse(url));
-        enqueue = dm.enqueue(request);
-
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                boolean downloading = true;
-
-                while (downloading) {
-
-                    DownloadManager.Query q = new DownloadManager.Query();
-                    q.setFilterById(enqueue);
-
-                    Cursor cursor = dm.query(q);
-                    cursor.moveToFirst();
-                    int bytes_downloaded = cursor.getInt(cursor
-                            .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-                    int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-
-                    if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
-                        downloading = false;
-                    }
-
-                    final double dl_progress = ((double) bytes_downloaded / (double) bytes_total);
-                    System.out.println("Downloading: " + dl_progress);
-
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            if (progress.peek() != null)
-                                progress.peek().updateProgress((2.0+dl_progress)/3.0);
-
-                        }
-                    });
-                    cursor.close();
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-        }).start();
-    }
-
-    String randomString() {
-        char [] chars = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
-        String result = "";
-        Random random = new Random();
-        for(int i=0; i<20; i++) {
-            result += chars[random.nextInt(chars.length-1)];
-        }
-        return result;
     }
 
     private LatLngBounds selectArea(LatLngBounds screen) {
@@ -1783,20 +1539,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
     private void onDownloadAreaSelected() {
         LatLngBounds demArea = GeoUtils.makeRectangle(dlCenter, dlWidth, aspect);
         DownloadDEM(demArea);
-
-        //create notification
-        NotificationManager mNotifyManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.notification)
-                        .setContentTitle("DEM download")
-                        .setContentText("Download in progress")
-                        .setProgress(0, 0, true);
-
-        int id = demDownloadCount++;
-        mNotifyManager.notify(id, mBuilder.build());
     }
 
     static Bitmap textToBitmap(String text) {
@@ -1819,34 +1561,5 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
     static int dpToPx(int dp) {
         return (int) (dp * density + 0.5f);
-    }
-
-    private static int getProgressPercentage() {
-
-        int DOWNLOADED_BYTES_SO_FAR_INT = 0, TOTAL_BYTES_INT = 0, PERCENTAGE = 0;
-
-        try {
-            Cursor c = dm.query(new DownloadManager.Query()
-                    .setFilterById(enqueue));
-
-            if (c.moveToFirst()) {
-                DOWNLOADED_BYTES_SO_FAR_INT = (int) c
-                        .getLong(c
-                                .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-                TOTAL_BYTES_INT = (int) c
-                        .getLong(c
-                                .getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-            }
-
-            System.out.println("PERCEN ------" + DOWNLOADED_BYTES_SO_FAR_INT
-                    + " ------ " + TOTAL_BYTES_INT + "****" + PERCENTAGE);
-            PERCENTAGE = (DOWNLOADED_BYTES_SO_FAR_INT * 100 / TOTAL_BYTES_INT);
-            System.out.println("PERCENTAGE % " + PERCENTAGE);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return PERCENTAGE;
     }
 }

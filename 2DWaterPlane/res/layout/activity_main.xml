@@ -13,8 +13,6 @@
                       android:layout_weight="2"
                       class="com.waterapps.lib.MyMapFragment"
                       />
-
-
             <ImageView
                     android:id="@+id/graphView"
                     android:layout_width="match_parent"
