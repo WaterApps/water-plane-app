@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
@@ -147,19 +148,34 @@ public class DownloadDem {
 
                 @Override
                 public void onPageFinished(WebView view, String url) {
-
                     Log.d("onPageFinished", "url:" + url);
+                    //this is the page where opentopo's datasets are listed
+                    //the correct one needs to be selected and its page opened
                     if(url.contains("datasets")) {
                         Log.d("onPageFinished", "Finding dataset");
-                        String strFunction = "javascript:" +
-                                "var buttons;" +
-                                "buttons = document.querySelectorAll(\"input[value='Get Data']\");" +
-                                "if (buttons.length > 0) {" +
-                                "   buttons[0].onclick();" +
-                                "}" +
-                                "else {" +
-                                "   javascript:console.log('"+errorString+"');" +
-                                "}";
+                        //workaround for kitkat webview bug
+                        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+                        String strFunction;
+                        if (currentapiVersion >= Build.VERSION_CODES.KITKAT){
+                            strFunction = "javascript:" +
+                                    "var buttons;" +
+                                    "buttons = document.querySelectorAll(\"input[value='Get Data']\");" +
+                                    "try {" +
+                                    "buttons[0].onclick();" +
+                                    "} catch(err) { }";
+                        } else{
+                            //if there is no dataset for the area, download should be canceled and user informed
+                            //kitkat webview calls onpagefinished before the page actually finishes so this doesn't work
+                            strFunction = "javascript:" +
+                                    "var buttons;" +
+                                    "buttons = document.querySelectorAll(\"input[value='Get Data']\");" +
+                                    "if (buttons.length > 0) {" +
+                                    "   buttons[0].onclick();" +
+                                    "}" +
+                                    "else {" +
+                                    "   javascript:console.log('"+errorString+"');" +
+                                    "}";
+                        }
                         webView.loadUrl(strFunction);
                     }
                     else if(url.contains("lidarDataset")){
@@ -215,12 +231,14 @@ public class DownloadDem {
                     return true;
                 }
                 else if (cmsg.message().startsWith(errorString)) {
+                    /*
                     Log.d("onConsoleMessage", "no dem data available");
                     Toast toast = Toast.makeText(context, "No DEM data available for this region", Toast.LENGTH_LONG);
                     toast.show();
                     NotificationManager mNotifyManager =
                             (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                     mNotifyManager.cancel(notificationID);
+                    */
                 }
                 return false;
             }
