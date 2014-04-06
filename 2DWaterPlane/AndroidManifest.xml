@@ -78,10 +78,7 @@
         </activity>
         <meta-data
     		android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyBY3jLiH0G3Ec3h_oACjigaHm29z6pOuhw"/>
+            android:value="AIzaSyCCEbhlGZxDn1vF2siSlulaQv4AiC51Fak"/>
     </application>
 
 </manifest>
-
-<!-- debug:   android:value="AIzaSyBY3jLiH0G3Ec3h_oACjigaHm29z6pOuhw"
-     release: android:value="AIzaSyAY8BOg0EEGKWKw4GacgquGVe6_KY9wjds"  -->
