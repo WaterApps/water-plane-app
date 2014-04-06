@@ -35,7 +35,6 @@ public class DemInProgress extends GeoRectangle  {
         this.map = map;
         outline = map.addPolygon(getPolyOptions(Color.BLUE));
         BitmapDescriptor b = BitmapDescriptorFactory.fromResource(R.drawable.notification);
-        b = BitmapDescriptorFactory.fromBitmap(textToBitmap("Downloading..."));
         mark = map.addMarker(new MarkerOptions().icon(b)
                                                 .position(this.center())
                                                 .anchor(0.5f, 0.5f));

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -16,14 +17,14 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.waterapps.waterplane.MainActivity;
 import com.waterapps.waterplane.R;
 
 import java.io.File;
-import java.util.Random;
-
-import static android.os.Environment.getExternalStorageDirectory;
 
 /**
  * Created by Steve on 2/26/14.
@@ -35,8 +36,10 @@ public class DownloadDem {
     BroadcastReceiver receiver;
     Context context;
     int notificationID;
+    GoogleMap map;
+    DemInProgress dlArea;
 
-    public DownloadDem(final LatLngBounds extent, final String directory, Context con) {
+    public DownloadDem(final LatLngBounds extent, final String directory, GoogleMap map, Context con) {
         notificationID = (int)System.currentTimeMillis();
         context = con;
         receiver = new BroadcastReceiver() {
@@ -76,6 +79,8 @@ public class DownloadDem {
                                             .setProgress(0, 0, false);
 
                             mNotifyManager.notify(notificationID, mBuilder.build());
+
+                            dlArea.remove();
                         }
                     }
                 }
@@ -100,6 +105,16 @@ public class DownloadDem {
                         .setProgress(0, 0, true);
 
         mNotifyManager.notify(notificationID, mBuilder.build());
+
+        //show dl area on map
+        PolygonOptions rectOptions = new PolygonOptions()
+                .add(extent.northeast)
+                .add(new LatLng(extent.northeast.latitude, extent.southwest.longitude))
+                .add(extent.southwest)
+                .add(new LatLng(extent.southwest.latitude, extent.northeast.longitude))
+                .strokeColor(Color.BLUE);
+        dlArea = new DemInProgress(extent, map);
+
         new runWeb(extent, context).run();
     }
 

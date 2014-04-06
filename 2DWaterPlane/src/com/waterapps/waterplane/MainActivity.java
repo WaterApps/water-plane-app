@@ -1,7 +1,6 @@
 package com.waterapps.waterplane;
 
 import android.app.ActivityManager;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -22,7 +21,6 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -1502,15 +1500,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     void DownloadDEM(LatLngBounds extent) {
-        new DownloadDem(extent, demDirectory, getContext());
-    }
-
-    public void cancelDownload() {
-        Log.d("cancelDownload", "no data found");
-        NotificationManager mNotifyManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotifyManager.cancel(--demDownloadCount);
-        progress.poll().remove();
+        new DownloadDem(extent, demDirectory, map, getContext());
     }
 
     private LatLngBounds selectArea(LatLngBounds screen) {
