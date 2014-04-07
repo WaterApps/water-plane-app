@@ -3,6 +3,7 @@ package com.waterapps.lib;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.tiffdecoder.TiffDecoder;
 
 import java.net.URI;
@@ -12,6 +13,7 @@ import com.ibm.util.CoordinateConversion;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.ogr.ogr;
+import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 
 /**
@@ -53,37 +55,10 @@ public class ReadGeoTiff implements ReadDemData {
             }
         }
 
-        //read latitude and longitude (assumed to the UTM format)
-        float longitude = TiffDecoder.nativeTiffGetCornerLongitude();
-        float latitude = TiffDecoder.nativeTiffGetCornerLatitude();
-        double latLng[];
+        LatLngBounds demBounds = GdalUtils.getLatLngBounds(fileUri.getPath());
 
-        //convert from UTM->LatLng as GMaps expects
-        CoordinateConversion conversion = new CoordinateConversion();
-        //String UTM = TiffDecoder.nativeTiffGetParams();
-        //String UTMZone = UTM.substring(18, 20).concat(" ").concat(UTM.substring(20, 21)).concat(" ");
-
-        //figure out UTM zone
-        //gdal returns positive zone for north hemisphere, negative for south
-        String UTMZone;
-        gdal.AllRegister();
-        ogr.RegisterAll();
-        Dataset ds = gdal.Open(fileUri.getPath());
-        int zone = new SpatialReference(ds.GetProjectionRef()).GetUTMZone();
-        if (zone > 0) {
-            UTMZone = Integer.toString(zone) + " N ";
-        } else {
-            UTMZone = Integer.toString(-zone) + " S ";
-        }
-        latLng = conversion.utm2LatLon(UTMZone + Integer.toString((int)longitude) + " " + Integer.toString((int)latitude));
-        double scaleX = TiffDecoder.nativeTiffGetScaleX();
-        double scaleY = TiffDecoder.nativeTiffGetScaleY();
-
-        //calculate position of northeast corner, as only southwest and scale are provided
-        double width = scaleX*raster.getNrows()/(111111.0);
-        double height = scaleY*raster.getNcols()/(111111.0*Math.cos(Math.toRadians(latLng[0])));
-        raster.setSouthWest(new LatLng(latLng[0] - width, latLng[1]));
-        raster.setNorthEast(new LatLng(latLng[0], latLng[1] + height));
+        raster.setSouthWest(demBounds.southwest);
+        raster.setNorthEast(demBounds.northeast);
         return raster;
     }
 

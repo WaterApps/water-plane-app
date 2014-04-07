@@ -36,6 +36,16 @@ public class DemFile {
         this.timestamp = timestamp;
     }
 
+    public DemFile(LatLngBounds bounds, String filename, String timestamp, URI fileUri) {
+        this.sw_lat = (float)bounds.southwest.latitude;
+        this.sw_long = (float)bounds.southwest.longitude;
+        this.ne_lat = (float)bounds.northeast.latitude;
+        this.ne_long = (float)bounds.southwest.longitude;
+        this.filename = filename;
+        this.timestamp = timestamp;
+        this.fileUri = fileUri;
+    }
+
     public DemFile(float sw_lat, float sw_long, float ne_lat, float ne_long, String filename, String timestamp, URI fileUri) {
         this.sw_lat = sw_lat;
         this.sw_long = sw_long;
