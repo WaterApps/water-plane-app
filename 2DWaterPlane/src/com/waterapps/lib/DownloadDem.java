@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
+import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
@@ -160,9 +161,9 @@ public class DownloadDem {
                             strFunction = "javascript:" +
                                     "var buttons;" +
                                     "buttons = document.querySelectorAll(\"input[value='Get Data']\");" +
-                                    "try {" +
-                                    "buttons[0].onclick();" +
-                                    "} catch(err) { }";
+                                    "if (buttons.length > 0) {" +
+                                    "   buttons[0].onclick();" +
+                                    "}";
                         } else{
                             //if there is no dataset for the area, download should be canceled and user informed
                             //kitkat webview calls onpagefinished before the page actually finishes so this doesn't work
@@ -176,6 +177,7 @@ public class DownloadDem {
                                     "   javascript:console.log('"+errorString+"');" +
                                     "}";
                         }
+                        SystemClock.sleep(5000);
                         webView.loadUrl(strFunction);
                     }
                     else if(url.contains("lidarDataset")){

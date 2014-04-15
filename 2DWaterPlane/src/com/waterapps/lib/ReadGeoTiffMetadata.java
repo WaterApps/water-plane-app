@@ -23,8 +23,6 @@ public class ReadGeoTiffMetadata {
         DateFormat df = DateFormat.getDateInstance();
         String timeStamp = df.format(file.lastModified());
         URI fileUri = URI.create(Uri.fromFile(file).toString());
-        float sw_lat = 0.0f, sw_long = 0.0f, ne_lat = 0.0f, ne_long = 0.0f;
-
-        return new DemFile(GdalUtils.getLatLngBounds(fileUri.getPath()), fileName, timeStamp, fileUri);
+        return new DemFile(GdalUtils.getLatLngBounds(file.getPath()), fileName, timeStamp, fileUri);
     }
 }

@@ -13,8 +13,8 @@ public interface ReadDemData {
 
     /**
      * Reads a DemData object from a specified file
-     * @param fileUri File location to be read
+     * @param filename File location to be read
      * @return DemData object read from file
      */
-    public DemData readFromFile(URI fileUri);
+    public DemData readFromFile(String filename);
 }

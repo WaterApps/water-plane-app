@@ -64,8 +64,8 @@ public class ReadDemDataTask extends AsyncTask<URI, Integer, DemData> {
 
         //select proper reader for filetype
         //only geotiff supported for now
-        if (params[0].getPath().contains(".tif")) readObject = new ReadGeoTiff();
-        data = readObject.readFromFile(params[0]);
+        if (filename.contains(".tif")) readObject = new ReadGeoTiff();
+        data = readObject.readFromFile(filename); //params[0]);
         publishProgress(100);
         return data;
     }

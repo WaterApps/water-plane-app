@@ -149,7 +149,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         that = this;
-
+        GdalUtils.init();
         profile = false;
         lines = new ArrayList<MapLine>();
         lineJoints = new ArrayList<Marker>();
@@ -1052,7 +1052,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
                     e.printStackTrace();
                 }
                 DemData raster = new DemData();
-                String filename = fileUri.getPath().split("/")[fileUri.getPath().split("/").length-1];
+                //String filename = fileUri.getPath().split("/")[fileUri.getPath().split("/").length-1];
+                String filename = data.getDataString();
                 new ReadDemDataTask(this, raster, filename).execute(juri);
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString("last_dem", fileUri.getPath());
@@ -1293,7 +1294,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         File demFile = new File(prefs.getString("last_dem", "foo"));
         if(demFile.exists() && demFile.isFile()) {
             DemData raster = new DemData();
-            new ReadDemDataTask(this, raster, demFile.getName()).execute(UritoURI(Uri.fromFile(demFile)));
+            new ReadDemDataTask(this, raster, demFile.getPath()).execute();
             setCurrentlyLoaded(prefs.getString("last_dem", "foo"));
             return;
         }

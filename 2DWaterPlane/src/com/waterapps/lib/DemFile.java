@@ -40,7 +40,7 @@ public class DemFile {
         this.sw_lat = (float)bounds.southwest.latitude;
         this.sw_long = (float)bounds.southwest.longitude;
         this.ne_lat = (float)bounds.northeast.latitude;
-        this.ne_long = (float)bounds.southwest.longitude;
+        this.ne_long = (float)bounds.northeast.longitude;
         this.filename = filename;
         this.timestamp = timestamp;
         this.fileUri = fileUri;

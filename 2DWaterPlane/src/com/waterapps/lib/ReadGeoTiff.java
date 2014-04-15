@@ -23,14 +23,14 @@ public class ReadGeoTiff implements ReadDemData {
 
     /**
      * Reads data from a GeoTIFF into a DemData object
-     * @param fileUri File location to be read
+     * @param filename File location to be read
      * @return The DEM data
      */
-    public DemData readFromFile(URI fileUri) {
+    public DemData readFromFile(String filename) {
         DemData raster = new DemData();
         raster.setMaxElevation(Float.NEGATIVE_INFINITY);
         raster.setMinElevation(Float.POSITIVE_INFINITY);
-        TiffDecoder.nativeTiffOpen(fileUri.getPath());
+        TiffDecoder.nativeTiffOpen(filename);
         raster.setDimensions(TiffDecoder.nativeTiffGetWidth(), TiffDecoder.nativeTiffGetHeight());
         float[] pixels = TiffDecoder.nativeTiffGetFloats();
         raster.elevationData = new float[raster.getNrows()][raster.getNcols()];
@@ -55,7 +55,7 @@ public class ReadGeoTiff implements ReadDemData {
             }
         }
 
-        LatLngBounds demBounds = GdalUtils.getLatLngBounds(fileUri.getPath());
+        LatLngBounds demBounds = GdalUtils.getLatLngBounds(filename);
 
         raster.setSouthWest(demBounds.southwest);
         raster.setNorthEast(demBounds.northeast);

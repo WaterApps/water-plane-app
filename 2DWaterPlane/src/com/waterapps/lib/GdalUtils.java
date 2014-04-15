@@ -1,5 +1,7 @@
 package com.waterapps.lib;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -9,19 +11,26 @@ import org.gdal.ogr.ogr;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 
+import java.io.FileNotFoundException;
+
 /**
  * Created by Steve on 4/6/2014.
  */
 public class GdalUtils {
+    public static void init() {
+        System.loadLibrary("proj");
+    }
+
     /**
      * returns the boundaries of a DEM in lat/long format
      * @param filename filename of the DEM to be read
      * @return LatLngBounds representing the boundary of the DEM
      */
-    static LatLngBounds getLatLngBounds(String filename) {
+
+    public static LatLngBounds getLatLngBounds(String filename) {
+        Log.d("gdal filename", filename);
         //initialize GDAL by loading drivers
         gdal.AllRegister();
-        ogr.RegisterAll();
 
         //open up the DEM as a GDAL dataset
         Dataset dataset = gdal.Open(filename);
