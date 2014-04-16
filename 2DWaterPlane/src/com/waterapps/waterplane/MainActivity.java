@@ -81,6 +81,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     static GoogleMap map;
     public static String demDirectory = "/dem";
     static boolean drag_mode = false;
+    public static boolean downloading;
     static LinearLayout elevationControls;
     static LinearLayout markerBottomText;
     static LinearLayout dlControls;
@@ -148,6 +149,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     static MainActivity that;
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
+        downloading = false;
         that = this;
         GdalUtils.init();
         profile = false;
@@ -243,7 +245,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
 		CustomMarker.setDemData(demData);
 		CustomMarker.setMap(map);
 
-		demData.prevoverlay = demData.createOverlay(map);
+		//demData.prevoverlay = demData.createOverlay(map);
 		configSeekbar(demData, prevoverlay);
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
@@ -279,7 +281,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 // Increase elevation
             	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
             	seekBar.setProgress(seekBar.getProgress()+2);
-            	updateColors(demData);
+            	DemData.updateColors(waterLevelMeters, coloring, transparency, alpha);
             }
         });
 
@@ -289,7 +291,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
             	// Decrease elevation
             	SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar);
             	seekBar.setProgress(seekBar.getProgress()-2);
-            	updateColors(demData);
+            	DemData.updateColors(waterLevelMeters, coloring, transparency, alpha);
             }
         });
 
@@ -469,7 +471,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         });
 
 
-		updateColors(demData);
+		DemData.updateColors(waterLevelMeters, coloring, transparency, alpha);
 
         //if GPS isn't enabled, ask user to enable it
         if(hasGPS) {
@@ -548,7 +550,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-        updateColors(demData);
+        DemData.updateColors(waterLevelMeters, coloring, transparency, alpha);
         if (hasGPS)
 		    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
@@ -668,7 +670,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
             edit.putBoolean("coloring", coloring);
             edit.commit();
             item.setChecked(coloring);
-            updateColors(demData);
+            DemData.updateColors(waterLevelMeters, coloring, transparency, alpha);
         }
 
         else if(item.getItemId() == R.id.menu_transparency) {
@@ -682,7 +684,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
             edit.putBoolean("transparency_bool", transparency);
             edit.commit();
             item.setChecked(transparency);
-            updateColors(demData);
+            DemData.updateColors(waterLevelMeters, coloring, transparency, alpha);
         }
 
         else if (item.getItemId() == R.id.menu_choose_dem) {
@@ -728,12 +730,17 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
         //Download DEM of currently visible area
         else if(item.getItemId() == R.id.menu_download) {
-            showDlControls();
-            hideElevationControls();
-            //download DEM of currently visible area
-            Log.d("screen", map.getProjection().getVisibleRegion().latLngBounds.toString());
-            LatLngBounds demArea = selectArea(map.getProjection().getVisibleRegion().latLngBounds);
-            dlWidth = s;
+            if(!downloading) {
+                showDlControls();
+                hideElevationControls();
+                //download DEM of currently visible area
+                Log.d("screen", map.getProjection().getVisibleRegion().latLngBounds.toString());
+                LatLngBounds demArea = selectArea(map.getProjection().getVisibleRegion().latLngBounds);
+                dlWidth = s;
+            } else {
+                Toast toast = Toast.makeText(this, "Only one DEM download supported at once", Toast.LENGTH_LONG);
+                toast.show();
+            }
         }
 
 	    else {
@@ -987,7 +994,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
                     else {
                       //visual updates
                       updateMarkers();
-                      updateColors(demData);
+                      DemData.updateColors(waterLevelMeters, coloring, transparency, alpha);
                     }
                 }
 
@@ -997,7 +1004,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
             public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                updateColors(demData);
+                DemData.updateColors(waterLevelMeters, coloring, transparency, alpha);
                 updateMarkers();
             }
         });
@@ -1032,7 +1039,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
         //handle data from file manager
 
         if (requestCode == FIRST_START) {
-
             loadInitialDEM();
             return;
         }
@@ -1058,7 +1064,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString("last_dem", fileUri.getPath());
                 editor.commit();
-                setCurrentlyLoaded(prefs.getString("last_dem", "foo"));
+                setCurrentlyLoaded(prefs.getString("last_dem", demDirectory+"/Feldun.tif"));
                 return;
             }
             else {
@@ -1109,7 +1115,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
             Log.d("following", "water level is set");
         }
 
-        updateColors(demData);
+        DemData.updateColors(waterLevelMeters, coloring, transparency, alpha);
         updateSlider();
 
         map.animateCamera(CameraUpdateFactory.newLatLngBounds(raster.getBounds(), 50));
@@ -1354,11 +1360,11 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 setCurrentlyLoaded(demDirectory+"Feldun.tif");
             }
             //if one TIFF, open it
-            else if(count == 1) {
-                DemData raster = new DemData();
-                new ReadDemDataTask(this, raster, tiffs.get(0).getName()).execute(UritoURI(Uri.fromFile(tiffs.get(0))));
-                setCurrentlyLoaded(tiffs.get(0).getPath());
-            }
+            //else if(count == 1) {
+            //    DemData raster = new DemData();
+            //    new ReadDemDataTask(this, raster, tiffs.get(0).getName()).execute(UritoURI(Uri.fromFile(tiffs.get(0))));
+            //    setCurrentlyLoaded(tiffs.get(0).getPath());
+            //}
             //if multiple TIFFs, let user choose
             else {
                 Intent intent = new Intent("com.filebrowser.DataFileChooserWaterplane");
@@ -1466,7 +1472,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
             //update marker text
             CustomMarker.setWaterElevation(waterLevelMeters);
         }
-        updateColors(demData);
+        DemData.updateColors(waterLevelMeters, coloring, transparency, alpha);
     }
 
     /**

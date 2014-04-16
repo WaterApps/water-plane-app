@@ -24,9 +24,9 @@ android {
 	signingConfigs {
         release {
             storeFile file("openatk.keystore")
-            storePassword "************"
-            keyAlias "************"
-            keyPassword "**************"
+            storePassword "1ubuntu9@"
+            keyAlias "openatk"
+            keyPassword "1ubuntu9@"
         }
     }
 	

@@ -43,8 +43,10 @@ public class DownloadDem {
     GoogleMap map;
     DemInProgress dlArea;
     LatLngBounds extent;
+    static boolean busy;
 
     public DownloadDem(final LatLngBounds extent, final String directory, GoogleMap map, Context con) {
+        MainActivity.downloading = true;
         this.extent = extent;
         notificationID = (int)System.currentTimeMillis();
         context = con;
@@ -229,6 +231,7 @@ public class DownloadDem {
                     downloadFile(categoryMsg);
                     webView.stopLoading();
                     webView.destroy();
+                    MainActivity.downloading = false;
                     return true;
                 }
                 else if (cmsg.message().startsWith(errorString)) {
@@ -241,6 +244,7 @@ public class DownloadDem {
                     dlArea.remove();
                     webView.stopLoading();
                     webView.destroy();
+                    MainActivity.downloading = false;
                     return true;
                 }
                 return false;

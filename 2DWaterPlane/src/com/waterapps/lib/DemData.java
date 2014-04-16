@@ -31,17 +31,17 @@ public class DemData {
     private int ncols;
     private int nrows;
     float [][]elevationData;
-    private float minElevation;
-    private float maxElevation;
-    private LatLng sw;
-    private LatLng ne;
-
+    private static float minElevation;
+    private static float maxElevation;
+    private static LatLng sw;
+    private static LatLng ne;
+    private static boolean currentlyDrawing = false;
     //bitmap represents rasterized elevation data
-    private Bitmap elevationBitmap;
-    Polyline polyline;
+    private static Bitmap elevationBitmap;
+    static Polyline polyline;
 
     //defines the edges of the field
-    private LatLngBounds demBounds;
+    private static LatLngBounds demBounds;
 
     static MapFragment mapFragment;
     public static SeekBar seekBar;
@@ -244,7 +244,7 @@ public class DemData {
      * @param map Map to overlay on
      * @return Generated overlay
      */
-    public GroundOverlay createOverlay(GoogleMap map) {
+    public static GroundOverlay createOverlay(GoogleMap map) {
         PolylineOptions rectOptions = new PolylineOptions()
                 .add(new LatLng(sw.latitude, ne.longitude))
                 .add(sw)
@@ -266,7 +266,9 @@ public class DemData {
      * @return Generated PolyLine
      */
     public Polyline updatePolyLine() {
-        polyline.remove();
+        if(polyline != null) {
+            polyline.remove();
+        }
         PolylineOptions rectOptions = new PolylineOptions()
                 .add(new LatLng(sw.latitude, ne.longitude))
                 .add(sw)
@@ -352,15 +354,15 @@ public class DemData {
         return groundOverlay;
     }
 
-    public double getMinElevation() {
+    public static double getMinElevation() {
         return minElevation;
     }
 
-    public double getMaxElevation() {
+    public static double getMaxElevation() {
         return maxElevation;
     }
 
-    public Bitmap getElevationBitmap() {
+    public static Bitmap getElevationBitmap() {
         return elevationBitmap;
     }
 
@@ -368,7 +370,7 @@ public class DemData {
         this.elevationBitmap = elevationBitmap;
     }
 
-    public LatLngBounds getDemBounds() {
+    public static LatLngBounds getDemBounds() {
         return demBounds;
     }
 
@@ -556,5 +558,52 @@ public class DemData {
         seekBar.setProgress((int)(255.0*(level-MainActivity.sliderMin)/(MainActivity.sliderMax-MainActivity.sliderMin)));
         MainActivity.updateColors(this);
     }
+
+    public static void updateColors(double waterLevelMeters, boolean coloring, boolean transparency, float alpha) {
+        if (!currentlyDrawing) {
+            currentlyDrawing = true;
+            //get level from seekbar
+            double distanceFromBottom = waterLevelMeters - getMinElevation();
+            double fieldRange = getMaxElevation() - getMinElevation();
+
+            double level = 255.0*distanceFromBottom/fieldRange;
+
+            int waterLevel = (int)level;
+            int width = getElevationBitmap().getWidth();
+            int height = getElevationBitmap().getHeight();
+            int[] pixels = new int[width * height];
+            getElevationBitmap().getPixels(pixels, 0, width, 0, 0, width, height);
+            Bitmap bitmap = getElevationBitmap().copy(getElevationBitmap().getConfig(), true);
+            int c;
+            if (!coloring) {
+                //test each pixel, if below water level set blue, else set transparent
+                for (int i = 0; i < (width * height); i++) {
+                    pixels[i] = ((pixels[i] & 0x000000FF) < waterLevel) ? 0xFF0000FF : 0x00000000;
+                }
+            }
+            else {
+                //elevation shading is being used
+                for (int i = 0; i < (width * height); i++) {
+                    c = pixels[i] & 0x000000FF;
+                    pixels[i] = (c < waterLevel) ? MainActivity.hsvColors[c] : 0x00000000;
+                }
+            }
+            bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
+
+            //remove old map overlay and create new one
+            //this unfortunately creates annoying flickering
+            //currently not aware of any way to avoid this
+
+            GroundOverlay ppo = prevoverlay;
+            prevoverlay = createOverlay(mapFragment.getMap());
+            prevoverlay.setImage(BitmapDescriptorFactory.fromBitmap(bitmap));
+            if (transparency) {
+                prevoverlay.setTransparency(alpha);
+            }
+            ppo.remove();
+            currentlyDrawing = false;
+        }
+    }
+
 
 }
