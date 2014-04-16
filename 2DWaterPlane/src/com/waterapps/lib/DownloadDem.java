@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
@@ -27,6 +28,7 @@ import com.waterapps.waterplane.MainActivity;
 import com.waterapps.waterplane.R;
 
 import java.io.File;
+import java.net.URL;
 
 /**
  * Created by Steve on 2/26/14.
@@ -40,8 +42,10 @@ public class DownloadDem {
     int notificationID;
     GoogleMap map;
     DemInProgress dlArea;
+    LatLngBounds extent;
 
     public DownloadDem(final LatLngBounds extent, final String directory, GoogleMap map, Context con) {
+        this.extent = extent;
         notificationID = (int)System.currentTimeMillis();
         context = con;
         receiver = new BroadcastReceiver() {
@@ -118,6 +122,7 @@ public class DownloadDem {
         dlArea = new DemInProgress(extent, map);
 
         new runWeb(extent, context).run();
+        //new DownloadDemTask().execute();
     }
 
     private class runWeb {
@@ -158,26 +163,20 @@ public class DownloadDem {
                         int currentapiVersion = android.os.Build.VERSION.SDK_INT;
                         String strFunction;
                         if (currentapiVersion >= Build.VERSION_CODES.KITKAT){
-                            strFunction = "javascript:" +
-                                    "var buttons;" +
-                                    "buttons = document.querySelectorAll(\"input[value='Get Data']\");" +
-                                    "if (buttons.length > 0) {" +
-                                    "   buttons[0].onclick();" +
-                                    "}";
-                        } else{
-                            //if there is no dataset for the area, download should be canceled and user informed
-                            //kitkat webview calls onpagefinished before the page actually finishes so this doesn't work
-                            strFunction = "javascript:" +
-                                    "var buttons;" +
-                                    "buttons = document.querySelectorAll(\"input[value='Get Data']\");" +
-                                    "if (buttons.length > 0) {" +
-                                    "   buttons[0].onclick();" +
-                                    "}" +
-                                    "else {" +
-                                    "   javascript:console.log('"+errorString+"');" +
-                                    "}";
+                            SystemClock.sleep(1000);
                         }
-                        SystemClock.sleep(5000);
+                        //if there is no dataset for the area, download should be canceled and user informed
+                        //kitkat webview calls onpagefinished before the page actually finishes so this doesn't work
+                        //so wait for kitkat
+                        strFunction = "javascript:" +
+                                "var buttons;" +
+                                "buttons = document.querySelectorAll(\"input[value='Get Data']\");" +
+                                "if (buttons.length > 0) {" +
+                                "   buttons[0].onclick();" +
+                                "}" +
+                                "else {" +
+                                "   javascript:console.log('"+errorString+"');" +
+                                "}";
                         webView.loadUrl(strFunction);
                     }
                     else if(url.contains("lidarDataset")){
@@ -233,14 +232,16 @@ public class DownloadDem {
                     return true;
                 }
                 else if (cmsg.message().startsWith(errorString)) {
-                    /*
                     Log.d("onConsoleMessage", "no dem data available");
                     Toast toast = Toast.makeText(context, "No DEM data available for this region", Toast.LENGTH_LONG);
                     toast.show();
                     NotificationManager mNotifyManager =
                             (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                     mNotifyManager.cancel(notificationID);
-                    */
+                    dlArea.remove();
+                    webView.stopLoading();
+                    webView.destroy();
+                    return true;
                 }
                 return false;
             }
@@ -286,7 +287,7 @@ public class DownloadDem {
                     }
                 }
             }
-        }).start();
+        }); //.start();
     }
 
     private int getProgressPercentage() {
@@ -316,4 +317,20 @@ public class DownloadDem {
 
         return PERCENTAGE;
     }
+
+    private class DownloadDemTask extends AsyncTask<URL, Integer, Long> {
+        protected Long doInBackground(URL... urls) {
+            new runWeb(extent, context).run();
+            return (long)0;
+        }
+
+        protected void onProgressUpdate(Integer... progress) {
+            //TODO meaningful progress updates if that is possible
+        }
+
+        protected void onPostExecute(Long result) {
+            //TODO clear notification on download completion
+        }
+    }
+
 }
