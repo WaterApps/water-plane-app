@@ -162,11 +162,8 @@ public class DownloadDem {
                     if(url.contains("datasets")) {
                         Log.d("onPageFinished", "Finding dataset");
                         //workaround for kitkat webview bug
-                        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
                         String strFunction;
-                        if (currentapiVersion >= Build.VERSION_CODES.KITKAT){
-                            SystemClock.sleep(1000);
-                        }
+
                         //if there is no dataset for the area, download should be canceled and user informed
                         //kitkat webview calls onpagefinished before the page actually finishes so this doesn't work
                         //so wait for kitkat
@@ -179,12 +176,19 @@ public class DownloadDem {
                                 "else {" +
                                 "   javascript:console.log('"+errorString+"');" +
                                 "}";
+                        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+                        if (currentapiVersion >= Build.VERSION_CODES.KITKAT){
+                            SystemClock.sleep(2000);
+                        }
                         webView.loadUrl(strFunction);
                     }
                     else if(url.contains("lidarDataset")){
+                        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
                         Log.d("onPageFinished", "Submitting form");
                         //Initial homemade post page, change post vars here, then post form;
                         final String strFunction = "javascript:"
+                                + "setTimeout(function(){alert('Hello')},3000);"
+                                + "while (document.getElementsByName('selectForm').length == 0) {};"
                                 + "document.getElementById('email').value = 'newEmailAddress@email.com';"
                                 + "document.getElementById('minX').value = '" + Double.toString(minX) + "';"
                                 + "document.getElementById('minY').value = '" + Double.toString(minY) + "';"
@@ -196,6 +200,9 @@ public class DownloadDem {
                                 + "document.getElementById('resolution').value = '" + Double.toString(3.0) + "';"
                                 + "document.getElementById('format').value = 'GTiff';"
                                 + "document.getElementsByName('selectForm')[0].submit();";
+                        if (currentapiVersion >= Build.VERSION_CODES.KITKAT){
+                            //SystemClock.sleep(5000);
+                        }
                         webView.loadUrl(strFunction);
                         Log.d("url", strFunction);
                     }
@@ -204,20 +211,30 @@ public class DownloadDem {
                         Log.d("onPageFinished", "URL:" + url);
                         //Open topo pages
                         String strFunction = "javascript:"
+                                + "var finished = false;"
                                 + "var els = document.getElementsByTagName('a');"
+                                + "while (!finished) {"
                                 + "for (var i = 0, l = els.length; i < l; i++) {"
                                 + "    var el = els[i];"
                                 + "    if (el.innerHTML.indexOf('dems.tar.gz') != -1) {"
                                 + "         if (el.href.indexOf('appBulkFormat') != -1) {"
+                                + "             finished = true;"
                                 + "             javascript:console.log('"+magicString+"'+ el.href);"
                                 + "         }"
                                 + "    }"
+                                + "}"
+                                //+ "javascript:console.log('checking for DEM');"
                                 + "}";
                         Log.d("url:",strFunction);
+                        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+                        if (currentapiVersion >= Build.VERSION_CODES.KITKAT){
+                            //SystemClock.sleep(15000);
+                        }
                         webView.loadUrl(strFunction);
                     }
                 }
             });
+
 
             webView.loadUrl(initalURL);
         }
@@ -247,6 +264,7 @@ public class DownloadDem {
                     MainActivity.downloading = false;
                     return true;
                 }
+                Log.d("javascript log: ", cmsg.message());
                 return false;
             }
         }

@@ -1259,34 +1259,35 @@ public class MainActivity extends Activity implements OnMapClickListener {
         demOutlines = new ArrayList<Polygon>();
 
         //don't look through it if it isn't a directory
-        if (f.isDirectory()) {
+        if (!f.isDirectory()) {
             //loop through each file in dir
             File file[] = f.listFiles();
-            for (int i=0; i < file.length; i++)
-            {
-                //get metadata
-                demFile = ReadGeoTiffMetadata.readMetadata(file[i]);
-                if(i==0) {
-                    demBounds = new LatLngBounds(new LatLng(demFile.getSw_lat(), demFile.getSw_long()),
-                            new LatLng(demFile.getNe_lat(), demFile.getNe_long()));
+            for (int i=0; i < file.length; i++) {
+                if (!file[i].isDirectory()) {
+                    //get metadata
+                    demFile = ReadGeoTiffMetadata.readMetadata(file[i]);
+                    if (i == 0) {
+                        demBounds = new LatLngBounds(new LatLng(demFile.getSw_lat(), demFile.getSw_long()),
+                                new LatLng(demFile.getNe_lat(), demFile.getNe_long()));
+                    }
+                    //add to list of dem objects
+                    demFiles.add(demFile);
+                    //draw outline on map
+                    demOutlines.add(map.addPolygon(new PolygonOptions().add(new LatLng(demFile.getSw_lat(), demFile.getSw_long()))
+                            .add(new LatLng(demFile.getSw_lat(), demFile.getNe_long()))
+                            .add(new LatLng(demFile.getNe_lat(), demFile.getNe_long()))
+                            .add(new LatLng(demFile.getNe_lat(), demFile.getSw_long()))
+                            .add(new LatLng(demFile.getSw_lat(), demFile.getSw_long()))
+                            .strokeColor(Color.RED)
+                            .fillColor(Color.argb(64, 255, 0, 0))));
+                    //expand bounds to include each dem
+                    demBounds = demBounds.including(new LatLng(demFile.getSw_lat(), demFile.getSw_long()));
+                    demBounds = demBounds.including(new LatLng(demFile.getNe_lat(), demFile.getNe_long()));
+                    demMarkers.add(map.addMarker(new MarkerOptions()
+                            .icon(BitmapDescriptorFactory.fromBitmap(textToBitmap("Tap")))
+                            .position(new GeoRectangle(demFile.getBounds()).center())
+                            .title("Tap")));
                 }
-                //add to list of dem objects
-                demFiles.add(demFile);
-                //draw outline on map
-                demOutlines.add(map.addPolygon(new PolygonOptions().add(new LatLng(demFile.getSw_lat(), demFile.getSw_long()))
-                        .add(new LatLng(demFile.getSw_lat(), demFile.getNe_long()))
-                        .add(new LatLng(demFile.getNe_lat(), demFile.getNe_long()))
-                        .add(new LatLng(demFile.getNe_lat(), demFile.getSw_long()))
-                        .add(new LatLng(demFile.getSw_lat(), demFile.getSw_long()))
-                        .strokeColor(Color.RED)
-                        .fillColor(Color.argb(64, 255, 0, 0))));
-                //expand bounds to include each dem
-                demBounds = demBounds.including(new LatLng(demFile.getSw_lat(), demFile.getSw_long()));
-                demBounds = demBounds.including(new LatLng(demFile.getNe_lat(), demFile.getNe_long()));
-                demMarkers.add(map.addMarker(new MarkerOptions()
-                        .icon(BitmapDescriptorFactory.fromBitmap(textToBitmap("Tap")))
-                        .position(new GeoRectangle(demFile.getBounds()).center())
-                        .title("Tap")));
             }
         }
     }

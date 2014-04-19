@@ -88,7 +88,7 @@ public class DemInProgress extends GeoRectangle  {
             for (int i = 0; i < 100; i++) {
                 publishProgress(i);
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(700);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
