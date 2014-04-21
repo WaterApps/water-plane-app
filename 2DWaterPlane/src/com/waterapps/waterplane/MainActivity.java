@@ -796,8 +796,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
                 }
             }
         }
-        removeDemOutline(currentlyLoaded.getBounds().getCenter());
-        removeMarker(currentlyLoaded.getBounds());
+        if (currentlyLoaded != null) {
+            removeDemOutline(currentlyLoaded.getBounds().getCenter());
+            removeMarker(currentlyLoaded.getBounds());
+        }
         updateMarkers();
     }
 

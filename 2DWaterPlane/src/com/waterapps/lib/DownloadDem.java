@@ -187,19 +187,26 @@ public class DownloadDem {
                         Log.d("onPageFinished", "Submitting form");
                         //Initial homemade post page, change post vars here, then post form;
                         final String strFunction = "javascript:"
-                                + "setTimeout(function(){alert('Hello')},3000);"
-                                + "while (document.getElementsByName('selectForm').length == 0) {};"
-                                + "document.getElementById('email').value = 'newEmailAddress@email.com';"
-                                + "document.getElementById('minX').value = '" + Double.toString(minX) + "';"
-                                + "document.getElementById('minY').value = '" + Double.toString(minY) + "';"
-                                + "document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
-                                + "document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
-                                + "document.getElementById('lasOutput').checked = 'unchecked';"
-                                + "document.getElementById('derivativeSelect').checked = 'unchecked';"
-                                + "document.getElementById('visualization').checked = 'unchecked';"
-                                + "document.getElementById('resolution').value = '" + Double.toString(3.0) + "';"
-                                + "document.getElementById('format').value = 'GTiff';"
-                                + "document.getElementsByName('selectForm')[0].submit();";
+                                + "setInterval(function(){"
+                                + "	if(document.getElementsByName('selectForm').length == 0) {"
+                                + "	/* keep waiting, page isn't finished loading */"
+                                + "	} else {"
+                                + "		/* fill in the form with our desired values */"
+                                + "		document.getElementById('email').value = 'newEmailAddress@email.com';"
+                                + "		document.getElementById('minX').value = '" + Double.toString(minX) + "';"
+                                + "		document.getElementById('minY').value = '" + Double.toString(minY) + "';"
+                                + "		document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
+                                + "		document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
+                                + "		document.getElementById('lasOutput').checked = 'unchecked';"
+                                + "		document.getElementById('derivativeSelect').checked = 'unchecked';"
+                                + "		document.getElementById('visualization').checked = 'unchecked';"
+                                + "		document.getElementById('resolution').value = '" + Double.toString(3.0) + "';"
+                                + "		document.getElementById('format').value = 'GTiff';"
+                                + "		/* submit it */"
+                                + "		document.getElementsByName('selectForm')[0].submit();"
+                                + "    clearInterval();"
+                                + "	}"
+                                + "}, 5000);";
                         if (currentapiVersion >= Build.VERSION_CODES.KITKAT){
                             //SystemClock.sleep(5000);
                         }
@@ -211,20 +218,18 @@ public class DownloadDem {
                         Log.d("onPageFinished", "URL:" + url);
                         //Open topo pages
                         String strFunction = "javascript:"
-                                + "var finished = false;"
-                                + "var els = document.getElementsByTagName('a');"
-                                + "while (!finished) {"
-                                + "for (var i = 0, l = els.length; i < l; i++) {"
-                                + "    var el = els[i];"
-                                + "    if (el.innerHTML.indexOf('dems.tar.gz') != -1) {"
-                                + "         if (el.href.indexOf('appBulkFormat') != -1) {"
-                                + "             finished = true;"
-                                + "             javascript:console.log('"+magicString+"'+ el.href);"
-                                + "         }"
-                                + "    }"
-                                + "}"
-                                //+ "javascript:console.log('checking for DEM');"
-                                + "}";
+                                + "setInterval(function(){"
+                                + "	var els = document.getElementsByTagName('a');"
+                                + "	for (var i = 0, l = els.length; i < l; i++) {"
+                                + "			var el = els[i];"
+                                + "			if (el.innerHTML.indexOf('dems.tar.gz') != -1) {"
+                                + "				//if (el.href.indexOf('appBulkFormat') != -1) {"
+                                + "					javascript:console.log('"+magicString+"'+ el.href);"
+                                + "					clearInterval();"
+                                + "				//}"
+                                + "			}"
+                                + "		}"
+                                + "}, 5000);";
                         Log.d("url:",strFunction);
                         int currentapiVersion = android.os.Build.VERSION.SDK_INT;
                         if (currentapiVersion >= Build.VERSION_CODES.KITKAT){
