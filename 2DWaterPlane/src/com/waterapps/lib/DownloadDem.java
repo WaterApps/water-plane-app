@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -34,7 +35,7 @@ import java.net.URL;
  * Created by Steve on 2/26/14.
  */
 public class DownloadDem {
-    WebView webView;
+    static WebView webView;
     long enqueue;
     DownloadManager dm;
     BroadcastReceiver receiver;
@@ -44,8 +45,15 @@ public class DownloadDem {
     DemInProgress dlArea;
     LatLngBounds extent;
     static boolean busy;
+    private boolean jSubmitForm = false;
+    private boolean jGetData = false;
+    private boolean jJobId = false;
+    private boolean jDeleteMap = false;
 
-    public DownloadDem(final LatLngBounds extent, final String directory, GoogleMap map, Context con) {
+    private boolean jJobIdFinding = false;
+
+    public DownloadDem(final LatLngBounds extent, final String directory, GoogleMap map, Context con, WebView webView) {
+        this.webView = webView;
         MainActivity.downloading = true;
         this.extent = extent;
         notificationID = (int)System.currentTimeMillis();
@@ -149,13 +157,85 @@ public class DownloadDem {
                     Double.toString(maxX) + "&maxY=" +
                     Double.toString(maxY);
 
-            webView = new WebView(MainActivity.getContext());
+            //webView = new WebView(MainActivity.getContext());
+            webView.setVisibility(View.VISIBLE);
             webView.getSettings().setJavaScriptEnabled(true);
             webView.setWebChromeClient(new PageHandler());
             webView.setWebViewClient(new WebViewClient() {
 
                 @Override
                 public void onPageFinished(WebView view, String url) {
+                    //Log.d("onPageFinished", "url:" + url);
+                    //this is the page where opentopo's datasets are listed
+                    //the correct one needs to be selected and its page opened
+                    if(url.contains("cid=datasets")) {
+                        if(jDeleteMap == false){
+                            Log.d("onPageFinished", "Finding map");
+                            String strFunction;
+                            strFunction = "javascript:"
+                                    + "var deleteMap = setInterval(function(){"+
+                                    "var div = document.getElementById('map');" +
+                                    "if (div != null) {" +
+                                    "   div.parentNode.removeChild(div);" +
+                                    "   clearInterval(deleteMap);"+
+                                    "   var findGetData = setInterval(function(){"+
+                                    "       var buttons = document.querySelectorAll(\"input[value='Get Data']\");" +
+                                    "       if (buttons.length > 0) {" +
+                                    "  		    clearInterval(findGetData);"+
+                                    "           buttons[0].onclick();" +
+                                    "       } else {" +
+                                    "           javascript:console.log('"+errorString+"Could not find getdata button. Waiting a sec.');" +
+                                    "       }" +
+                                    "    }, 1000);" +
+                                    "} else {" +
+                                    "   javascript:console.log('"+errorString+" Could not find map to delete. Waiting a sec.');" +
+                                    "}"
+                                    + "}, 1000);";
+                            webView.loadUrl(strFunction);
+
+                            jDeleteMap = true;
+                        }
+                    }
+                    else if(url.contains("action=lidarDataset")){
+                        if(jSubmitForm == false){
+                            Log.d("onPageFinished", "Submitting form");
+                            //Initial homemade post page, change post vars here, then post form;
+                            String strFunction = "javascript:"
+                                    + "var deleteMap = setInterval(function(){"
+                                    + " var div = document.getElementById('map');"
+                                    + " if (div != null) {"
+                                    + "   div.parentNode.removeChild(div);"
+                                    + "   clearInterval(deleteMap);"
+                                    + "   var findForm = setInterval(function(){"
+                                    + "	    if(document.getElementsByName('selectForm').length == 0) {"
+                                    + "       javascript:console.log('"+errorString+" Waiting to find form for entry.');"
+                                    + "	    } else {"
+                                    + "         clearInterval(findForm);"
+                                    + "		    document.getElementById('email').value = 'newEmailAddress@email.com';"
+                                    + "		    document.getElementById('minX').value = '" + Double.toString(minX) + "';"
+                                    + "		    document.getElementById('minY').value = '" + Double.toString(minY) + "';"
+                                    + "		    document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
+                                    + "		    document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
+                                    + "		    document.getElementById('lasOutput').checked = 'unchecked';"
+                                    + "		    document.getElementById('derivativeSelect').checked = 'unchecked';"
+                                    + "		    document.getElementById('visualization').checked = 'unchecked';"
+                                    + "		    document.getElementById('resolution').value = '" + Double.toString(3.0) + "';"
+                                    + "		    document.getElementById('format').value = 'GTiff';"
+                                    + "		    document.getElementsByName('selectForm')[0].submit();"
+                                    + "	    }"
+                                    + "   }, 1000);"
+                                    + " } else {"
+                                    + "   javascript:console.log('"+errorString+" Could not find map to delete. Waiting a sec.');"
+                                    + " }"
+                                    + "}, 1000);";
+                            webView.loadUrl(strFunction);
+                            Log.d("onPageFinished - ", "Javascript for submitting form");
+                            jSubmitForm = true;
+                        }
+                    }
+                }
+                /*
+/*                public void onPageFinished(WebView view, String url) {
                     Log.d("onPageFinished", "url:" + url);
                     //this is the page where opentopo's datasets are listed
                     //the correct one needs to be selected and its page opened
@@ -189,21 +269,22 @@ public class DownloadDem {
                         final String strFunction = "javascript:"
                                 + "setInterval(function(){"
                                 + "	if(document.getElementsByName('selectForm').length == 0) {"
-                                + "	/* keep waiting, page isn't finished loading */"
+                                + "	*//* keep waiting, page isn't finished loading *//*"
                                 + "	} else {"
-                                + "		/* fill in the form with our desired values */"
+                                + "		*//* fill in the form with our desired values *//*"
                                 + "		document.getElementById('email').value = 'newEmailAddress@email.com';"
-                                + "		document.getElementById('minX').value = '" + Double.toString(minX) + "';"
-                                + "		document.getElementById('minY').value = '" + Double.toString(minY) + "';"
-                                + "		document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
-                                + "		document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
-                                + "		document.getElementById('lasOutput').checked = 'unchecked';"
-                                + "		document.getElementById('derivativeSelect').checked = 'unchecked';"
-                                + "		document.getElementById('visualization').checked = 'unchecked';"
-                                + "		document.getElementById('resolution').value = '" + Double.toString(3.0) + "';"
+                                //+ "		document.getElementById('minX').value = '" + Double.toString(minX) + "';"
+                                //+ "		document.getElementById('minY').value = '" + Double.toString(minY) + "';"
+                                //+ "		document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
+                                //+ "		document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
+                                //+ "		document.getElementById('lasOutput').checked = 'unchecked';"
+                                //+ "		document.getElementById('derivativeSelect').checked = 'unchecked';"
+                                //+ "		document.getElementById('visualization').checked = 'unchecked';"
+                                //+ "		document.getElementById('resolution').value = '" + Double.toString(3.0) + "';"
                                 + "		document.getElementById('format').value = 'GTiff';"
-                                + "		/* submit it */"
-                                + "		document.getElementsByName('selectForm')[0].submit();"
+                                + "		*//* submit it *//*"
+                                //+ "		document.getElementsByName('selectForm')[0].submit();"
+                                + "     setTimeout(function(){ document.querySelectorAll(\"input[value='Submit']\")[0].click(); }, 4000);"
                                 + "    clearInterval();"
                                 + "	}"
                                 + "}, 5000);";
@@ -213,7 +294,7 @@ public class DownloadDem {
                         webView.loadUrl(strFunction);
                         Log.d("url", strFunction);
                     }
-                    else {
+                    else if(url.contains("jobId")){
                         Log.d("onPageFinished", "Searching for DEM");
                         Log.d("onPageFinished", "URL:" + url);
                         //Open topo pages
@@ -223,10 +304,8 @@ public class DownloadDem {
                                 + "	for (var i = 0, l = els.length; i < l; i++) {"
                                 + "			var el = els[i];"
                                 + "			if (el.innerHTML.indexOf('dems.tar.gz') != -1) {"
-                                + "				//if (el.href.indexOf('appBulkFormat') != -1) {"
                                 + "					javascript:console.log('"+magicString+"'+ el.href);"
                                 + "					clearInterval();"
-                                + "				//}"
                                 + "			}"
                                 + "		}"
                                 + "}, 5000);";
@@ -237,7 +316,29 @@ public class DownloadDem {
                         }
                         webView.loadUrl(strFunction);
                     }
+                    else if(url.contains("lidarSubmit")) {
+                        final String strFunction = "\n" +
+                                "var jobRegex = /jobId=[0-9]+&/g;\n" +
+                                "var numRegex = /[0-9]+/g;\n" +
+                                "var docString = document.documentElement.innerHTML;\n" +
+                                "\n" +
+                                "setInterval(function(){\n" +
+                                "\ttry {\n" +
+                                "\t\tjavascript:console.log('bacon');\n" +
+                                "\t\tvar jobId = jobRegex.exec(docString);\n" +
+                                "\t\tjobId = numRegex.exec(jobId[0]);\n" +
+                                "\t\tjavascript:console.log('idregex:' + jobId);\n" +
+                                "\t\t*//*window.location.href = \"http://opentopo.sdsc.edu/gridsphere/gridsphere?gs_action=lidarOutput&cid=geonlidarframeportlet&jobId=\" + jobId;*//*\n" +
+                                "\t\t*//*clearInterval();*//*\n" +
+                                "\t} catch(err) {\n" +
+                                "\t\t*//* do nothing *//*\n" +
+                                "\t}\n" +
+                                "}, 5000);\n";
+                        //Log.d("url", strFunction);
+                        //webView.loadUrl(strFunction);
+                    }
                 }
+                */
             });
 
 
@@ -247,14 +348,14 @@ public class DownloadDem {
         private class PageHandler extends WebChromeClient {
             public boolean onConsoleMessage(ConsoleMessage cmsg){
                 if(cmsg.message().startsWith(magicString)){
-                    String categoryMsg = cmsg.message().substring(magicString.length());
-                    Log.d("magic:", magicString);
-                    Log.d("Link:", categoryMsg);
-                    downloadFile(categoryMsg);
-                    webView.stopLoading();
-                    webView.destroy();
-                    MainActivity.downloading = false;
-                    return true;
+                                        String categoryMsg = cmsg.message().substring(magicString.length());
+                                        Log.d("magic:", magicString);
+                                        Log.d("Link:", categoryMsg);
+                                        downloadFile(categoryMsg);
+                                        webView.stopLoading();
+                                        webView.destroy();
+                                        MainActivity.downloading = false;
+                                        return true;
                 }
                 else if (cmsg.message().startsWith(errorString)) {
                     Log.d("onConsoleMessage", "no dem data available");
@@ -272,7 +373,41 @@ public class DownloadDem {
                 Log.d("javascript log: ", cmsg.message());
                 return false;
             }
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                // TODO Auto-generated method stub
+                if(view.getUrl() == null){
+
+                } else if(view.getUrl().contains("lidarSubmit")){
+                    Log.d("onProgressChanged - ", "Javascript lidarSubmit");
+                    if(jJobId == true && jJobIdFinding == false){
+                        //Look for job id
+                        Log.d("onProgressChanged - ", "Javascript for finding job id");
+                        String strFunction = "javascript:"
+                                + "         var findJobId = setInterval(function(){"
+                                + "               javascript:console.log('"+errorString+" Starting to find jobid');"
+                                + "	           var els = document.getElementsByTagName('h3');"
+                                + "	           for (var i = 0, l = els.length; i < l; i++) {"
+                                + "			     var el = els[i];"
+                                + "			     if (el.innerHTML.indexOf('jobId:') != -1) {"
+                                + "                    clearInterval(findJobId);"
+                                + "					javascript:console.log('"+errorString+"Found JOB ID:' + el.innerHTML);"
+                                + "			     } else {"
+                                + "                    javascript:console.log('"+errorString+" Waiting to find JobId:' + i);"
+                                + "		         }"
+                                + "		       }"
+                                + "         }, 1000);";
+                        webView.loadUrl(strFunction);
+                        jJobIdFinding = true;
+                    }
+                }
+                super.onProgressChanged(view, newProgress);
+            }
         }
+    }
+
+    public static void setWebView(WebView wv) {
+        webView = wv;
     }
 
     private void downloadFile(String url) {

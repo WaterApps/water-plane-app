@@ -26,6 +26,7 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.*;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -147,6 +148,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
         return context;
     }
     static MainActivity that;
+    WebView webView;
+
     @Override
 	protected void onCreate(Bundle savedInstanceState) {
         downloading = false;
@@ -183,6 +186,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         defaultSliderMax = 250.925f;
         currentlyDrawing = false;
 		setContentView(R.layout.activity_main);
+        webView = (WebView) findViewById(R.id.webview);
         editMin = (TextView) findViewById(R.id.editMin);
         editMax = (TextView) findViewById(R.id.editMax);
         elevationControls = (LinearLayout) findViewById(R.id.elevationControls);
@@ -523,7 +527,6 @@ public class MainActivity extends Activity implements OnMapClickListener {
 
             //keep it from happening again
             SharedPreferences.Editor edit = prefs.edit();
-            edit = prefs.edit();
             edit.putBoolean("first_start", false);
             edit.commit();
         }
@@ -1510,7 +1513,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     void DownloadDEM(LatLngBounds extent) {
-        new DownloadDem(extent, demDirectory, map, getContext());
+        new DownloadDem(extent, demDirectory, map, getContext(), webView);
     }
 
     private LatLngBounds selectArea(LatLngBounds screen) {
