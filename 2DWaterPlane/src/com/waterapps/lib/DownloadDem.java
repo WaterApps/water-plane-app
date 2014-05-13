@@ -143,11 +143,8 @@ public class DownloadDem {
             final double minY = (extent.southwest.latitude < extent.northeast.latitude) ? extent.southwest.latitude :  extent.northeast.latitude;
             final double maxX = (extent.southwest.longitude > extent.northeast.longitude) ? extent.southwest.longitude :  extent.northeast.longitude;
             final double maxY = (extent.southwest.latitude > extent.northeast.latitude) ? extent.southwest.latitude :  extent.northeast.latitude;
-            String initalURL = "http://opentopo.sdsc.edu/gridsphere/gridsphere?cid=datasets&minX=" +
-                    Double.toString(minX) + "&minY=" +
-                    Double.toString(minY) + "&maxX=" +
-                    Double.toString(maxX) + "&maxY=" +
-                    Double.toString(maxY);
+
+            String initalURL = "file:///android_asset/OpenTopo.html";
 
             webView = new WebView(MainActivity.getContext());
             webView.getSettings().setJavaScriptEnabled(true);
@@ -160,7 +157,7 @@ public class DownloadDem {
                     //this is the page where opentopo's datasets are listed
                     //the correct one needs to be selected and its page opened
                     if(url.contains("datasets")) {
-                        Log.d("onPageFinished", "Finding dataset");
+/*                        Log.d("onPageFinished", "Finding dataset");
                         //workaround for kitkat webview bug
                         String strFunction;
 
@@ -181,8 +178,9 @@ public class DownloadDem {
                             SystemClock.sleep(2000);
                         }
                         webView.loadUrl(strFunction);
+*/
                     }
-                    else if(url.contains("lidarDataset")){
+                    else if(url.contains("OpenTopo.html")){
                         int currentapiVersion = android.os.Build.VERSION.SDK_INT;
                         Log.d("onPageFinished", "Submitting form");
                         //Initial homemade post page, change post vars here, then post form;
@@ -197,6 +195,11 @@ public class DownloadDem {
                                 + "		document.getElementById('minY').value = '" + Double.toString(minY) + "';"
                                 + "		document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
                                 + "		document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
+
+                                + "		document.getElementById('auto_xmin').value = '" + Double.toString(minX) + "';"
+                                + "		document.getElementById('auto_ymin').value = '" + Double.toString(minY) + "';"
+                                + "		document.getElementById('auto_xmax').value = '" + Double.toString(maxX) + "';"
+                                + "		document.getElementById('auto_ymax').value = '" + Double.toString(maxY) + "';"
                                 + "		document.getElementById('lasOutput').checked = 'unchecked';"
                                 + "		document.getElementById('derivativeSelect').checked = 'unchecked';"
                                 + "		document.getElementById('visualization').checked = 'unchecked';"
@@ -207,9 +210,7 @@ public class DownloadDem {
                                 + "    clearInterval();"
                                 + "	}"
                                 + "}, 5000);";
-                        if (currentapiVersion >= Build.VERSION_CODES.KITKAT){
-                            //SystemClock.sleep(5000);
-                        }
+
                         webView.loadUrl(strFunction);
                         Log.d("url", strFunction);
                     }
@@ -223,18 +224,13 @@ public class DownloadDem {
                                 + "	for (var i = 0, l = els.length; i < l; i++) {"
                                 + "			var el = els[i];"
                                 + "			if (el.innerHTML.indexOf('dems.tar.gz') != -1) {"
-                                + "				//if (el.href.indexOf('appBulkFormat') != -1) {"
                                 + "					javascript:console.log('"+magicString+"'+ el.href);"
                                 + "					clearInterval();"
-                                + "				//}"
                                 + "			}"
                                 + "		}"
                                 + "}, 5000);";
                         Log.d("url:",strFunction);
-                        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-                        if (currentapiVersion >= Build.VERSION_CODES.KITKAT){
-                            //SystemClock.sleep(15000);
-                        }
+
                         webView.loadUrl(strFunction);
                     }
                 }
