@@ -92,11 +92,8 @@ public class CustomMarker {
      * Updates the marker graphics.
      */
 	public void updateMarker() {
-        try {
-            MapsInitializer.initialize(MainActivity.getContext());
-        } catch (GooglePlayServicesNotAvailableException e) {
-            e.printStackTrace();
-        }
+        MapsInitializer.initialize(MainActivity.getContext());
+
         if (marker.isVisible()) {
             LatLng point = marker.getPosition();
             double elevationDouble = demData.elevationFromLatLng(point);

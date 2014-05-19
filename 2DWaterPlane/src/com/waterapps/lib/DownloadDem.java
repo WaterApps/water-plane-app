@@ -10,8 +10,6 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
@@ -41,20 +39,11 @@ public class DownloadDem {
     BroadcastReceiver receiver;
     Context context;
     int notificationID;
-    GoogleMap map;
     DemInProgress dlArea;
     LatLngBounds extent;
-    static boolean busy;
-
     private boolean jSubmitForm = false;
-    private boolean jJobId = false;
-    private boolean jDeleteMap = false;
 
-    private boolean jJobIdFinding = false;
-    private boolean jGetFile = false;
-
-    public DownloadDem(final LatLngBounds extent, final String directory, GoogleMap map, Context con, WebView webView) {
-        this.webView = webView;
+    public DownloadDem(final LatLngBounds extent, final String directory, GoogleMap map, Context con) {
         MainActivity.downloading = true;
         this.extent = extent;
         notificationID = (int)System.currentTimeMillis();
@@ -155,7 +144,7 @@ public class DownloadDem {
 
             String initalURL = "file:///android_asset/OpenTopo.html";
 
-            //webView = new WebView(MainActivity.getContext());
+            webView = new WebView(MainActivity.getContext());
             webView.setVisibility(View.VISIBLE);
             webView.getSettings().setJavaScriptEnabled(true);
             webView.setWebChromeClient(new PageHandler());
@@ -163,7 +152,7 @@ public class DownloadDem {
 
                 @Override
                 public void onPageFinished(WebView view, String url) {
-                    //Log.d("onPageFinished", "url:" + url);
+                    Log.d("onPageFinished", "url:" + url);
                     //this is the page where opentopo's datasets are listed
                     //the correct one needs to be selected and its page opened
                     if(url.contains("OpenTopo.html")){
@@ -198,6 +187,7 @@ public class DownloadDem {
                         }
                     }
                     else if(url.contains("lidarSubmit")) {
+
                         final String strFunction = "\n" +
                                 "var jobRegex = /jobId=[0-9]+&/g;\n" +
                                 "var numRegex = /[0-9]+/g;\n" +
@@ -205,7 +195,6 @@ public class DownloadDem {
                                 "\n" +
                                 "setInterval(function(){\n" +
                                 "\ttry {\n" +
-                                "\t\tjavascript:console.log('bacon');\n" +
                                 "\t\tvar jobId = jobRegex.exec(docString);\n" +
                                 "\t\tjobId = numRegex.exec(jobId[0]);\n" +
                                 "\t\tjavascript:console.log('idregex:' + jobId);\n" +
@@ -232,7 +221,7 @@ public class DownloadDem {
                                 + "}, 5000);";
                         Log.d("url:",strFunction);
 
-                        //webView.loadUrl(strFunction);
+                        webView.loadUrl(strFunction);
                     }
                 }
             });
