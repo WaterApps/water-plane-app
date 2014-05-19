@@ -26,6 +26,7 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
 import android.view.*;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -132,6 +133,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
     public static boolean profile;
     private static long enqueue;
 
+    WebView webView;
+
     int demDownloadCount = 1;
     int demFinishedCount = 1;
     static int currentDemDownloads = 0;
@@ -215,6 +218,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
 		UiSettings uiSettings = map.getUiSettings();
         waterElevationTextView = (TextView) findViewById(R.id.text);
 		ElevationTextView = (TextView) findViewById(R.id.text2);
+
+        webView = (WebView) findViewById(R.id.webview);
 
         //set ups markers
 		userMarker = map.addMarker(new MarkerOptions()
@@ -1510,7 +1515,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     }
 
     void DownloadDEM(LatLngBounds extent) {
-        new DownloadDem(extent, demDirectory, map, getContext());
+        new DownloadDem(extent, demDirectory, map, getContext(), webView);
     }
 
     private LatLngBounds selectArea(LatLngBounds screen) {

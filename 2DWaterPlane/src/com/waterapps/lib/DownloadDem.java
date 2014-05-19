@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -45,7 +46,15 @@ public class DownloadDem {
     LatLngBounds extent;
     static boolean busy;
 
-    public DownloadDem(final LatLngBounds extent, final String directory, GoogleMap map, Context con) {
+    private boolean jSubmitForm = false;
+    private boolean jJobId = false;
+    private boolean jDeleteMap = false;
+
+    private boolean jJobIdFinding = false;
+    private boolean jGetFile = false;
+
+    public DownloadDem(final LatLngBounds extent, final String directory, GoogleMap map, Context con, WebView webView) {
+        this.webView = webView;
         MainActivity.downloading = true;
         this.extent = extent;
         notificationID = (int)System.currentTimeMillis();
@@ -146,92 +155,84 @@ public class DownloadDem {
 
             String initalURL = "file:///android_asset/OpenTopo.html";
 
-            webView = new WebView(MainActivity.getContext());
+            //webView = new WebView(MainActivity.getContext());
+            webView.setVisibility(View.VISIBLE);
             webView.getSettings().setJavaScriptEnabled(true);
             webView.setWebChromeClient(new PageHandler());
             webView.setWebViewClient(new WebViewClient() {
 
                 @Override
                 public void onPageFinished(WebView view, String url) {
-                    Log.d("onPageFinished", "url:" + url);
+                    //Log.d("onPageFinished", "url:" + url);
                     //this is the page where opentopo's datasets are listed
                     //the correct one needs to be selected and its page opened
-                    if(url.contains("datasets")) {
-/*                        Log.d("onPageFinished", "Finding dataset");
-                        //workaround for kitkat webview bug
-                        String strFunction;
-
-                        //if there is no dataset for the area, download should be canceled and user informed
-                        //kitkat webview calls onpagefinished before the page actually finishes so this doesn't work
-                        //so wait for kitkat
-                        strFunction = "javascript:" +
-                                "var buttons;" +
-                                "buttons = document.querySelectorAll(\"input[value='Get Data']\");" +
-                                "if (buttons.length > 0) {" +
-                                "   buttons[0].onclick();" +
-                                "}" +
-                                "else {" +
-                                "   javascript:console.log('"+errorString+"');" +
-                                "}";
-                        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-                        if (currentapiVersion >= Build.VERSION_CODES.KITKAT){
-                            SystemClock.sleep(2000);
+                    if(url.contains("OpenTopo.html")){
+                        if(jSubmitForm == false){
+                            Log.d("onPageFinished", "Submitting form");
+                            //Initial homemade post page, change post vars here, then post form;
+                            String strFunction = "javascript:"
+                                    + "   var findForm = setInterval(function(){"
+                                    + "	    if(document.getElementsByName('selectForm').length == 0) {"
+                                    + "       /*javascript:console.log('"+errorString+" Waiting to find form for entry.');*/"
+                                    + "	    } else {"
+                                    + "         clearInterval(findForm);"
+                                    + "         /*javascript:console.log('"+errorString+" Waiting 3 seconds to submit');*/"
+                                    + "         setTimeout(function(){"
+                                    + "             document.getElementById('email').value = 'newEmailAddress@email.com';"
+                                    + "		        document.getElementById('minX').value = '" + Double.toString(minX) + "';"
+                                    + "		        document.getElementById('minY').value = '" + Double.toString(minY) + "';"
+                                    + "		        document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
+                                    + "		        document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
+                                    + "		        document.getElementById('lasOutput').checked = 'unchecked';"
+                                    + "		        document.getElementById('derivativeSelect').checked = 'unchecked';"
+                                    + "		        document.getElementById('visualization').checked = 'unchecked';"
+                                    + "		        document.getElementById('resolution').value = '" + Double.toString(3.0) + "';"
+                                    + "		        document.getElementById('format').value = 'GTiff';"
+                                    + "             setInterval(function(){document.getElementsByName('selectForm')[0].submit(); }, 3000);"
+                                    + "         }, 3000);"
+                                    + "	    }"
+                                    + "   }, 1000);";
+                            webView.loadUrl(strFunction);
+                            Log.d("onPageFinished - ", "Javascript for submitting form");
+                            jSubmitForm = true;
                         }
-                        webView.loadUrl(strFunction);
-*/
                     }
-                    else if(url.contains("OpenTopo.html")){
-                        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-                        Log.d("onPageFinished", "Submitting form");
-                        //Initial homemade post page, change post vars here, then post form;
-                        final String strFunction = "javascript:"
-                                + "setInterval(function(){"
-                                + "	if(document.getElementsByName('selectForm').length == 0) {"
-                                + "	/* keep waiting, page isn't finished loading */"
-                                + "	} else {"
-                                + "		/* fill in the form with our desired values */"
-                                + "		document.getElementById('email').value = 'newEmailAddress@email.com';"
-                                + "		document.getElementById('minX').value = '" + Double.toString(minX) + "';"
-                                + "		document.getElementById('minY').value = '" + Double.toString(minY) + "';"
-                                + "		document.getElementById('maxX').value = '" + Double.toString(maxX) + "';"
-                                + "		document.getElementById('maxY').value = '" + Double.toString(maxY) + "';"
-
-                                + "		document.getElementById('auto_xmin').value = '" + Double.toString(minX) + "';"
-                                + "		document.getElementById('auto_ymin').value = '" + Double.toString(minY) + "';"
-                                + "		document.getElementById('auto_xmax').value = '" + Double.toString(maxX) + "';"
-                                + "		document.getElementById('auto_ymax').value = '" + Double.toString(maxY) + "';"
-                                + "		document.getElementById('lasOutput').checked = 'unchecked';"
-                                + "		document.getElementById('derivativeSelect').checked = 'unchecked';"
-                                + "		document.getElementById('visualization').checked = 'unchecked';"
-                                + "		document.getElementById('resolution').value = '" + Double.toString(3.0) + "';"
-                                + "		document.getElementById('format').value = 'GTiff';"
-                                + "		/* submit it */"
-                                + "		document.getElementsByName('selectForm')[0].submit();"
-                                + "    clearInterval();"
-                                + "	}"
-                                + "}, 5000);";
-
-                        webView.loadUrl(strFunction);
-                        Log.d("url", strFunction);
+                    else if(url.contains("lidarSubmit")) {
+                        final String strFunction = "\n" +
+                                "var jobRegex = /jobId=[0-9]+&/g;\n" +
+                                "var numRegex = /[0-9]+/g;\n" +
+                                "var docString = document.documentElement.innerHTML;\n" +
+                                "\n" +
+                                "setInterval(function(){\n" +
+                                "\ttry {\n" +
+                                "\t\tjavascript:console.log('bacon');\n" +
+                                "\t\tvar jobId = jobRegex.exec(docString);\n" +
+                                "\t\tjobId = numRegex.exec(jobId[0]);\n" +
+                                "\t\tjavascript:console.log('idregex:' + jobId);\n" +
+                                "\t\twindow.location.href = \"http://opentopo.sdsc.edu/gridsphere/gridsphere?gs_action=lidarOutput&cid=geonlidarframeportlet&jobId=\" + jobId;\n" +
+                                "\t} catch(err) {\n" +
+                                "\t}\n" +
+                                "}, 5000);\n";
+                                //webView.loadUrl(strFunction);
                     }
-                    else {
+                    else if(url.contains("lidarOutput")) {
                         Log.d("onPageFinished", "Searching for DEM");
                         Log.d("onPageFinished", "URL:" + url);
                         //Open topo pages
                         String strFunction = "javascript:"
                                 + "setInterval(function(){"
-                                + "	var els = document.getElementsByTagName('a');"
-                                + "	for (var i = 0, l = els.length; i < l; i++) {"
-                                + "			var el = els[i];"
-                                + "			if (el.innerHTML.indexOf('dems.tar.gz') != -1) {"
-                                + "					javascript:console.log('"+magicString+"'+ el.href);"
-                                + "					clearInterval();"
-                                + "			}"
-                                + "		}"
+                                + " var els = document.getElementsByTagName('a');"
+                                + " for (var i = 0, l = els.length; i < l; i++) {"
+                                + " var el = els[i];"
+                                + " if (el.innerHTML.indexOf('dems.tar.gz') != -1) {"
+                                + " javascript:console.log('"+magicString+"'+ el.href);"
+                                + " clearInterval();"
+                                + " }"
+                                + " }"
                                 + "}, 5000);";
                         Log.d("url:",strFunction);
 
-                        webView.loadUrl(strFunction);
+                        //webView.loadUrl(strFunction);
                     }
                 }
             });

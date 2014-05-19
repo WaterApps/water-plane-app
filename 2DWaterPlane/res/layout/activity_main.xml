@@ -13,6 +13,12 @@
                       android:layout_weight="2"
                       class="com.waterapps.lib.MyMapFragment"
                       />
+
+            <WebView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:visibility="gone"
+                android:id="@+id/webview"></WebView>
             <ImageView
                     android:id="@+id/graphView"
                     android:layout_width="match_parent"
