@@ -18,14 +18,12 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
-
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.waterapps.waterplane.MainActivity;
 import com.waterapps.waterplane.R;
-
 import java.io.File;
 import java.net.URL;
 
@@ -43,11 +41,20 @@ public class DownloadDem {
     LatLngBounds extent;
     private boolean jSubmitForm = false;
 
+    /**
+     * Initiates a download of a DEM file from OpenTopo.
+     * @param extent the area to be downloaded
+     * @param directory the directory to write the DEM to
+     * @param map map where progress will be shown
+     * @param con app context
+     */
     public DownloadDem(final LatLngBounds extent, final String directory, GoogleMap map, Context con) {
         MainActivity.downloading = true;
         this.extent = extent;
         notificationID = (int)System.currentTimeMillis();
         context = con;
+
+        //setup for the the download manager & notification handling
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -112,7 +119,7 @@ public class DownloadDem {
 
         mNotifyManager.notify(notificationID, mBuilder.build());
 
-        //show dl area on map
+        //show dl area on map to update progress
         PolygonOptions rectOptions = new PolygonOptions()
                 .add(extent.northeast)
                 .add(new LatLng(extent.northeast.latitude, extent.southwest.longitude))
@@ -121,16 +128,24 @@ public class DownloadDem {
                 .strokeColor(Color.BLUE);
         dlArea = new DemInProgress(extent, map);
 
+        //all of the magic happens here
         new runWeb(extent, context).run();
-        //new DownloadDemTask().execute();
     }
 
+    /**
+     * Creates a webview of the opentopo site and uses javascript injection to get the DEM
+     */
     private class runWeb {
         private static final String magicString = "25az225MAGICee4587da";
         private static final String errorString = "AsV2gZ2pxd9PcC8pJLkm";
         LatLngBounds extent;
         Context context;
 
+        /**
+         *
+         * @param extent the area to be downloaded
+         * @param con app context
+         */
         public runWeb(LatLngBounds extent, Context con) {
             this.extent = extent;
             this.context = con;
@@ -142,8 +157,10 @@ public class DownloadDem {
             final double maxX = (extent.southwest.longitude > extent.northeast.longitude) ? extent.southwest.longitude :  extent.northeast.longitude;
             final double maxY = (extent.southwest.latitude > extent.northeast.latitude) ? extent.southwest.latitude :  extent.northeast.latitude;
 
+            //this is a slightly modified version of the opentopo job submit page with problematic elements removed
             String initalURL = "file:///android_asset/OpenTopo.html";
 
+            //set up the webview and load the page
             webView = new WebView(MainActivity.getContext());
             webView.setVisibility(View.VISIBLE);
             webView.getSettings().setJavaScriptEnabled(true);
@@ -186,28 +203,10 @@ public class DownloadDem {
                             jSubmitForm = true;
                         }
                     }
-                    else if(url.contains("lidarSubmit")) {
-
-                        final String strFunction = "\n" +
-                                "var jobRegex = /jobId=[0-9]+&/g;\n" +
-                                "var numRegex = /[0-9]+/g;\n" +
-                                "var docString = document.documentElement.innerHTML;\n" +
-                                "\n" +
-                                "setInterval(function(){\n" +
-                                "\ttry {\n" +
-                                "\t\tvar jobId = jobRegex.exec(docString);\n" +
-                                "\t\tjobId = numRegex.exec(jobId[0]);\n" +
-                                "\t\tjavascript:console.log('idregex:' + jobId);\n" +
-                                "\t\twindow.location.href = \"http://opentopo.sdsc.edu/gridsphere/gridsphere?gs_action=lidarOutput&cid=geonlidarframeportlet&jobId=\" + jobId;\n" +
-                                "\t} catch(err) {\n" +
-                                "\t}\n" +
-                                "}, 5000);\n";
-                                //webView.loadUrl(strFunction);
-                    }
                     else if(url.contains("lidarOutput")) {
-                        Log.d("onPageFinished", "Searching for DEM");
-                        Log.d("onPageFinished", "URL:" + url);
-                        //Open topo pages
+                        //this is the page with the link to the DEM
+                        //but the page dynamically updates with progress until the DEM is ready
+                        //so periodically check if the link exists and download if it does
                         String strFunction = "javascript:"
                                 + "setInterval(function(){"
                                 + " var els = document.getElementsByTagName('a');"
@@ -232,10 +231,10 @@ public class DownloadDem {
 
         private class PageHandler extends WebChromeClient {
             public boolean onConsoleMessage(ConsoleMessage cmsg){
+                //the 'magic string' indicates that the message contains a URL to download
                 if(cmsg.message().startsWith(magicString)){
+                    //extract URL
                     String categoryMsg = cmsg.message().substring(magicString.length());
-                    Log.d("magic:", magicString);
-                    Log.d("Link:", categoryMsg);
                     downloadFile(categoryMsg);
                     webView.stopLoading();
                     webView.destroy();
@@ -261,6 +260,10 @@ public class DownloadDem {
         }
     }
 
+    /**
+     * Uses download manager to download a file.
+     * @param url the url to download
+     */
     private void downloadFile(String url) {
         Log.d("downloadFile", url);
         DownloadManager.Request request = new DownloadManager.Request(
@@ -290,7 +293,6 @@ public class DownloadDem {
                     }
 
                     final double dl_progress = ((double) bytes_downloaded / (double) bytes_total);
-                    System.out.println("Downloading: " + dl_progress);
 
                     cursor.close();
                     try {
@@ -300,35 +302,7 @@ public class DownloadDem {
                     }
                 }
             }
-        }); //.start();
-    }
-
-    private int getProgressPercentage() {
-        int DOWNLOADED_BYTES_SO_FAR_INT = 0, TOTAL_BYTES_INT = 0, PERCENTAGE = 0;
-
-        try {
-            Cursor c = dm.query(new DownloadManager.Query()
-                    .setFilterById(enqueue));
-
-            if (c.moveToFirst()) {
-                DOWNLOADED_BYTES_SO_FAR_INT = (int) c
-                        .getLong(c
-                                .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-                TOTAL_BYTES_INT = (int) c
-                        .getLong(c
-                                .getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-            }
-
-            System.out.println("PERCEN ------" + DOWNLOADED_BYTES_SO_FAR_INT
-                    + " ------ " + TOTAL_BYTES_INT + "****" + PERCENTAGE);
-            PERCENTAGE = (DOWNLOADED_BYTES_SO_FAR_INT * 100 / TOTAL_BYTES_INT);
-            System.out.println("PERCENTAGE % " + PERCENTAGE);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return PERCENTAGE;
+        });
     }
 
     private class DownloadDemTask extends AsyncTask<URL, Integer, Long> {
