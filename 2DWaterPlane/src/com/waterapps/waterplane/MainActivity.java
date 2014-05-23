@@ -1123,7 +1123,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
         map.animateCamera(CameraUpdateFactory.newLatLngBounds(raster.getBounds(), 50));
         removeDemOutline(new GeoRectangle(raster.getBounds()).center());
         removeMarker(raster.getBounds());
-
+        scanDEMs();
     }
 
     public static void hideElevationControls() {

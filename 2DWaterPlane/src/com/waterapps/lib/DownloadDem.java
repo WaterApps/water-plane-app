@@ -87,7 +87,6 @@ public class DownloadDem {
                                             .setProgress(0, 0, false);
 
                             mNotifyManager.notify(notificationID, mBuilder.build());
-
                             dlArea.remove();
                         }
                     }
