@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="main" >
+        <source path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res" >
+            <file
+                name="checkbox_done"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable/checkbox_done.xml"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="checkbox_planned"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable/checkbox_planned.xml"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="checkbox_started"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable/checkbox_started.xml"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="ic_launcher"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable/ic_launcher.png"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="fragment_slider_layout"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/layout/fragment_slider_layout.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="view_color_options"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/layout/view_color_options.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="view_job_status"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/layout/view_job_status.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="check_planned"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable-mdpi/check_planned.png"
+                qualifiers="mdpi"
+                type="drawable" />
+            <file
+                name="check_started"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable-mdpi/check_started.png"
+                qualifiers="mdpi"
+                type="drawable" />
+            <file
+                name="check_started_up"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable-mdpi/check_started_up.png"
+                qualifiers="mdpi"
+                type="drawable" />
+            <file
+                name="check_done"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable-mdpi/check_done.png"
+                qualifiers="mdpi"
+                type="drawable" />
+            <file
+                name="check_planned_up"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable-mdpi/check_planned_up.png"
+                qualifiers="mdpi"
+                type="drawable" />
+            <file
+                name="check_done_up"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable-mdpi/check_done_up.png"
+                qualifiers="mdpi"
+                type="drawable" />
+            <file
+                name="check_unplanned"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable-mdpi/check_unplanned.png"
+                qualifiers="mdpi"
+                type="drawable" />
+            <file
+                name="selected_vertex"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable-xhdpi/selected_vertex.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                name="unselected_vertex"
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/drawable-xhdpi/unselected_vertex.png"
+                qualifiers="xhdpi"
+                type="drawable" />
+            <file
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/values-v11/styles.xml"
+                qualifiers="v11" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme.Holo.Light" >
+
+                    <!-- API 11 theme customizations can go here. -->
+                </style>
+            </file>
+            <file
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/values-v14/styles.xml"
+                qualifiers="v14" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme.Holo.Light.DarkActionBar" >
+
+                    <!-- API 14 theme customizations can go here. -->
+                </style>
+            </file>
+            <file
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/values/strings.xml"
+                qualifiers="" >
+                <string name="app_name" >OpenATKLib
+                </string>
+            </file>
+            <file
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/values/styles.xml"
+                qualifiers="" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme.Light" >
+
+                    <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+                    -->
+                </style>
+
+                <style
+                    name="AppTheme"
+                    parent="AppBaseTheme" >
+
+                    <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+                </style>
+            </file>
+            <file
+                path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/res/values/attrs.xml"
+                qualifiers="" >
+                <declare-styleable name="ATKSliderLayout_LayoutParams" >
+                    <attr
+                        name="shown"
+                        format="boolean" />
+                </declare-styleable>
+                <declare-styleable name="ATKSliderLayout" >
+                    <attr
+                        name="horizontalSpacing"
+                        format="dimension" />
+                    <attr
+                        name="verticalSpacing"
+                        format="dimension" />
+                </declare-styleable>
+            </file>
+        </source>
+        <source path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/build/res/rs/release" />
+        <source path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/build/res/generated/release" />
+    </dataSet>
+    <dataSet config="release" >
+        <source path="/home/steve/AndroidStudioProjects/water-plane-app/2DWaterPlane/OpenATKLib/build-types/release/res" />
+    </dataSet>
+
+</merger>
