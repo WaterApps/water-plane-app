@@ -40,6 +40,7 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.*;
+import com.openatk.openatklib.atkmap.ATKSupportMapFragment;
 import com.waterapps.lib.*;
 
 import java.io.File;
@@ -57,9 +58,10 @@ import java.util.List;
 import java.util.Queue;
 
 import com.waterapps.lib.DownloadDem;
-
 import static android.graphics.Color.HSVToColor;
 import static android.os.Environment.getExternalStorageDirectory;
+
+import com.openatk.openatklib.atkmap.ATKMap;
 
 /**
  * The app's main activity.
@@ -109,7 +111,7 @@ public class MainActivity extends Activity implements OnMapClickListener {
     private boolean firstStart;
     public static LatLngBounds demBounds;
     static SeekBar seekBar;
-    static MapFragment mapFrag;
+    static ATKSupportMapFragment mapFrag;
     private static final int FIRST_START = 42;
     private static final int INITIAL_LOAD = 6502;
     static TextView waterElevationTextView;
@@ -229,9 +231,9 @@ public class MainActivity extends Activity implements OnMapClickListener {
 		uiSettings.setRotateGesturesEnabled(false);
 		uiSettings.setTiltGesturesEnabled(false);
 		uiSettings.setZoomControlsEnabled(false);
-		
-		mapFrag = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-		demData.setMapFragment(mapFrag);
+
+		//mapFrag = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+		//demData.setMapFragment(mapFrag);
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setMax(255);
         seekBar.setProgress(128);
