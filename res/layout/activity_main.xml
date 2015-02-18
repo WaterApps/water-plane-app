@@ -1,0 +1,249 @@
+	    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            tools:context=".MainActivity"
+            android:animateLayoutChanges="true">
+            <View android:id="@+id/focus_thief" 
+                android:layout_width="1dp" 
+                android:layout_height="1dp" 
+                android:focusable="true" 
+                android:focusableInTouchMode="true" />
+            <fragment
+                    android:id="@+id/map"
+                    android:name="com.openatk.openatklib.atkmap.ATKSupportMapFragment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0px"
+                    android:layout_weight="2"/>
+            <ImageView
+                    android:id="@+id/graphView"
+                    android:layout_width="match_parent"
+                    android:layout_height="0px"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"
+                    android:visibility="gone"/>
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                <Button
+                        android:id="@+id/buttonDeleteLine"
+                        android:text="Delete"
+                        android:layout_alignBottom="@id/map"
+                        android:layout_alignRight="@id/map"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@color/lighter_gray"
+                        android:visibility="gone"/>
+                <Button
+                        android:id="@+id/buttonShowProfile"
+                        android:text="Show Profile of Line"
+                        android:layout_alignBottom="@id/map"
+                        android:layout_alignLeft="@id/map"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@color/lighter_gray"
+                        android:visibility="gone"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/dlControls"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:orientation="horizontal"
+                android:visibility="gone">
+                <Button
+                    android:id="@+id/dlButton"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Download"/>
+                <Button
+                    android:id="@+id/dlCancelButton"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Cancel"/>
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <SeekBar
+                        android:id="@+id/sizeBar"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent" />
+                    <SeekBar
+                        android:id="@+id/aspectBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                          android:id="@+id/elevationControls"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="vertical">
+
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:orientation="horizontal"
+                        >
+
+                    <Button
+                            android:id="@+id/buttonMinus"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:text="-" />
+
+                    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                  android:layout_width="wrap_content"
+                                  android:layout_height="wrap_content"
+                                  android:orientation="vertical">
+
+                            <TextView android:id="@+id/text"
+                                      android:layout_width="wrap_content"
+                                      android:layout_height="wrap_content"
+                                      android:text="Water Elevation: 42.0m"
+                                      android:textSize="16dp"
+                                      android:paddingStart="20dp"
+                                      android:paddingTop="5dp"/>
+
+                            <TextView android:id="@+id/text2"
+                                      android:layout_width="wrap_content"
+                                      android:layout_height="wrap_content"
+                                      android:text="Your Elevation: 42.0m"
+                                      android:textSize="16dp"
+                                      android:paddingStart="20dp"/>
+                    </LinearLayout>
+                        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                      android:layout_width="fill_parent"
+                                      android:layout_height="wrap_content"
+                                      android:orientation="horizontal"
+                                      android:gravity="right">
+                            <Button
+                                    android:id="@+id/buttonPlus"
+                                    android:layout_width="40dp"
+                                    android:layout_height="40dp"
+                                    android:text="+" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/bottomBar"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="1dp"
+                    android:paddingRight="1dp"
+                    android:orientation="horizontal"
+                    android:divider="@color/background_dark">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="Min:"
+                        android:id="@+id/minText"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="241.94"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:id="@+id/editMin"
+                        android:inputType="numberDecimal"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="m"
+                        android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+                            <SeekBar
+                                android:id="@+id/seekBar"
+                                android:layout_width="wrap_content"
+                                android:layout_height="40dp"
+                                android:layout_weight="1"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="Max:"
+                        android:id="@+id/maxText"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:text="250.925"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:id="@+id/editMax"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:text="m"
+                        android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+            </LinearLayout>
+
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:paddingLeft="1dp"
+                              android:paddingRight="1dp"
+                              android:orientation="horizontal"
+                              android:divider="@color/background_dark">
+
+<!--
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="fill_parent"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:gravity="center_vertical"
+                            android:text="Min:"
+                            android:id="@+id/minText"/>
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="fill_parent"
+                            android:ems="10"
+                            android:text="241.94"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:id="@+id/editMin"/>
+
+
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="fill_parent"
+                                android:gravity="center_vertical"
+                                android:textAppearance="?android:attr/textAppearanceSmall"
+                                android:text="Max:"
+                                android:id="@+id/maxText"/>
+
+                        <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="fill_parent"
+                                android:text="250.925"
+                                android:ems="10"
+                                android:textAppearance="?android:attr/textAppearanceSmall"
+                                android:id="@+id/editMax"/>
+                                -->
+                </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/markerControls"
+                      android:layout_height="wrap_content"
+                      android:layout_width="fill_parent"
+                      android:orientation="horizontal"
+                      android:visibility="gone">
+            <TextView android:id="@+id/markerBottomText"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:text="Elevation:42.0m\nDistance from you: 50.0m"
+                    />
+        </LinearLayout>
+	</LinearLayout>

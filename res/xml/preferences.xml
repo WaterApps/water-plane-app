@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:robobunny="http://robobunny.com">
+    <com.waterapps.waterplane.SeekBarPreference
+            android:key="pref_key_trans_level"
+            android:title = "Transparency Level"
+            android:defaultValue="50"
+            robobunny:min="10"
+            android:max="100"/>
+    <EditTextPreference
+        android:key="pref_min_elevation"
+        android:title="Minimum Slider Elevation (m)"
+        android:defaultValue="241.94"
+        android:inputType="numberDecimal"
+        android:summary="241.94"/>
+    <EditTextPreference
+            android:key="pref_max_elevation"
+            android:title="Maximum Slider Elevation (m)"
+            android:defaultValue="250.925"
+            android:inputType="numberDecimal"
+            android:summary="250.925"/>
+<!--     <com.waterapps.waterplane.MyDialogPreference -->
+<!--             android:key="pref_reset" -->
+<!--             android:title="Reset Slider Elevations"/> -->
+
+    <Preference
+        android:key="dem_dir"
+        android:title="Choose DEM Folder">
+        <intent
+                android:action="com.filebrowser.DataPathChooserWaterplane"/>
+    </Preference>
+    <com.waterapps.waterplane.GMapsLegalDialog
+            android:key="pref_legal"
+            android:title="Google Maps Legal Notice"/>
+    <com.waterapps.waterplane.LicenceDialog
+            android:key="pref_licence"
+            android:title="Licence"/>
+</PreferenceScreen>
