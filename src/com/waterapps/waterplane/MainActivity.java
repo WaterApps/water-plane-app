@@ -245,24 +245,6 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
 		userMarker = map.addPoint(userPoint);
 		userMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.person), 100, 200);
 		
-//		ATKPointDragListener pointDragListener = null;
-//		map.setOnPointDragListener(pointDragListener);
-//		ATKPointClickListener pointClickListener = null;
-//		map.setOnPointClickListener(pointClickListener);
-		
-//		userMarker = map.addMarker(new MarkerOptions()
-//        .position(map.getCameraPosition().target)
-//        .title("You are here")
-//        .icon(BitmapDescriptorFactory.fromResource(R.drawable.person)));
-
-
-        //set up map ui
-//		uiSettings.setRotateGesturesEnabled(false);
-//		uiSettings.setTiltGesturesEnabled(false);
-//		uiSettings.setZoomControlsEnabled(false);
-		
-//		mapFrag = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-//		demData.setMapFragment(mapFrag);
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setMax(255);
         seekBar.setProgress(128);
