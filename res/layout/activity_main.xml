@@ -5,11 +5,6 @@
             android:orientation="vertical"
             tools:context=".MainActivity"
             android:animateLayoutChanges="true">
-            <View android:id="@+id/focus_thief" 
-                android:layout_width="1dp" 
-                android:layout_height="1dp" 
-                android:focusable="true" 
-                android:focusableInTouchMode="true" />
             <fragment
                     android:id="@+id/map"
                     android:name="com.openatk.openatklib.atkmap.ATKSupportMapFragment"

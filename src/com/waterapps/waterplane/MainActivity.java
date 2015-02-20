@@ -93,7 +93,8 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
 	
     private DemDataWrapper demDataWrapper;
     private static List<ATKPointView> markers;
-    private static ATKPointView selectedMarker;
+    private ATKPointView selectedMarker;
+    private int pointIdCounter = 0;
     private static int mode;
     public static double waterLevel;
     private LocationManager locationManager;
@@ -114,7 +115,7 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
     public static boolean coloring;
     static float alpha;
     public static boolean hasGPS;
-    public static Button buttonDelete;
+    public Button buttonDelete;
     static Button buttonDeleteLine;
     public static float sliderMin;
     public static float sliderMax;
@@ -126,7 +127,6 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
     private boolean firstStart;
     static SeekBar seekBar;
     static TextView waterElevationTextView;
-    private View focusThief;
     static boolean markerAB;
     static TextView appName;
     static Button showButton;
@@ -209,8 +209,6 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
         
         currentlyDrawing = false;
         
-        focusThief = findViewById(R.id.focus_thief);
-        
         editMin = (TextView) findViewById(R.id.editMin);
         editMax = (TextView) findViewById(R.id.editMax);
         
@@ -244,7 +242,7 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
 		ATKPoint userPoint = new ATKPoint("User", where);
 		userMarker = map.addPoint(userPoint);
 		userMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.person), 100, 200);
-		
+
 		seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setMax(255);
         seekBar.setProgress(128);
@@ -333,11 +331,12 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
                     marker = i.next();
                     if (selectedMarker.equals(marker)) {
                     	marker.setTitle("hidden");
-                    	marker.setIcon(updateMarkerTextIcon(marker), 100, 200);
+                    	marker.setIcon(updateMarkerTextIcon(marker, marker.equals(selectedMarker)), 100, 200);
                     	marker.update();
                         break;
                     }
                 }
+
                 showHiddenMarkerAB();
             }
         });
@@ -353,7 +352,7 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
                     marker = i.next();
                     if (selectedMarker.equals(marker)) {
                         marker.setTitle("visible");
-                        marker.setIcon(updateMarkerTextIcon(marker), 100, 200);
+                        marker.setIcon(updateMarkerTextIcon(marker, marker.equals(selectedMarker)), 100, 200);
                         marker.update();
                         break;
                     }
@@ -586,7 +585,6 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
 		super.onResume();
 //		getPreferenceScreen().getSharedPreferences()
 //        	.registerOnSharedPreferenceChangeListener(this);
-		Log.w("onresume", "ya");
 		if (demDataWrapper != null) {
 			demDataWrapper.updateColors(waterLevel, coloring, transparency, alpha);
 		}
@@ -787,7 +785,7 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
   * Takes a new water elevation and updates the bitmap to reflect the change
   * @param level New water level
   */
- public static void setWaterLevel(double level, DemDataWrapper demDataWrapper) {
+ public void setWaterLevel(double level, DemDataWrapper demDataWrapper) {
      seekBar.setProgress((int)(255.0*(level-MainActivity.sliderMin)/(MainActivity.sliderMax-MainActivity.sliderMin)));
      demDataWrapper.updateColors(level, coloring, transparency, alpha);
  }
@@ -877,29 +875,7 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
     			}
     		}
 
-//    public void onFileRead(DemDataWrapper demDataWrapper) {
-//        //if user is outside of demData, turn off location tracking
-//        if(!demDataWrapper.getBounds().contains(userLocation)) {
-//            drag_mode = true;
-//            SharedPreferences.Editor edit = prefs.edit();
-//            edit.putBoolean("drag_mode", drag_mode);
-//            edit.commit();
-//            userLocation = demDataWrapper.getCenter();
-//            userMarker.setPosition(userLocation);
-//            userMarker.setDraggable(true);
-//            MarkerHandler.setText();
-//            Toast toast = Toast.makeText(getContext(), "Press and hold the location marker to drag.", Toast.LENGTH_LONG);
-//            toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 100);
-//            toast.show();
-//        }
-//        demDataWrapper.updateColors(waterLevelMeters, coloring, transparency, alpha);
-//        updateSlider();
-//        map.animateCamera(CameraUpdateFactory.newLatLngBounds(getDemData().getBounds(), 50));
-//        removeDemOutline(new GeoRectangle(raster.getBounds()).center());
-//        removeMarker(raster.getBounds());
-//    }
-
-    public static void hideElevationControls() {
+    public void hideElevationControls() {
         elevationControls.setVisibility(View.GONE);
     }
 
@@ -926,7 +902,7 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
     /**
      * Displays the action bar for when a marker is selected and its text is visible
      */
-    public static void showMarkerAB() {
+    public void showMarkerAB() {
         buttonDelete.setVisibility(View.VISIBLE);
         appName.setVisibility(View.GONE);
         hideButton.setVisibility(View.VISIBLE);
@@ -946,7 +922,7 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
     /**
      * Displays the action bar for when no marker is selected
      */
-    public static void showNormalAB() {
+    public void showNormalAB() {
         buttonDelete.setVisibility(View.GONE);
         appName.setVisibility(View.VISIBLE);
         hideButton.setVisibility(View.GONE);
@@ -1087,7 +1063,7 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
 
         while (i.hasNext()) {
              marker = i.next();
-             marker.setIcon(updateMarkerTextIcon(marker),100,200);
+             marker.setIcon(updateMarkerTextIcon(marker, marker.equals(selectedMarker)),100,200);
              marker.update();
         }
     }
@@ -1106,7 +1082,7 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
     /**
      * Updates the marker graphics.
      */
-	public BitmapDescriptor updateMarkerTextIcon(ATKPointView pointView) {
+	public BitmapDescriptor updateMarkerTextIcon(ATKPointView pointView, Boolean isSelectedMarker) {
         try {
             MapsInitializer.initialize(this);
         } catch (NullPointerException e) {
@@ -1114,18 +1090,15 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
         }
         if (pointView.isVisible()) {
             double elevationDouble = getDemData().getElevationFromLatLng(pointView.getAtkPoint().position);
-//            String title;
             String userDelta;
             String waterDelta;
 
             if (elevationDouble == 0.0) {
-//                title = "";
                 userDelta = "available";
                 waterDelta = "No elevation data";
             }
             else {
                 String temp = new DecimalFormat("#.#").format(Math.abs(userElevation-elevationDouble));
-//                title = "";
                 if (userElevation-elevationDouble < 0.0) {
                     userDelta = temp+"m above you";
                 } else {
@@ -1140,29 +1113,27 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
                 }
             }
 
-            Bitmap bitmap = textToBitmap(waterDelta + "\n" + userDelta, pointView.equals(selectedMarker));
+            Bitmap bitmap = textToBitmap(waterDelta + "\n" + userDelta, isSelectedMarker);
             BitmapDescriptor icon;
 
-            if (pointView != null) {
-            	if (pointView.getTitle().equals("visible")) {
-                    icon = BitmapDescriptorFactory.fromBitmap(bitmap);
-                }
-                else {
-                    if (pointView.equals(selectedMarker)) {
-                        icon = BitmapDescriptorFactory.fromResource(drawable.arrow_selected);
-                    }
-                    else {
-                        icon = BitmapDescriptorFactory.fromResource(drawable.arrow);
-                    }
-                }
-//                try {
-//                	pointView.setIcon(icon, 100, 200);
-//                	pointView.update();
-//                } catch (java.lang.IllegalArgumentException e) {
-//                    System.out.println(e);
-//                }
-            	return icon;
+            if (pointView.getTitle().equals("visible")) {
+            	icon = BitmapDescriptorFactory.fromBitmap(bitmap);
             }
+            else {
+            	if (isSelectedMarker) {
+            		icon = BitmapDescriptorFactory.fromResource(drawable.arrow_selected);
+            	}
+            	else {
+            		icon = BitmapDescriptorFactory.fromResource(drawable.arrow);
+            	}
+            }
+            try {
+            	pointView.setIcon(icon, 100, 200);
+            	pointView.update();
+            } catch (java.lang.IllegalArgumentException e) {
+            	System.out.println(e);
+            }
+            return icon;
         }
         return null;
 	}
@@ -1313,33 +1284,32 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
         }
 
         //handle markers
-		selectedMarker = null;
-        showNormalAB();
 		switch(mode) {
 			case ADD_MODE:
-//				CustomMarker.setWaterElevation(waterLevel);
-				ATKPoint atkPoint = new ATKPoint("custom", point);
+				Log.w("added to map", "already");
+				pointIdCounter++;
+				String markerId = "Custom" + String.valueOf(pointIdCounter);
+				ATKPoint atkPoint = new ATKPoint(markerId, point);
 				ATKPointView pointView = map.addPoint(atkPoint);
 				pointView.setAnchor(0.5f, 1.0f);
-				pointView.setOnDragListener(this);
-				pointView.setOnClickListener(this);
-				pointView.setDraggable(true);
+//				pointView.setDraggable(true);
 				pointView.setTitle("visible");
 				pointView.hideTitle();
-				pointView.setIcon(updateMarkerTextIcon(pointView),100, 200);
+				pointView.setIcon(updateMarkerTextIcon(pointView, true), 100, 200);
+				pointView.setOnDragListener(this);
+				pointView.setOnClickListener(this);
+				pointView.setSuperDraggable(true);
 				pointView.update();
-//				CustomMarker marker = new CustomMarker(pointView);
-//				marker.updateMarker();
-//				markers.add(marker);
 				markers.add(pointView);
-				//updateMarkers();
+		        selectMarker(pointView);
 				mode = 0;
-                Toast toast = Toast.makeText(this, "Press and hold on the marker to move it.", Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
-                toast.show();
+//                Toast toast = Toast.makeText(this, "Touch the middle of the marker to move it.", Toast.LENGTH_LONG);
+//                toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+//                toast.show();
 				break;
 				
 			default:
+		        selectMarker(null);
                 showNormalAB();
                 buttonDeleteLine.setVisibility(View.GONE);
                 buttonShowProfile.setVisibility(View.GONE);
@@ -1364,61 +1334,78 @@ public class MainActivity extends FragmentActivity implements ATKMapClickListene
 
         //if this is a marker that identifies a line, set up appropriate UI        
         if(clickedPointView.getTitle().equals("Line")) {
-            MainActivity.buttonDeleteLine.setVisibility(View.VISIBLE);
-            MainActivity.hideElevationControls();
+            buttonDeleteLine.setVisibility(View.VISIBLE);
+            hideElevationControls();
             setSelectedLine(clickedPointView);
             MainActivity.buttonShowProfile.setVisibility(View.VISIBLE);
         }
         
         if (clickedPointView.getTitle().equals("visible") | (clickedPointView.getTitle().equals("hidden"))) {
-            selectedMarker = clickedPointView;
-//            CustomMarker.setSelected(pointView);
+        	selectMarker(clickedPointView);
             
             //if the marker text is visible
             if (clickedPointView.getTitle().equals("visible")) {
-                MainActivity.showMarkerAB();    
+                showMarkerAB();    
             }
             //if the marker text is hidden
             if (clickedPointView.getTitle().equals("hidden")) {
                 showHiddenMarkerAB();
             }
         }
-//
-//        updateMarkers();
-//        clickedPointView.hideTitle();
-//        clickedPointView.update();
         return true;
+	}
+	
+	public void selectMarker(ATKPointView pointView) {
+		// Deselect currently selected marker
+		if (selectedMarker != null) {
+    		selectedMarker.setIcon(updateMarkerTextIcon(selectedMarker, false), 100, 200);
+        	selectedMarker.update();
+    	}
+		// Select marker
+		if (pointView != null) {
+			pointView.setIcon(updateMarkerTextIcon(pointView, true), 100, 200);
+        	pointView.update();
+        	selectedMarker = pointView;
+    		if (pointView.getTitle().equals("visible")) {
+                showMarkerAB();    
+            }
+            //if the marker text is hidden
+            if (pointView.getTitle().equals("hidden")) {
+                showHiddenMarkerAB();
+            }
+		}
 	}
 
 	@Override
 	public boolean onPointDrag(ATKPointView pointView) {
-//		Log.w("point dragged", pointView.getAtkPoint().position.toString());
-//		//this is for the user location marker
-//        if(pointView.getAtkPoint().id.equals("User")) {
-////            userMarker.getAtkPoint().position = pointView.getAtkPoint().position;
-//            updateSliderUserText();
-//            updateMarkers();
-//        }
-//        //for when 'location following' mode is set
-//        if (MainActivity.following) {
-//            MainActivity.setWaterLevel(demDataWrapper.getDemData().getElevationFromLatLng(userMarker.getAtkPoint().position), demDataWrapper);
-//        }
-//        Log.w("onpointdrag", userMarker.getAtkPoint().position.toString());
-////    	double elevationDouble = demDataWrapper.getDemData().getElevationFromLatLng(userMarker.getAtkPoint().position);
-//    	userElevation = demDataWrapper.getDemData().getElevationFromLatLng(userMarker.getAtkPoint().position);
-////        CustomMarker.setUserElevation(elevationDouble);
+		//this is for the user location marker
+        if(pointView.getAtkPoint().id.equals("User")) {
+            updateSliderUserText();
+            updateMarkers();
+            userElevation = demDataWrapper.getDemData().getElevationFromLatLng(userMarker.getAtkPoint().position);
+        }
+        //for when 'location following' mode is set
+        if (following) {
+            setWaterLevel(demDataWrapper.getDemData().getElevationFromLatLng(userMarker.getAtkPoint().position), demDataWrapper);
+        }
+        //TODO
+        if (pointView.getAtkPoint().id.toString().contains("Custom")) {
+        	pointView.setIcon(updateMarkerTextIcon(pointView, true), 100, 200);
+        	pointView.update();
+        }
         return false;
 	}
 
 	@Override
 	public boolean onPointDragEnd(ATKPointView pointView) {
-		updateMarkers();
 		return false;
 	}
 
 	@Override
 	public boolean onPointDragStart(ATKPointView pointView) {
-		// TODO Auto-generated method stub
+		if (pointView.getAtkPoint().id.toString().contains("Custom")) {
+			selectMarker(pointView);
+        }
 		return false;
 	}
 
