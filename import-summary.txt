@@ -1,0 +1,151 @@
+ECLIPSE ANDROID PROJECT IMPORT SUMMARY
+======================================
+
+Ignored Files:
+--------------
+The following files were *not* copied into the new Gradle project; you
+should evaluate whether these are still needed in your project and if
+so manually move them:
+
+* .DS_Store
+* .idea/
+* .idea/compiler.xml
+* .idea/copyright/
+* .idea/copyright/profiles_settings.xml
+* .idea/encodings.xml
+* .idea/inspectionProfiles/
+* .idea/inspectionProfiles/Project_Default.xml
+* .idea/libraries/
+* .idea/libraries/libs.xml
+* .idea/misc.xml
+* .idea/modules.xml
+* .idea/vcs.xml
+* .idea/water-plane-app.iml
+* .idea/workspace.xml
+* README.md
+* doc/
+* doc/.DS_Store
+* doc/allclasses-frame.html
+* doc/allclasses-noframe.html
+* doc/com/
+* doc/com/filebrowser/
+* doc/com/filebrowser/DataFileChooser.DirectoryAdapter.html
+* doc/com/filebrowser/DataFileChooser.DirectoryInfo.html
+* doc/com/filebrowser/DataFileChooser.html
+* doc/com/filebrowser/DataPathChooser.DirectoryAdapter.html
+* doc/com/filebrowser/DataPathChooser.DirectoryInfo.html
+* doc/com/filebrowser/DataPathChooser.html
+* doc/com/filebrowser/package-frame.html
+* doc/com/filebrowser/package-summary.html
+* doc/com/filebrowser/package-tree.html
+* doc/com/ibm/
+* doc/com/ibm/util/
+* doc/com/ibm/util/CoordinateConversion.html
+* doc/com/ibm/util/package-frame.html
+* doc/com/ibm/util/package-summary.html
+* doc/com/ibm/util/package-tree.html
+* doc/com/tiffdecoder/
+* doc/com/tiffdecoder/TiffDecoder.html
+* doc/com/tiffdecoder/package-frame.html
+* doc/com/tiffdecoder/package-summary.html
+* doc/com/tiffdecoder/package-tree.html
+* doc/com/waterapps/
+* doc/com/waterapps/lib/
+* doc/com/waterapps/lib/CustomMarker.html
+* doc/com/waterapps/lib/DatabaseHandler.html
+* doc/com/waterapps/lib/DemData.html
+* doc/com/waterapps/lib/DemFile.html
+* doc/com/waterapps/lib/MyMapFragment.html
+* doc/com/waterapps/lib/ReadDemData.html
+* doc/com/waterapps/lib/ReadDemDataTask.html
+* doc/com/waterapps/lib/ReadGeoTiff.html
+* doc/com/waterapps/lib/ReadGeoTiffMetadata.html
+* doc/com/waterapps/lib/TouchableWrapper.html
+* doc/com/waterapps/lib/package-frame.html
+* doc/com/waterapps/lib/package-summary.html
+* doc/com/waterapps/lib/package-tree.html
+* doc/com/waterapps/waterplane/
+* doc/com/waterapps/waterplane/BuildConfig.html
+* doc/com/waterapps/waterplane/GMapsLegalDialog.html
+* doc/com/waterapps/waterplane/HelpActivity.html
+* doc/com/waterapps/waterplane/IntroActivity.html
+* doc/com/waterapps/waterplane/LicenceDialog.html
+* doc/com/waterapps/waterplane/LocationHandler.html
+* doc/com/waterapps/waterplane/MainActivity.html
+* doc/com/waterapps/waterplane/Manifest.html
+* doc/com/waterapps/waterplane/MarkerHandler.html
+* doc/com/waterapps/waterplane/MyDialogPreference.html
+* doc/com/waterapps/waterplane/R.html
+* doc/com/waterapps/waterplane/SeekBarPreference.html
+* doc/com/waterapps/waterplane/SettingsActivity.html
+* doc/com/waterapps/waterplane/package-frame.html
+* doc/com/waterapps/waterplane/package-summary.html
+* doc/com/waterapps/waterplane/package-tree.html
+* doc/constant-values.html
+* doc/deprecated-list.html
+* doc/help-doc.html
+* doc/index-files/
+* doc/index-files/index-1.html
+* doc/index-files/index-10.html
+* doc/index-files/index-11.html
+* doc/index-files/index-12.html
+* doc/index-files/index-13.html
+* doc/index-files/index-14.html
+* doc/index-files/index-15.html
+* doc/index-files/index-16.html
+* doc/index-files/index-17.html
+* doc/index-files/index-18.html
+* doc/index-files/index-2.html
+* doc/index-files/index-3.html
+* doc/index-files/index-4.html
+* doc/index-files/index-5.html
+* doc/index-files/index-6.html
+* doc/index-files/index-7.html
+* doc/index-files/index-8.html
+* doc/index-files/index-9.html
+* doc/index.html
+* doc/overview-frame.html
+* doc/overview-summary.html
+* doc/overview-tree.html
+* doc/package-list
+* doc/resources/
+* doc/resources/background.gif
+* doc/resources/tab.gif
+* doc/resources/titlebar.gif
+* doc/resources/titlebar_end.gif
+* doc/stylesheet.css
+* doc/wiki/
+* doc/wiki/git.PNG
+* doc/wiki/sdk.png
+* proguard-project.txt
+
+Moved Files:
+------------
+Android Gradle projects use a different directory structure than ADT
+Eclipse projects. Here's how the projects were restructured:
+
+* AndroidManifest.xml => app/src/main/AndroidManifest.xml
+* assets/ => app/src/main/assets/
+* jni/ => app/src/main/jni/
+* libs/basic-http-client-android-0.88.jar => app/libs/basic-http-client-android-0.88.jar
+* libs/jtar-1.1.jar => app/libs/jtar-1.1.jar
+* res/ => app/src/main/res/
+* src/ => app/src/main/java/
+* src/.DS_Store => app/src/main/resources/.DS_Store
+* src/android/.DS_Store => app/src/main/resources/android/.DS_Store
+* src/android/widget/.DS_Store => app/src/main/resources/android/widget/.DS_Store
+
+Next Steps:
+-----------
+You can now build the project. The Gradle project needs network
+connectivity to download dependencies.
+
+Bugs:
+-----
+If for some reason your project does not build, and you determine that
+it is due to a bug or limitation of the Eclipse to Gradle importer,
+please file a bug at http://b.android.com with category
+Component-Tools.
+
+(This import summary is for your information only, and can be deleted
+after import once you are satisfied with the results.)

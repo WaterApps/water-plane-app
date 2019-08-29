@@ -1,0 +1,4 @@
+#Wed Aug 28 14:08:13 EDT 2019
+base.0=/Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/build/intermediates/transforms/dexMerger/debug/6
+path.0=classes.dex
+renamed.0=classes.dex

@@ -1,0 +1,367 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:2:1-86:12
+INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:2:1-86:12
+INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:2:1-86:12
+INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:2:1-86:12
+MERGED from [:WmacLib] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/WmacLib/build/intermediates/library_manifest/debug/AndroidManifest.xml:2:1-18:12
+MERGED from [:OpenATKLib2] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/OpenATKLib2/build/intermediates/library_manifest/debug/AndroidManifest.xml:2:1-18:12
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:17:1-38:12
+MERGED from [com.google.android.gms:play-services-location:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/113bd999f0c3b6a453e7dba82739964e/AndroidManifest.xml:2:1-9:12
+MERGED from [com.google.android.gms:play-services-base:17.1.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ba4575b3149b348e4c2ac4187b8e5d8b/AndroidManifest.xml:17:1-29:12
+MERGED from [com.google.android.gms:play-services-tasks:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/d8855aa1e4af58269630e4ec575056ae/AndroidManifest.xml:2:1-9:12
+MERGED from [com.google.android.gms:play-services-places-placereport:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/9c25386377039bf2f7a36ea3a16b2986/AndroidManifest.xml:17:1-24:12
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/b3478acc9a4c25554af4745b9ecdb385/AndroidManifest.xml:17:1-28:12
+MERGED from [androidx.constraintlayout:constraintlayout:2.0.0-beta2] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ad8bef2c9453436179791d3c7fd2757d/AndroidManifest.xml:2:1-11:12
+MERGED from [com.google.android.material:material:1.1.0-alpha09] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/bcbf214f4fca4c4fd8092b6056b6e262/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.appcompat:appcompat:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/c27211e18fffcced1316a7e555cb6ce9/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.legacy:legacy-support-v4:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/549b93a42a7c27913d5f70a4acc3852b/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager2:viewpager2:1.0.0-beta02] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/88b0fa633e32963c66a79472ac1386f7/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.fragment:fragment:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/d5fe41ffe297c9b304898b8cea6ca2c3/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/caf0bd4dc80e49b0b4822a99bddcd440/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/314b5c3d5145cc4a95b200c0cfd88944/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/9f8102c3a60f5bfc5d10c3fd89bcd728/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/833621e1a6948cdbbf940d7157fdced0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.media:media:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/236edf4e76e58f4c65172ae3cb3c647e/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/0f312c58800193adae30e7cbb01365b1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0-beta01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/e1b2dbda02e3cd04c57fca2389f81c3e/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.transition:transition:1.0.1] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/577a76392539b119d3ec0fd634bcb0b6/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/0ea1b3a44ec0842e8f792bf52034f644/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/c9cd266356a4c5e3410f02de5fce2a4b/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/447e0cb03ba342bedd47d15a610cb3d2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/e012959b25b9de04cb5ed2f98d46a275/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.recyclerview:recyclerview:1.1.0-beta01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ebb3c456bb32932ff5431f9e63341687/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.customview:customview:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/75c80c67c454e70437643f93879af9eb/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ffd49d6c33198aac71f5defda580625e/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/404d4b11aa8f683c4662c57e42a57511/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.activity:activity:1.0.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/82516e488a4633fd844257023c18257b/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.core:core:1.1.0-rc02] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/fd1b8f9d1cc31c2bac344594368b2a85/AndroidManifest.xml:17:1-26:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/f8d65216aae0f41b349b78db92af61d9/AndroidManifest.xml:17:1-27:12
+MERGED from [:gdal-release] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/8a81883e6a5232a6270c8c7640ca9d1e/AndroidManifest.xml:2:1-11:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/658eb09cb486e9286562ab0ea6c10434/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.cardview:cardview:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/623fdd1943f08b457138afa5e4d00ba8/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/a59f495f76ada772d90c3b8663a9556b/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/e41dc05b226c807357205a4028b3b4ea/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/95253c775233845dd69af2b1594811d0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.print:print:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/7b1e464784e9181b1179079a6516b10c/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/b24fc2ffa6c4a5b2d1a1c2801c4ed608/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/1c63a04dd02d1ef89fd82c751d8e5c65/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.arch.core:core-runtime:2.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/287a24781c284f8aaf53739b75b06913/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/d2a012abc89f26ff8d0e9fa744d54e55/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/30a1398152f6c6b99774a1ea7ade0052/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.savedstate:savedstate:1.0.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/2b1de75199662304ba2d3a0712563893/AndroidManifest.xml:17:1-24:12
+INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:2:1-86:12
+INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:2:1-86:12
+INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:2:1-86:12
+	package
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:2:11-45
+		INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+	android:versionName
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:6:5-32
+		INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:4:5-51
+	xmlns:android
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:3:2-60
+	android:versionCode
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:5:5-29
+		INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+uses-feature#0x00020000
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:9:5-11:30
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:26:5-28:35
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:26:5-28:35
+	android:glEsVersion
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:10:5-37
+	android:required
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:11:5-28
+permission#com.waterapps.waterplane.permission.MAPS_RECEIVE
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:13:5-15:46
+	android:protectionLevel
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:15:9-44
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:14:9-72
+uses-permission#com.waterapps.waterplane.permission.MAPS_RECEIVE
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:16:9-91
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:16:26-89
+uses-permission#android.permission.INTERNET
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:17:9-70
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:24:5-67
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:24:5-67
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:17:26-68
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:18:9-82
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:23:5-79
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:23:5-79
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:18:26-80
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:19:3-78
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:19:20-76
+uses-permission#com.google.android.providers.gsf.permission.READ_GSERVICES
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:20:3-95
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:20:20-93
+uses-permission#android.permission.ACCESS_COARSE_LOCATION
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:21:3-78
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:21:20-76
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:22:3-76
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:22:20-74
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:23:3-78
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:23:20-75
+application
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:25:5-84:19
+MERGED from [:WmacLib] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/WmacLib/build/intermediates/library_manifest/debug/AndroidManifest.xml:11:5-16:19
+MERGED from [:WmacLib] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/WmacLib/build/intermediates/library_manifest/debug/AndroidManifest.xml:11:5-16:19
+MERGED from [:OpenATKLib2] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/OpenATKLib2/build/intermediates/library_manifest/debug/AndroidManifest.xml:11:5-16:19
+MERGED from [:OpenATKLib2] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/OpenATKLib2/build/intermediates/library_manifest/debug/AndroidManifest.xml:11:5-16:19
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:30:5-36:19
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:30:5-36:19
+MERGED from [com.google.android.gms:play-services-location:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/113bd999f0c3b6a453e7dba82739964e/AndroidManifest.xml:7:5-20
+MERGED from [com.google.android.gms:play-services-location:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/113bd999f0c3b6a453e7dba82739964e/AndroidManifest.xml:7:5-20
+MERGED from [com.google.android.gms:play-services-base:17.1.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ba4575b3149b348e4c2ac4187b8e5d8b/AndroidManifest.xml:22:5-27:19
+MERGED from [com.google.android.gms:play-services-base:17.1.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ba4575b3149b348e4c2ac4187b8e5d8b/AndroidManifest.xml:22:5-27:19
+MERGED from [com.google.android.gms:play-services-tasks:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/d8855aa1e4af58269630e4ec575056ae/AndroidManifest.xml:7:5-20
+MERGED from [com.google.android.gms:play-services-tasks:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/d8855aa1e4af58269630e4ec575056ae/AndroidManifest.xml:7:5-20
+MERGED from [com.google.android.gms:play-services-places-placereport:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/9c25386377039bf2f7a36ea3a16b2986/AndroidManifest.xml:22:5-20
+MERGED from [com.google.android.gms:play-services-places-placereport:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/9c25386377039bf2f7a36ea3a16b2986/AndroidManifest.xml:22:5-20
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/b3478acc9a4c25554af4745b9ecdb385/AndroidManifest.xml:22:5-26:19
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/b3478acc9a4c25554af4745b9ecdb385/AndroidManifest.xml:22:5-26:19
+MERGED from [androidx.constraintlayout:constraintlayout:2.0.0-beta2] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ad8bef2c9453436179791d3c7fd2757d/AndroidManifest.xml:9:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:2.0.0-beta2] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ad8bef2c9453436179791d3c7fd2757d/AndroidManifest.xml:9:5-20
+MERGED from [com.google.android.material:material:1.1.0-alpha09] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/bcbf214f4fca4c4fd8092b6056b6e262/AndroidManifest.xml:22:5-20
+MERGED from [com.google.android.material:material:1.1.0-alpha09] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/bcbf214f4fca4c4fd8092b6056b6e262/AndroidManifest.xml:22:5-20
+MERGED from [androidx.core:core:1.1.0-rc02] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/fd1b8f9d1cc31c2bac344594368b2a85/AndroidManifest.xml:24:5-89
+MERGED from [androidx.core:core:1.1.0-rc02] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/fd1b8f9d1cc31c2bac344594368b2a85/AndroidManifest.xml:24:5-89
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/f8d65216aae0f41b349b78db92af61d9/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/f8d65216aae0f41b349b78db92af61d9/AndroidManifest.xml:24:5-25:19
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.1.0-rc02] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/fd1b8f9d1cc31c2bac344594368b2a85/AndroidManifest.xml:24:18-86
+	android:label
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:30:9-41
+	android:largeHeap
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:28:9-33
+	android:icon
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:29:9-45
+		REJECTED from [:WmacLib] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/WmacLib/build/intermediates/library_manifest/debug/AndroidManifest.xml:13:9-45
+		REJECTED from [:OpenATKLib2] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/OpenATKLib2/build/intermediates/library_manifest/debug/AndroidManifest.xml:13:9-45
+	android:allowBackup
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:27:9-35
+	android:theme
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:31:9-40
+	tools:replace
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:26:9-37
+meta-data#com.google.android.gms.version
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:33:9-122
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/b3478acc9a4c25554af4745b9ecdb385/AndroidManifest.xml:23:9-25:69
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/b3478acc9a4c25554af4745b9ecdb385/AndroidManifest.xml:23:9-25:69
+	android:value
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:33:66-119
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:33:20-65
+activity#com.waterapps.waterplane.MainActivity
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:34:9-43:20
+	android:label
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:36:13-45
+	android:configChanges
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:37:13-74
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:35:13-65
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:39:13-42:29
+action#android.intent.action.MAIN
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:40:17-69
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:40:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:41:17-77
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:41:27-74
+activity#com.filebrowser.DataPathChooser
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:44:9-51:20
+	android:label
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:46:17-49
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:45:17-63
+intent-filter#action:name:com.filebrowser.DataPathChooserWaterplane+category:name:android.intent.category.DEFAULT
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:47:13-50:29
+action#com.filebrowser.DataPathChooserWaterplane
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:48:17-83
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:48:25-81
+category#android.intent.category.DEFAULT
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:49:17-76
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:49:27-73
+activity#com.filebrowser.DataFileChooser
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:52:9-59:20
+	android:label
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:54:17-49
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:53:17-63
+intent-filter#action:name:com.filebrowser.DataFileChooserWaterplane+category:name:android.intent.category.DEFAULT
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:55:13-58:29
+action#com.filebrowser.DataFileChooserWaterplane
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:56:17-83
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:56:25-81
+activity#com.waterapps.waterplane.SettingsActivity
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:60:9-63:20
+	android:label
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:62:17-54
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:61:17-73
+activity#com.waterapps.waterplane.IntroActivity
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:64:9-67:20
+	android:label
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:66:17-38
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:65:17-70
+activity#com.waterapps.waterplane.HelpActivity
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:68:9-75:20
+	android:label
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:70:17-48
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:69:17-69
+intent-filter#action:name:com.waterapps.waterplane.HelpActivity+category:name:android.intent.category.DEFAULT
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:71:13-74:29
+action#com.waterapps.waterplane.HelpActivity
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:72:17-80
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:72:25-77
+meta-data#com.google.android.maps.v2.API_KEY
+ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:77:10-79:71
+	android:value
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:79:14-69
+	android:name
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml:78:8-57
+uses-sdk
+INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+MERGED from [:WmacLib] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/WmacLib/build/intermediates/library_manifest/debug/AndroidManifest.xml:7:5-9:41
+MERGED from [:WmacLib] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/WmacLib/build/intermediates/library_manifest/debug/AndroidManifest.xml:7:5-9:41
+MERGED from [:OpenATKLib2] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/OpenATKLib2/build/intermediates/library_manifest/debug/AndroidManifest.xml:7:5-9:41
+MERGED from [:OpenATKLib2] /Users/Samuel/AndroidStudioDoOvers/water-plane-app/OpenATKLib2/build/intermediates/library_manifest/debug/AndroidManifest.xml:7:5-9:41
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-location:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/113bd999f0c3b6a453e7dba82739964e/AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-location:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/113bd999f0c3b6a453e7dba82739964e/AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-base:17.1.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ba4575b3149b348e4c2ac4187b8e5d8b/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-base:17.1.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ba4575b3149b348e4c2ac4187b8e5d8b/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-tasks:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/d8855aa1e4af58269630e4ec575056ae/AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-tasks:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/d8855aa1e4af58269630e4ec575056ae/AndroidManifest.xml:5:5-44
+MERGED from [com.google.android.gms:play-services-places-placereport:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/9c25386377039bf2f7a36ea3a16b2986/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-places-placereport:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/9c25386377039bf2f7a36ea3a16b2986/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/b3478acc9a4c25554af4745b9ecdb385/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.gms:play-services-basement:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/b3478acc9a4c25554af4745b9ecdb385/AndroidManifest.xml:20:5-44
+MERGED from [androidx.constraintlayout:constraintlayout:2.0.0-beta2] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ad8bef2c9453436179791d3c7fd2757d/AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.constraintlayout:constraintlayout:2.0.0-beta2] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ad8bef2c9453436179791d3c7fd2757d/AndroidManifest.xml:5:5-7:41
+MERGED from [com.google.android.material:material:1.1.0-alpha09] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/bcbf214f4fca4c4fd8092b6056b6e262/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.material:material:1.1.0-alpha09] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/bcbf214f4fca4c4fd8092b6056b6e262/AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/c27211e18fffcced1316a7e555cb6ce9/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/c27211e18fffcced1316a7e555cb6ce9/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.legacy:legacy-support-v4:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/549b93a42a7c27913d5f70a4acc3852b/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-v4:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/549b93a42a7c27913d5f70a4acc3852b/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager2:viewpager2:1.0.0-beta02] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/88b0fa633e32963c66a79472ac1386f7/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.viewpager2:viewpager2:1.0.0-beta02] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/88b0fa633e32963c66a79472ac1386f7/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/d5fe41ffe297c9b304898b8cea6ca2c3/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/d5fe41ffe297c9b304898b8cea6ca2c3/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/caf0bd4dc80e49b0b4822a99bddcd440/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/caf0bd4dc80e49b0b4822a99bddcd440/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/314b5c3d5145cc4a95b200c0cfd88944/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/314b5c3d5145cc4a95b200c0cfd88944/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/9f8102c3a60f5bfc5d10c3fd89bcd728/AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/9f8102c3a60f5bfc5d10c3fd89bcd728/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/833621e1a6948cdbbf940d7157fdced0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/833621e1a6948cdbbf940d7157fdced0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media:media:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/236edf4e76e58f4c65172ae3cb3c647e/AndroidManifest.xml:20:5-44
+MERGED from [androidx.media:media:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/236edf4e76e58f4c65172ae3cb3c647e/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/0f312c58800193adae30e7cbb01365b1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/0f312c58800193adae30e7cbb01365b1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0-beta01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/e1b2dbda02e3cd04c57fca2389f81c3e/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0-beta01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/e1b2dbda02e3cd04c57fca2389f81c3e/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.0.1] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/577a76392539b119d3ec0fd634bcb0b6/AndroidManifest.xml:20:5-44
+MERGED from [androidx.transition:transition:1.0.1] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/577a76392539b119d3ec0fd634bcb0b6/AndroidManifest.xml:20:5-44
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/0ea1b3a44ec0842e8f792bf52034f644/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/0ea1b3a44ec0842e8f792bf52034f644/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/c9cd266356a4c5e3410f02de5fce2a4b/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/c9cd266356a4c5e3410f02de5fce2a4b/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/447e0cb03ba342bedd47d15a610cb3d2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/447e0cb03ba342bedd47d15a610cb3d2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/e012959b25b9de04cb5ed2f98d46a275/AndroidManifest.xml:20:5-44
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/e012959b25b9de04cb5ed2f98d46a275/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.1.0-beta01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ebb3c456bb32932ff5431f9e63341687/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.recyclerview:recyclerview:1.1.0-beta01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ebb3c456bb32932ff5431f9e63341687/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/75c80c67c454e70437643f93879af9eb/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/75c80c67c454e70437643f93879af9eb/AndroidManifest.xml:20:5-44
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ffd49d6c33198aac71f5defda580625e/AndroidManifest.xml:20:5-44
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ffd49d6c33198aac71f5defda580625e/AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/404d4b11aa8f683c4662c57e42a57511/AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/404d4b11aa8f683c4662c57e42a57511/AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.0.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/82516e488a4633fd844257023c18257b/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.activity:activity:1.0.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/82516e488a4633fd844257023c18257b/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.core:core:1.1.0-rc02] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/fd1b8f9d1cc31c2bac344594368b2a85/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.core:core:1.1.0-rc02] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/fd1b8f9d1cc31c2bac344594368b2a85/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/f8d65216aae0f41b349b78db92af61d9/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/f8d65216aae0f41b349b78db92af61d9/AndroidManifest.xml:20:5-22:41
+MERGED from [:gdal-release] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/8a81883e6a5232a6270c8c7640ca9d1e/AndroidManifest.xml:7:5-9:41
+MERGED from [:gdal-release] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/8a81883e6a5232a6270c8c7640ca9d1e/AndroidManifest.xml:7:5-9:41
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/658eb09cb486e9286562ab0ea6c10434/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/658eb09cb486e9286562ab0ea6c10434/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/623fdd1943f08b457138afa5e4d00ba8/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/623fdd1943f08b457138afa5e4d00ba8/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/a59f495f76ada772d90c3b8663a9556b/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/a59f495f76ada772d90c3b8663a9556b/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/e41dc05b226c807357205a4028b3b4ea/AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/e41dc05b226c807357205a4028b3b4ea/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/95253c775233845dd69af2b1594811d0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/95253c775233845dd69af2b1594811d0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/7b1e464784e9181b1179079a6516b10c/AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/7b1e464784e9181b1179079a6516b10c/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/b24fc2ffa6c4a5b2d1a1c2801c4ed608/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/b24fc2ffa6c4a5b2d1a1c2801c4ed608/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/1c63a04dd02d1ef89fd82c751d8e5c65/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/1c63a04dd02d1ef89fd82c751d8e5c65/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/287a24781c284f8aaf53739b75b06913/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/287a24781c284f8aaf53739b75b06913/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/d2a012abc89f26ff8d0e9fa744d54e55/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/d2a012abc89f26ff8d0e9fa744d54e55/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/30a1398152f6c6b99774a1ea7ade0052/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.1.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/30a1398152f6c6b99774a1ea7ade0052/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.0.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/2b1de75199662304ba2d3a0712563893/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.savedstate:savedstate:1.0.0-rc01] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/2b1de75199662304ba2d3a0712563893/AndroidManifest.xml:20:5-22:41
+INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+		ADDED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+		INJECTED from /Users/Samuel/AndroidStudioDoOvers/water-plane-app/app/src/main/AndroidManifest.xml
+uses-library#org.apache.http.legacy
+ADDED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:33:9-35:40
+	android:required
+		ADDED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:35:13-37
+	android:name
+		ADDED from [com.google.android.gms:play-services-maps:17.0.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/844259ebd87e32293f5920ddc906db6a/AndroidManifest.xml:34:13-50
+activity#com.google.android.gms.common.api.GoogleApiActivity
+ADDED from [com.google.android.gms:play-services-base:17.1.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ba4575b3149b348e4c2ac4187b8e5d8b/AndroidManifest.xml:23:9-26:75
+	android:exported
+		ADDED from [com.google.android.gms:play-services-base:17.1.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ba4575b3149b348e4c2ac4187b8e5d8b/AndroidManifest.xml:25:13-37
+	android:theme
+		ADDED from [com.google.android.gms:play-services-base:17.1.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ba4575b3149b348e4c2ac4187b8e5d8b/AndroidManifest.xml:26:13-72
+	android:name
+		ADDED from [com.google.android.gms:play-services-base:17.1.0] /Users/Samuel/.gradle/caches/transforms-2/files-2.1/ba4575b3149b348e4c2ac4187b8e5d8b/AndroidManifest.xml:24:13-79
